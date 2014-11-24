@@ -24,4 +24,10 @@ public class EnemyBullet extends Bullet {
 		
 	}
 
+	@Override
+	protected void createSprite() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
