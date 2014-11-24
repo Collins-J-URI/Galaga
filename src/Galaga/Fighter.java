@@ -63,11 +63,11 @@ public class Fighter implements ApplicationConstants {
 		switch (joystick) {
 		case left:
 			if (x > -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
-				x -= FIGHTER_SPEED * elapsed * 0.001;
+				x -= STRAFE_SPEED * elapsed * 0.001;
 			break;
 		case right:
 			if (x < WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
-				x += FIGHTER_SPEED * elapsed * 0.001;
+				x += STRAFE_SPEED * elapsed * 0.001;
 			break;
 		default:
 			break;
@@ -100,6 +100,14 @@ public class Fighter implements ApplicationConstants {
 	public void center() {
 		joystick = Joystick.center;
 	}
+	
+	/**
+	 * Return a bullet shot from the fighter
+	 * @return
+	 */
+	public Bullet shoot() {
+		return new FighterBullet(x, y);
+	}
 
 	/**
 	 * Loads the sprite
@@ -118,6 +126,7 @@ public class Fighter implements ApplicationConstants {
 		g.pushMatrix();
 		g.translate(x, y);
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.translate(-7.5f, 0);
 		g.noSmooth();
 
 		g.image(sprite, 0, 0);

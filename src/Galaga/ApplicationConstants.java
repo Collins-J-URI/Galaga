@@ -15,5 +15,6 @@ public interface ApplicationConstants {
 	float PIXEL_WIDTH = WORLD_HEIGHT/200.f;
 	
 	float CROSS_WORLD_TIME = 2;
-	float FIGHTER_SPEED = WORLD_WIDTH / CROSS_WORLD_TIME;
+	float STRAFE_SPEED = WORLD_WIDTH / CROSS_WORLD_TIME;
+	float BULLET_SPEED = STRAFE_SPEED * 2;
 }
