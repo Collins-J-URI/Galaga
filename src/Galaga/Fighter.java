@@ -2,31 +2,64 @@ package Galaga;
 
 import processing.core.*;
 
+/**
+ * Defines a fighter. Only one instance of this class can exist at a time.
+ * 
+ * @author Christopher Glasz
+ */
 public class Fighter implements ApplicationConstants {
 
+	/**
+	 * Instance of the fighter
+	 */
 	private static Fighter instance;
 
+	/**
+	 * Coordinates of the fighter
+	 */
 	private float x, y;
-	private float vx;
+
+	/**
+	 * Sprite to draw
+	 */
 	private PImage sprite;
 
+	/**
+	 * Joystick position to define which direction the fighter should move
+	 */
 	private Joystick joystick;
 
+	/**
+	 * Fetch the one instance of the fighter. If the instance does not exist,
+	 * create it.
+	 * 
+	 * @return instance of the fighter
+	 */
 	public static Fighter instance() {
 		if (instance == null)
 			instance = new Fighter();
 		return instance;
 	}
 
+	/**
+	 * Private constructor ensures that only once instance of the fighter exists
+	 */
 	private Fighter() {
 		x = 0;
 		y = WORLD_HEIGHT * 0.1f;
-		vx = 0;
 		joystick = Joystick.center;
 		createSprite();
 	}
 
+	/**
+	 * Update position of fighter according to current position of the joystick
+	 * 
+	 * @param elapsed
+	 *            time since last draw
+	 */
 	public void update(float elapsed) {
+
+		// Move fighter according joystick position
 		switch (joystick) {
 		case left:
 			if (x > -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
@@ -34,58 +67,78 @@ public class Fighter implements ApplicationConstants {
 			break;
 		case right:
 			if (x < WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
-				x += FIGHTER_SPEED  * elapsed * 0.001;
+				x += FIGHTER_SPEED * elapsed * 0.001;
 			break;
 		default:
 			break;
 		}
 
+		// Ensure that the fighter doesn't get past the edge of the screen
 		if (x < -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
 			x = -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10;
 		else if (x > WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
 			x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
-		// x += vx;
 	}
 
+	/**
+	 * Set the joystick to the right position
+	 */
 	public void right() {
 		joystick = Joystick.right;
 	}
 
+	/**
+	 * Set the joystick to the left position
+	 */
 	public void left() {
 		joystick = Joystick.left;
 	}
 
+	/**
+	 * Set the joystick to the center position
+	 */
 	public void center() {
 		joystick = Joystick.center;
 	}
-	
-	public void createSprite() {
+
+	/**
+	 * Loads the sprite
+	 */
+	private void createSprite() {
 		sprite = (new PApplet()).loadImage("fighter.png");
 	}
 
+	/**
+	 * Draws the fighter to the passed PApplet
+	 * 
+	 * @param g
+	 *            PApplet to draw to
+	 */
 	public void render(PApplet g) {
-		
 		g.pushMatrix();
 		g.translate(x, y);
-		
-		g.noSmooth();
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.noSmooth();
+
 		g.image(sprite, 0, 0);
-		
+
 		g.popMatrix();
-		
-		
-		//manualRender(g);
 	}
-	
-	private void manualRender(PApplet g) {
+
+	/**
+	 * Manually draws fighter to PApplet, rather than using a sprite
+	 * 
+	 * @param g
+	 *            PApplet to draw to
+	 */
+	public void manualRender(PApplet g) {
 		g.translate(x, y);
-		
+
 		g.fill(255);
 		g.stroke(255);
 		g.strokeWeight(0.5f * P2W);
 		g.noStroke();
-		g.rectMode(g.CENTER);
+		g.rectMode(PConstants.CENTER);
 
 		// nose
 		g.translate(0, -PIXEL_WIDTH);
@@ -136,7 +189,7 @@ public class Fighter implements ApplicationConstants {
 		// red
 		g.fill(255, 0, 0);
 		g.stroke(255, 0, 0);
-		g.rectMode(g.CORNER);
+		g.rectMode(PConstants.CORNER);
 
 		// tail fins
 		g.translate(-4.5f * PIXEL_WIDTH, 1.5f * PIXEL_WIDTH);
@@ -175,6 +228,6 @@ public class Fighter implements ApplicationConstants {
 		g.rect(0, 0, PIXEL_WIDTH, -PIXEL_WIDTH);
 		g.translate(6 * PIXEL_WIDTH, 0);
 		g.rect(0, 0, PIXEL_WIDTH, -PIXEL_WIDTH);
-		
+
 	}
 }
