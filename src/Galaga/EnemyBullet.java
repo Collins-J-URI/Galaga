@@ -4,30 +4,37 @@ import processing.core.PApplet;
 
 public class EnemyBullet extends Bullet {
 
-	private float vx, vy;
+	private float vx;
 	
-	public EnemyBullet(float x, float y, float vx, float vy) {
+	public EnemyBullet(float x, float y, float vx) {
 		super(x, y);
 		this.vx = vx;
-		this.vy = vy;
 	}
 
-	@Override
+	
 	public void update(float elapsed) {
-		// TODO Auto-generated method stub
-		
+		y -= BULLET_SPEED * elapsed * 0.001;
+		x += vx * elapsed * 0.001;
 	}
 
-	@Override
+	
 	public void render(PApplet g) {
-		// TODO Auto-generated method stub
-		
+		g.pushMatrix();
+		g.translate(x, y);
+		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.translate(-7.5f, 0);
+		g.noSmooth();
+
+		g.image(sprite, 0, 0);
+
+		g.popMatrix();
 	}
 
-	@Override
+	/**
+	 * Loads the sprite
+	 */
 	protected void createSprite() {
-		// TODO Auto-generated method stub
-		
+		sprite = (new PApplet()).loadImage("enemy_bullet.png");
 	}
 
 }
