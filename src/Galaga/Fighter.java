@@ -23,6 +23,7 @@ public class Fighter implements ApplicationConstants {
 		y = WORLD_HEIGHT * 0.1f;
 		vx = 0;
 		joystick = Joystick.center;
+		createSprite();
 	}
 
 	public void update(float elapsed) {
@@ -58,13 +59,28 @@ public class Fighter implements ApplicationConstants {
 		joystick = Joystick.center;
 	}
 	
-	public void createSprite(PApplet g) {
-		sprite = g.createImage((int)(15 * PIXEL_WIDTH), (int)(15 * PIXEL_WIDTH), g.ARGB);
+	public void createSprite() {
+		sprite = (new PApplet()).loadImage("fighter.png");
 	}
 
 	public void render(PApplet g) {
+		
+		g.pushMatrix();
 		g.translate(x, y);
-
+		
+		g.noSmooth();
+		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.image(sprite, 0, 0);
+		
+		g.popMatrix();
+		
+		
+		//manualRender(g);
+	}
+	
+	private void manualRender(PApplet g) {
+		g.translate(x, y);
+		
 		g.fill(255);
 		g.stroke(255);
 		g.strokeWeight(0.5f * P2W);
@@ -159,5 +175,6 @@ public class Fighter implements ApplicationConstants {
 		g.rect(0, 0, PIXEL_WIDTH, -PIXEL_WIDTH);
 		g.translate(6 * PIXEL_WIDTH, 0);
 		g.rect(0, 0, PIXEL_WIDTH, -PIXEL_WIDTH);
+		
 	}
 }
