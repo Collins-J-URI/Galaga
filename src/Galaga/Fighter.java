@@ -103,7 +103,7 @@ public class Fighter implements ApplicationConstants {
 	
 	/**
 	 * Return a bullet shot from the fighter
-	 * @return
+	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
 		return new FighterBullet(x, y);
@@ -113,7 +113,7 @@ public class Fighter implements ApplicationConstants {
 	 * Loads the sprite
 	 */
 	private void createSprite() {
-		sprite = (new PApplet()).loadImage("fighter.png");
+		sprite = (new PApplet()).loadImage("Sprites/fighter.png");
 	}
 
 	/**

@@ -41,7 +41,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 
 	public void update() {
-
 		float drawTime = millis();
 		float elapsed = drawTime - lastDrawTime;
 		lastDrawTime = drawTime;

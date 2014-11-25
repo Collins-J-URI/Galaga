@@ -34,7 +34,7 @@ public class EnemyBullet extends Bullet {
 	 * Loads the sprite
 	 */
 	protected void createSprite() {
-		sprite = (new PApplet()).loadImage("enemy_bullet.png");
+		sprite = (new PApplet()).loadImage("Sprites/enemy_bullet.png");
 	}
 
 }

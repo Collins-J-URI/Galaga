@@ -31,7 +31,7 @@ public class FighterBullet extends Bullet {
 	 * Loads the sprite
 	 */
 	protected void createSprite() {
-		sprite = (new PApplet()).loadImage("fighter_bullet.png");
+		sprite = (new PApplet()).loadImage("Sprites/fighter_bullet.png");
 	}
 
 }
