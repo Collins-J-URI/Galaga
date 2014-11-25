@@ -37,9 +37,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	public void draw() {
 		update();
+		purge();
 		render();
 	}
 
+	/**
+	 * Move all objects
+	 */
 	public void update() {
 		float drawTime = millis();
 		float elapsed = drawTime - lastDrawTime;
@@ -49,7 +53,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for(Bullet b : bullets)
 			b.update(elapsed);
 	}
+	
+	/** 
+	 * Remove destroyed enemies, bullets, and handle destroyed fighter
+	 */
+	public void purge() {
+		
+	}
 
+	/**
+	 * Render scene
+	 */
 	public void render() {
 		background(0);
 		scale(W2P);
