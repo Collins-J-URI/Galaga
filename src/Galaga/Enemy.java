@@ -2,7 +2,7 @@ package Galaga;
 
 import processing.core.*;
 
-public abstract class Enemy {
+public abstract class Enemy implements ApplicationConstants {
 
 	private boolean destroyed;
 	protected float x, y;
@@ -17,6 +17,7 @@ public abstract class Enemy {
 		this.vx = 0;
 		this.vy = 0;
 		destroyed = false;
+		createSprite();
 	}
 	
 	public Enemy(float x, float y, float vx, float vy) {
@@ -35,8 +36,8 @@ public abstract class Enemy {
 		destroyed = true;
 	}
 	
-	public abstract void update();
-	public abstract void render();
+	public abstract void update(float elapsed);
+	public abstract void render(PApplet g);
 	public abstract void shoot(Bullet bullet);
 	public abstract Enemy clone();
 	protected abstract void createSprite();

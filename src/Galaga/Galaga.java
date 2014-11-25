@@ -21,6 +21,25 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
 		bullets = new ArrayList<Bullet>();
+		enemies = new ArrayList<Enemy>();
+
+		for (int i = 0; i < 10; i++)
+			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.6f));
+		for (int i = 0; i < 10; i++)
+			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.675f));
+
+		for (int i = 0; i < 8; i++)
+			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3*WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.75f));
+		for (int i = 0; i < 8; i++)
+			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3*WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.825f));
+		
+		for (int i = 0; i < 4; i++)
+			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7*WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.9f));
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -50,15 +69,18 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		lastDrawTime = drawTime;
 
 		fighter.update(elapsed);
-		for(Bullet b : bullets)
+		for (Bullet b : bullets)
 			b.update(elapsed);
+
+		for (Enemy e : enemies)
+			e.update(elapsed);
 	}
-	
-	/** 
+
+	/**
 	 * Remove destroyed enemies, bullets, and handle destroyed fighter
 	 */
 	public void purge() {
-		
+
 	}
 
 	/**
@@ -80,8 +102,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 
 		fighter.render(this);
-		for(Bullet b : bullets)
+		for (Bullet b : bullets)
 			b.render(this);
+		for (Enemy e : enemies)
+			e.render(this);
 	}
 
 	// TODO: Handle multiple keys being pressed at once

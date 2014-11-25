@@ -10,14 +10,22 @@ public class Bee extends Enemy {
 	}
 
 	@Override
-	public void update() {
+	public void update(float elapsed) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void render() {
-		// TODO Auto-generated method stub
+	public void render(PApplet g) {
+		g.pushMatrix();
+		g.translate(x, y);
+		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.translate(-7.5f, 0);
+		g.noSmooth();
+
+		g.image(sprite1, 0, 0);
+
+		g.popMatrix();
 
 	}
 
@@ -34,8 +42,8 @@ public class Bee extends Enemy {
 	}
 
 	protected void createSprite() {
-		sprite1 = (new PApplet()).loadImage("Sprites/bee");
-		sprite2 = (new PApplet()).loadImage("Sprites/bee2");
+		sprite1 = (new PApplet()).loadImage("Sprites/bee.png");
+		sprite2 = (new PApplet()).loadImage("Sprites/bee2.png");
 	}
 
 }
