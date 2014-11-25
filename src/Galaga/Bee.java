@@ -6,7 +6,7 @@ public class Bee extends Enemy {
 
 	public Bee(float x, float y) {
 		super(x, y);
-		// TODO Auto-generated constructor stub
+		r = 7 * PIXEL_WIDTH;
 	}
 
 	@Override

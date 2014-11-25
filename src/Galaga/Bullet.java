@@ -23,6 +23,20 @@ public abstract class Bullet implements ApplicationConstants {
 		return destroyed;
 	}
 
+	/**
+	 * @return the x
+	 */
+	public float getX() {
+		return x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public float getY() {
+		return y;
+	}
+
 	public abstract void update(float elapsed);
 	
 	public abstract void render(PApplet g);

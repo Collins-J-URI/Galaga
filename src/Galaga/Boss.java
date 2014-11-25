@@ -5,10 +5,12 @@ import processing.core.*;
 public class Boss extends Enemy {
 
 	private PImage hitSprite1, hitSprite2;
-	
+	private boolean isHit;
+
 	public Boss(float x, float y) {
 		super(x, y);
-		// TODO Auto-generated constructor stub
+		r = 8 * PIXEL_WIDTH;
+		isHit = false;
 	}
 
 	@Override
@@ -25,9 +27,26 @@ public class Boss extends Enemy {
 		g.translate(-7.5f, 0);
 		g.noSmooth();
 
-		g.image(sprite1, 0, 0);
+		if (isHit)
+			g.image(hitSprite2, 0, 0);
+		else
+			g.image(sprite2, 0, 0);
 
 		g.popMatrix();
+	}
+
+	public void detectCollision(Bullet bullet) {
+		float bx = bullet.getX();
+		float by = bullet.getY();
+
+		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
+		if (dist2 < r * r) {
+			if (isHit)
+				destroy();
+			else
+				isHit = true;
+			bullet.destroy();
+		}
 	}
 
 	@Override

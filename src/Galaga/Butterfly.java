@@ -6,7 +6,7 @@ public class Butterfly extends Enemy {
 
 	public Butterfly(float x, float y) {
 		super(x, y);
-		// TODO Auto-generated constructor stub
+		r = 7 * PIXEL_WIDTH;
 	}
 
 	@Override

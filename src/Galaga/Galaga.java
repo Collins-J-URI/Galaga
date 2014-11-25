@@ -76,6 +76,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		for (Enemy e : enemies)
 			e.update(elapsed);
+
+		for (Enemy e : enemies)
+			for (Bullet b : bullets)
+				e.detectCollision(b);
 	}
 
 	/**

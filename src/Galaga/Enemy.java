@@ -7,6 +7,7 @@ public abstract class Enemy implements ApplicationConstants {
 	private boolean destroyed;
 	protected float x, y;
 	protected float vx, vy;
+	protected float r;
 
 	protected PImage sprite1;
 	protected PImage sprite2;
@@ -26,6 +27,17 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vx = vx;
 		this.vy = vy;
 		destroyed = false;
+	}
+	
+	public void detectCollision(Bullet bullet) {
+		float bx = bullet.getX();
+		float by = bullet.getY();
+		
+		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
+		if (dist2 < r * r) {
+			destroy();
+			bullet.destroy();
+		}
 	}
 	
 	public boolean isDestroyed() {
