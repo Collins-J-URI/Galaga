@@ -1,6 +1,7 @@
 package Galaga;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import processing.core.*;
 
@@ -21,6 +22,26 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
 		bullets = new ArrayList<Bullet>();
+		enemies = new ArrayList<Enemy>();
+		
+		for (int i = 0; i < 4; i++)
+			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7*WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+		
+		for (int i = 0; i < 8; i++)
+			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3*WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
+		for (int i = 0; i < 8; i++)
+			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3*WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+		
+		for (int i = 0; i < 10; i++)
+			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
+		for (int i = 0; i < 10; i++)
+			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
+
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -50,15 +71,34 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		lastDrawTime = drawTime;
 
 		fighter.update(elapsed);
-		for(Bullet b : bullets)
+		for (Bullet b : bullets)
 			b.update(elapsed);
+
+		for (Enemy e : enemies)
+			e.update(elapsed);
+
+		for (Enemy e : enemies)
+			for (Bullet b : bullets)
+				e.detectCollision(b);
 	}
-	
-	/** 
+
+	/**
 	 * Remove destroyed enemies, bullets, and handle destroyed fighter
 	 */
 	public void purge() {
 		
+		// Get rid of bullets once they're outside the window
+		Iterator<Bullet> bit = bullets.iterator();
+		while (bit.hasNext())
+			if (bit.next().isDestroyed())
+				bit.remove();
+		
+		// Get rid of bullets once they're outside the window
+		Iterator<Enemy> eit = enemies.iterator();
+		while (eit.hasNext())
+			if (eit.next().isDestroyed())
+				eit.remove();
+
 	}
 
 	/**
@@ -80,8 +120,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 
 		fighter.render(this);
-		for(Bullet b : bullets)
+		for (Bullet b : bullets)
 			b.render(this);
+		for (Enemy e : enemies)
+			e.render(this);
 	}
 
 	// TODO: Handle multiple keys being pressed at once

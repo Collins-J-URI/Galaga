@@ -12,6 +12,8 @@ public class FighterBullet extends Bullet {
 	
 	public void update(float elapsed) {
 		y += BULLET_SPEED * elapsed * 0.001;
+		if (y > WORLD_HEIGHT)
+			destroy();
 	}
 
 	

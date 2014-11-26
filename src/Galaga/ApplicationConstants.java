@@ -2,8 +2,8 @@ package Galaga;
 
 public interface ApplicationConstants {
 
-	int WINDOW_WIDTH = 800;
-	int WINDOW_HEIGHT = 800;
+	int WINDOW_WIDTH = 640;
+	int WINDOW_HEIGHT = 480;
 	
 	float WORLD_WIDTH = 1;
 	
