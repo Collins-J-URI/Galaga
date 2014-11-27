@@ -83,6 +83,7 @@ public class Fighter implements ApplicationConstants {
 			x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
 	}
 
+	
 	public void detectCollision(Bullet bullet) {
 		float bx = bullet.getX();
 		float by = bullet.getY();
