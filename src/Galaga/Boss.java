@@ -9,30 +9,13 @@ public class Boss extends Enemy {
 
 	public Boss(float x, float y) {
 		super(x, y);
-		r = 8 * PIXEL_WIDTH;
 		isHit = false;
 	}
 
 	@Override
 	public void update(float elapsed) {
-		// TODO Auto-generated method stub
+		super.update(elapsed);
 
-	}
-
-	@Override
-	public void render(PApplet g) {
-		g.pushMatrix();
-		g.translate(x, y);
-		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-		g.translate(-7.5f, 0);
-		g.noSmooth();
-
-		if (isHit)
-			g.image(hitSprite2, 0, 0);
-		else
-			g.image(sprite2, 0, 0);
-
-		g.popMatrix();
 	}
 
 	public void detectCollision(Bullet bullet) {
@@ -44,9 +27,15 @@ public class Boss extends Enemy {
 			if (isHit)
 				destroy();
 			else
-				isHit = true;
+				hit();
 			bullet.destroy();
 		}
+	}
+	
+	private void hit() {
+		isHit = true;
+		sprite1 = hitSprite1;
+		sprite2 = hitSprite2;
 	}
 
 	@Override
