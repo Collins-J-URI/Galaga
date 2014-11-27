@@ -18,6 +18,7 @@ public class Fighter implements ApplicationConstants {
 	 * Coordinates of the fighter
 	 */
 	private float x, y;
+	private float r;
 
 	/**
 	 * Sprite to draw
@@ -28,6 +29,7 @@ public class Fighter implements ApplicationConstants {
 	 * Joystick position to define which direction the fighter should move
 	 */
 	private Joystick joystick;
+	private boolean destroyed;
 
 	/**
 	 * Fetch the one instance of the fighter. If the instance does not exist,
@@ -47,6 +49,7 @@ public class Fighter implements ApplicationConstants {
 	private Fighter() {
 		x = 0;
 		y = WORLD_HEIGHT * 0.1f;
+		r = 7 * PIXEL_WIDTH;
 		joystick = Joystick.center;
 		createSprite();
 	}
@@ -78,6 +81,25 @@ public class Fighter implements ApplicationConstants {
 			x = -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10;
 		else if (x > WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
 			x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
+	}
+
+	public void detectCollision(Bullet bullet) {
+		float bx = bullet.getX();
+		float by = bullet.getY();
+
+		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
+		if (dist2 < r * r) {
+			destroy();
+			bullet.destroy();
+		}
+	}
+
+	public boolean isDestroyed() {
+		return destroyed;
+	}
+
+	public void destroy() {
+		destroyed = true;
 	}
 
 	/**

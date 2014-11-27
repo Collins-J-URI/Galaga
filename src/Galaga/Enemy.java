@@ -37,25 +37,6 @@ public abstract class Enemy implements ApplicationConstants {
 		destroyed = false;
 	}
 
-	public void detectCollision(Bullet bullet) {
-		float bx = bullet.getX();
-		float by = bullet.getY();
-
-		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
-		if (dist2 < r * r) {
-			destroy();
-			bullet.destroy();
-		}
-	}
-
-	public boolean isDestroyed() {
-		return destroyed;
-	}
-
-	public void destroy() {
-		destroyed = true;
-	}
-
 	public void update(float elapsed) {
 		if (cycleCount==0) 
 			animationState = animationState.getNext();
@@ -83,6 +64,25 @@ public abstract class Enemy implements ApplicationConstants {
 
 		g.popMatrix();
 
+	}
+
+	public void detectCollision(Bullet bullet) {
+		float bx = bullet.getX();
+		float by = bullet.getY();
+
+		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
+		if (dist2 < r * r) {
+			destroy();
+			bullet.destroy();
+		}
+	}
+
+	public boolean isDestroyed() {
+		return destroyed;
+	}
+
+	public void destroy() {
+		destroyed = true;
 	}
 	
 	/**

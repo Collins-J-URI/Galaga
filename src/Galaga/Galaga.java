@@ -84,6 +84,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (Bullet b : bullets)
 				if (b.getClass() == FighterBullet.class)
 					e.detectCollision(b);
+
+		for (Bullet b : bullets)
+			if (b.getClass() == EnemyBullet.class)
+				fighter.detectCollision(b);
 	}
 
 	/**
@@ -102,6 +106,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		while (eit.hasNext())
 			if (eit.next().isDestroyed())
 				eit.remove();
+		
+		if (fighter.isDestroyed())
+			noLoop();
 
 	}
 
