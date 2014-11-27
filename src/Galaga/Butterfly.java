@@ -6,26 +6,11 @@ public class Butterfly extends Enemy {
 
 	public Butterfly(float x, float y) {
 		super(x, y);
-		r = 7 * PIXEL_WIDTH;
 	}
 
 	@Override
 	public void update(float elapsed) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void render(PApplet g) {
-		g.pushMatrix();
-		g.translate(x, y);
-		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-		g.translate(-7.5f, 0);
-		g.noSmooth();
-
-		g.image(sprite1, 0, 0);
-
-		g.popMatrix();
+		super.update(elapsed);
 
 	}
 

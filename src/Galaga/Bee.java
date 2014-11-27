@@ -11,21 +11,7 @@ public class Bee extends Enemy {
 
 	@Override
 	public void update(float elapsed) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void render(PApplet g) {
-		g.pushMatrix();
-		g.translate(x, y);
-		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-		g.translate(-7.5f, 0);
-		g.noSmooth();
-
-		g.image(sprite1, 0, 0);
-
-		g.popMatrix();
+		super.update(elapsed);
 
 	}
 
