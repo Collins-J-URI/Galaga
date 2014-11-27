@@ -15,12 +15,6 @@ public class Butterfly extends Enemy {
 	}
 
 	@Override
-	public void shoot(Bullet bullet) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public Enemy clone() {
 		// TODO Auto-generated method stub
 		return null;

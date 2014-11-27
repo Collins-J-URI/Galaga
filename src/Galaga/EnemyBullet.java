@@ -21,7 +21,7 @@ public class EnemyBullet extends Bullet {
 	public void render(PApplet g) {
 		g.pushMatrix();
 		g.translate(x, y);
-		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.scale(PIXEL_WIDTH);
 		g.translate(-7.5f, 0);
 		g.noSmooth();
 
