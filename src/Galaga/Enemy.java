@@ -84,8 +84,14 @@ public abstract class Enemy implements ApplicationConstants {
 		g.popMatrix();
 
 	}
-
-	public abstract void shoot(Bullet bullet);
+	
+	/**
+	 * Return a bullet shot from the fighter
+	 * @return bullet shot from the fighter
+	 */
+	public Bullet shoot() {
+		return new EnemyBullet(x, y, vx);
+	}
 
 	public abstract Enemy clone();
 
