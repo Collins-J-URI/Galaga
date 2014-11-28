@@ -16,7 +16,8 @@ public abstract class Enemy implements ApplicationConstants {
 
 	protected AnimationState animationState;
 	protected int cycleCount;
-	protected int cycleLength;
+	protected int animationCycleLength;
+	protected int explosionCycleLength;
 
 	public Enemy(float x, float y) {
 		this.x = x;
@@ -25,8 +26,9 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
 		destroyed = false;
-		cycleLength = 40;
-		cycleCount = (int) (Math.random() * cycleLength);
+		animationCycleLength = 40;
+		explosionCycleLength = 3;
+		cycleCount = (int) (Math.random() * animationCycleLength);
 		animationState = AnimationState.random();
 		createSprite();
 	}
@@ -44,16 +46,14 @@ public abstract class Enemy implements ApplicationConstants {
 		if (!animationState.explosionState()) {
 			if (cycleCount == 0)
 				animationState = animationState.getNext();
-			cycleCount = (cycleCount + 1) % cycleLength;
+			cycleCount = (cycleCount + 1) % animationCycleLength;
 		} else {
-			if (cycleCount > cycleLength) {
+			if (cycleCount == 0)
 				if (animationState == AnimationState.EXP_5)
 					destroy();
 				else
 					animationState = animationState.getNext();
-				cycleCount = 0;
-			}
-			cycleCount = (cycleCount + 15);
+			cycleCount = (cycleCount + 1) % explosionCycleLength;
 		}
 	}
 

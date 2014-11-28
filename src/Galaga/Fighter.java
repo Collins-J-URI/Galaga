@@ -18,10 +18,26 @@ public class Fighter implements ApplicationConstants {
 	 * Coordinates of the fighter
 	 */
 	private float x, y;
+
+	/**
+	 * Radius of disk collider
+	 */
 	private float r;
+
+	/**
+	 * Current state in the animation cycle
+	 */
 	private AnimationState animationState;
-	protected int cycleCount;
-	protected int cycleLength;
+
+	/**
+	 * Current position in the animation cycle
+	 */
+	private int cycleCount;
+
+	/**
+	 * Length of a single animation cycle in frames
+	 */
+	private int cycleLength;
 
 	/**
 	 * Sprite to draw
@@ -32,6 +48,10 @@ public class Fighter implements ApplicationConstants {
 	 * Joystick position to define which direction the fighter should move
 	 */
 	private Joystick joystick;
+
+	/**
+	 * To keep track of whether the fighter is destroyed
+	 */
 	private boolean destroyed;
 
 	/**
@@ -101,6 +121,11 @@ public class Fighter implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * Detects if there is a collision between the fighter and the passed bullet
+	 * 
+	 * @param bullet
+	 */
 	public void detectCollision(Bullet bullet) {
 		float bx = bullet.getX();
 		float by = bullet.getY();
@@ -112,10 +137,18 @@ public class Fighter implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * Returns true of the fighter is destroyed
+	 * 
+	 * @return true of the fighter is destroyed
+	 */
 	public boolean isDestroyed() {
 		return destroyed;
 	}
 
+	/**
+	 * Destroys the fighter
+	 */
 	public void destroy() {
 		destroyed = true;
 	}
