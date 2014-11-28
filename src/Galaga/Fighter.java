@@ -18,17 +18,40 @@ public class Fighter implements ApplicationConstants {
 	 * Coordinates of the fighter
 	 */
 	private float x, y;
+
+	/**
+	 * Radius of disk collider
+	 */
 	private float r;
+
+	/**
+	 * Current state in the animation cycle
+	 */
+	private AnimationState animationState;
+
+	/**
+	 * Current position in the animation cycle
+	 */
+	private int cycleCount;
+
+	/**
+	 * Length of a single animation cycle in frames
+	 */
+	private int cycleLength;
 
 	/**
 	 * Sprite to draw
 	 */
-	private PImage sprite;
+	private PImage sprite, eSprite1, eSprite2, eSprite3, eSprite4;
 
 	/**
 	 * Joystick position to define which direction the fighter should move
 	 */
 	private Joystick joystick;
+
+	/**
+	 * To keep track of whether the fighter is destroyed
+	 */
 	private boolean destroyed;
 
 	/**
@@ -50,7 +73,11 @@ public class Fighter implements ApplicationConstants {
 		x = 0;
 		y = WORLD_HEIGHT * 0.1f;
 		r = 7 * PIXEL_WIDTH;
+		destroyed = false;
+		cycleLength = 5;
+		cycleCount = (int) (Math.random() * cycleLength);
 		joystick = Joystick.center;
+		animationState = AnimationState.random();
 		createSprite();
 	}
 
@@ -62,43 +89,66 @@ public class Fighter implements ApplicationConstants {
 	 */
 	public void update(float elapsed) {
 
-		// Move fighter according joystick position
-		switch (joystick) {
-		case left:
-			if (x > -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
-				x -= STRAFE_SPEED * elapsed * 0.001;
-			break;
-		case right:
-			if (x < WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
-				x += STRAFE_SPEED * elapsed * 0.001;
-			break;
-		default:
-			break;
-		}
+		if (!animationState.explosionState()) {
+			// Move fighter according joystick position
+			switch (joystick) {
+			case left:
+				if (x > -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
+					x -= STRAFE_SPEED * elapsed * 0.001;
+				break;
+			case right:
+				if (x < WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
+					x += STRAFE_SPEED * elapsed * 0.001;
+				break;
+			default:
+				break;
+			}
 
-		// Ensure that the fighter doesn't get past the edge of the screen
-		if (x < -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
-			x = -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10;
-		else if (x > WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
-			x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
+			// Ensure that the fighter doesn't get past the edge of the screen
+			if (x < -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
+				x = -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10;
+			else if (x > WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
+				x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
+		} else {
+
+			if (cycleCount == 0)
+				if (animationState == AnimationState.EXP_4)
+					destroy();
+				else
+					animationState = animationState.getNext();
+
+			cycleCount = (cycleCount + 1) % cycleLength;
+		}
 	}
 
-	
+	/**
+	 * Detects if there is a collision between the fighter and the passed bullet
+	 * 
+	 * @param bullet
+	 */
 	public void detectCollision(Bullet bullet) {
 		float bx = bullet.getX();
 		float by = bullet.getY();
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
-			destroy();
+			animationState = AnimationState.EXP_1;
 			bullet.destroy();
 		}
 	}
 
+	/**
+	 * Returns true of the fighter is destroyed
+	 * 
+	 * @return true of the fighter is destroyed
+	 */
 	public boolean isDestroyed() {
 		return destroyed;
 	}
 
+	/**
+	 * Destroys the fighter
+	 */
 	public void destroy() {
 		destroyed = true;
 	}
@@ -123,9 +173,10 @@ public class Fighter implements ApplicationConstants {
 	public void center() {
 		joystick = Joystick.center;
 	}
-	
+
 	/**
 	 * Return a bullet shot from the fighter
+	 * 
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
@@ -137,6 +188,10 @@ public class Fighter implements ApplicationConstants {
 	 */
 	private void createSprite() {
 		sprite = (new PApplet()).loadImage("Sprites/fighter.png");
+		eSprite1 = (new PApplet()).loadImage("Sprites/fighter_explode_1.png");
+		eSprite2 = (new PApplet()).loadImage("Sprites/fighter_explode_2.png");
+		eSprite3 = (new PApplet()).loadImage("Sprites/fighter_explode_3.png");
+		eSprite4 = (new PApplet()).loadImage("Sprites/fighter_explode_4.png");
 	}
 
 	/**
@@ -149,10 +204,30 @@ public class Fighter implements ApplicationConstants {
 		g.pushMatrix();
 		g.translate(x, y);
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-		g.translate(-7.5f, 0);
 		g.noSmooth();
 
-		g.image(sprite, 0, 0);
+		switch (animationState) {
+		case EXP_1:
+			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
+			g.image(eSprite1, 0, 0);
+			break;
+		case EXP_2:
+			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
+			g.image(eSprite2, 0, 0);
+			break;
+		case EXP_3:
+			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
+			g.image(eSprite3, 0, 0);
+			break;
+		case EXP_4:
+			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
+			g.image(eSprite4, 0, 0);
+			break;
+		default:
+			g.translate(-sprite.width / 2.0f, -sprite.height / 2.0f);
+			g.image(sprite, 0, 0);
+			break;
+		}
 
 		g.popMatrix();
 	}
