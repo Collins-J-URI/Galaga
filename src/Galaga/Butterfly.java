@@ -21,6 +21,7 @@ public class Butterfly extends Enemy {
 	}
 
 	protected void createSprite() {
+		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/butterfly.png");
 		sprite2 = (new PApplet()).loadImage("Sprites/butterfly2.png");
 	}

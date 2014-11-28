@@ -5,11 +5,11 @@ import processing.core.*;
 public class Boss extends Enemy {
 
 	private PImage hitSprite1, hitSprite2;
-	private boolean isHit;
+	private boolean hitOnce;
 
 	public Boss(float x, float y) {
 		super(x, y);
-		isHit = false;
+		hitOnce = false;
 	}
 
 	@Override
@@ -24,18 +24,20 @@ public class Boss extends Enemy {
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
-			if (isHit)
-				destroy();
-			else
-				hit();
+			hit();
 			bullet.destroy();
 		}
 	}
-	
-	private void hit() {
-		isHit = true;
-		sprite1 = hitSprite1;
-		sprite2 = hitSprite2;
+
+	public void hit() {
+		if (!hitOnce) {
+			hitOnce = true;
+			sprite1 = hitSprite1;
+			sprite2 = hitSprite2;
+		} else {
+			animationState = AnimationState.EXP_1;
+			hit = true;
+		}
 	}
 
 	@Override
@@ -45,6 +47,7 @@ public class Boss extends Enemy {
 	}
 
 	protected void createSprite() {
+		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/boss.png");
 		sprite2 = (new PApplet()).loadImage("Sprites/boss2.png");
 		hitSprite1 = (new PApplet()).loadImage("Sprites/boss_hit.png");

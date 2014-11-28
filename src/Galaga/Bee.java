@@ -22,6 +22,7 @@ public class Bee extends Enemy {
 	}
 
 	protected void createSprite() {
+		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/bee.png");
 		sprite2 = (new PApplet()).loadImage("Sprites/bee2.png");
 	}
