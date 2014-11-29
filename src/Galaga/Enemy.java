@@ -12,7 +12,11 @@ public abstract class Enemy implements ApplicationConstants {
 
 	protected PImage sprite1;
 	protected PImage sprite2;
-	protected PImage eSprite1, eSprite2, eSprite3, eSprite4, eSprite5;
+
+	/**
+	 * Explosion sprites to draw
+	 */
+	private PImage[] eSprites;
 
 	protected AnimationState animationState;
 	protected int cycleCount;
@@ -73,24 +77,24 @@ public abstract class Enemy implements ApplicationConstants {
 			g.image(sprite2, 0, 0);
 			break;
 		case EXP_1:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite1, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[0], 0, 0);
 			break;
 		case EXP_2:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite2, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[1], 0, 0);
 			break;
 		case EXP_3:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite3, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[2], 0, 0);
 			break;
 		case EXP_4:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite4, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[3], 0, 0);
 			break;
 		case EXP_5:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite5, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[4], 0, 0);
 			break;
 		default:
 			break;
@@ -140,10 +144,11 @@ public abstract class Enemy implements ApplicationConstants {
 	public abstract Enemy clone();
 
 	protected void createSprite() {
-		eSprite1 = (new PApplet()).loadImage("Sprites/enemy_explosion_1.png");
-		eSprite2 = (new PApplet()).loadImage("Sprites/enemy_explosion_2.png");
-		eSprite3 = (new PApplet()).loadImage("Sprites/enemy_explosion_3.png");
-		eSprite4 = (new PApplet()).loadImage("Sprites/enemy_explosion_4.png");
-		eSprite5 = (new PApplet()).loadImage("Sprites/enemy_explosion_5.png");
+		eSprites = new PImage[5];
+		eSprites[0] = (new PApplet()).loadImage("Sprites/enemy_explosion_1.png");
+		eSprites[1] = (new PApplet()).loadImage("Sprites/enemy_explosion_2.png");
+		eSprites[2] = (new PApplet()).loadImage("Sprites/enemy_explosion_3.png");
+		eSprites[3] = (new PApplet()).loadImage("Sprites/enemy_explosion_4.png");
+		eSprites[4] = (new PApplet()).loadImage("Sprites/enemy_explosion_5.png");
 	}
 }

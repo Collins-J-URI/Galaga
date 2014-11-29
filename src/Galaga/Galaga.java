@@ -10,6 +10,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private Fighter fighter;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Bullet> bullets;
+	private ArrayList<Bullet> enemyBullets;
+	private ArrayList<Bullet> fighterBullets;
 
 	private final int numStars = 200;
 	private float[] starx;
@@ -21,7 +23,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
-		bullets = new ArrayList<Bullet>();
+		fighterBullets = new ArrayList<Bullet>();
+		enemyBullets = new ArrayList<Bullet>();
 		enemies = new ArrayList<Enemy>();
 
 		for (int i = 0; i < 4; i++)
@@ -70,7 +73,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		lastDrawTime = drawTime;
 
 		fighter.update(elapsed);
-		for (Bullet b : bullets)
+
+		for (Bullet b : fighterBullets)
+			b.update(elapsed);
+
+		for (Bullet b : enemyBullets)
 			b.update(elapsed);
 
 		for (Enemy e : enemies)
@@ -78,17 +85,20 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		for (Enemy e : enemies)
 			if (random(1) < 0.001f)
-				bullets.add(e.shoot());
+				enemyBullets.add(e.shoot());
 
 		for (Enemy e : enemies)
 			if (!e.isHit())
-				for (Bullet b : bullets)
-					if (b.getClass() == FighterBullet.class)
-						e.detectCollision(b);
+				for (Bullet b : fighterBullets)
+					e.detectCollision(b);
 
-		for (Bullet b : bullets)
-			if (b.getClass() == EnemyBullet.class)
+		for (Bullet b : enemyBullets)
+<<<<<<< HEAD
+			fighter.detectCollision(b);
+=======
+			if (!fighter.isHit())
 				fighter.detectCollision(b);
+>>>>>>> feature-explosion
 	}
 
 	/**
@@ -97,7 +107,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void purge() {
 
 		// Get rid of bullets once they're outside the window
-		Iterator<Bullet> bit = bullets.iterator();
+		Iterator<Bullet> bit = fighterBullets.iterator();
+		while (bit.hasNext())
+			if (bit.next().isDestroyed())
+				bit.remove();
+
+		// Get rid of bullets once they're outside the window
+		bit = enemyBullets.iterator();
 		while (bit.hasNext())
 			if (bit.next().isDestroyed())
 				bit.remove();
@@ -132,7 +148,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 
 		fighter.render(this);
-		for (Bullet b : bullets)
+		for (Bullet b : fighterBullets)
+			b.render(this);
+		for (Bullet b : enemyBullets)
 			b.render(this);
 		for (Enemy e : enemies)
 			e.render(this);
@@ -143,11 +161,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		if (key == CODED) {
 			switch (keyCode) {
 			case LEFT:
-				fighter.left();
+				fighter.push(Joystick.left);
+				// fighter.left();
 				break;
 
 			case RIGHT:
-				fighter.right();
+				fighter.push(Joystick.right);
+				// fighter.right();
 				break;
 			default:
 				// do something (or ignore)
@@ -156,7 +176,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		} else
 			switch (key) {
 			case ' ':
-				bullets.add(fighter.shoot());
+<<<<<<< HEAD
+				if (!fighter.isDestroyed() && fighterBullets.size() < 2)
+=======
+				if (!fighter.isHit() && fighterBullets.size() < 2)
+>>>>>>> feature-explosion
+					fighterBullets.add(fighter.shoot());
 				break;
 			}
 	}
@@ -166,17 +191,23 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		if (key == CODED) {
 			switch (keyCode) {
 			case LEFT:
-				fighter.center();
+				fighter.pop(Joystick.left);
+				// fighter.center();
 				break;
 
 			case RIGHT:
-				fighter.center();
+				fighter.pop(Joystick.right);
+				// fighter.center();
 				break;
 			default:
 				// do something (or ignore)
 				break;
 			}
-		}
+		} else
+			switch (key) {
+			case ' ':
+				break;
+			}
 	}
 
 }

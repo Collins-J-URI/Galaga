@@ -61,4 +61,14 @@ public interface ApplicationConstants {
 	 * Speed of the bullets
 	 */
 	float BULLET_SPEED = WORLD_HEIGHT / DOWN_WORLD_TIME;
+
+	/**
+	 * Time it takes an entity to explode
+	 */
+	float EXPLOSION_TIME = 0.5f;
+
+	/**
+	 * Length of a frame of an explosion in seconds
+	 */
+	float EXPLOSION_FRAME = EXPLOSION_TIME / 5;
 }
