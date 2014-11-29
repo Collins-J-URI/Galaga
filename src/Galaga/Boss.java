@@ -5,34 +5,17 @@ import processing.core.*;
 public class Boss extends Enemy {
 
 	private PImage hitSprite1, hitSprite2;
-	private boolean isHit;
+	private boolean hitOnce;
 
 	public Boss(float x, float y) {
 		super(x, y);
-		r = 8 * PIXEL_WIDTH;
-		isHit = false;
+		hitOnce = false;
 	}
 
 	@Override
 	public void update(float elapsed) {
-		// TODO Auto-generated method stub
+		super.update(elapsed);
 
-	}
-
-	@Override
-	public void render(PApplet g) {
-		g.pushMatrix();
-		g.translate(x, y);
-		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-		g.translate(-7.5f, 0);
-		g.noSmooth();
-
-		if (isHit)
-			g.image(hitSprite2, 0, 0);
-		else
-			g.image(sprite2, 0, 0);
-
-		g.popMatrix();
 	}
 
 	public void detectCollision(Bullet bullet) {
@@ -41,18 +24,20 @@ public class Boss extends Enemy {
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
-			if (isHit)
-				destroy();
-			else
-				isHit = true;
+			hit();
 			bullet.destroy();
 		}
 	}
 
-	@Override
-	public void shoot(Bullet bullet) {
-		// TODO Auto-generated method stub
-
+	public void hit() {
+		if (!hitOnce) {
+			hitOnce = true;
+			sprite1 = hitSprite1;
+			sprite2 = hitSprite2;
+		} else {
+			animationState = AnimationState.EXP_1;
+			hit = true;
+		}
 	}
 
 	@Override
@@ -62,6 +47,7 @@ public class Boss extends Enemy {
 	}
 
 	protected void createSprite() {
+		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/boss.png");
 		sprite2 = (new PApplet()).loadImage("Sprites/boss2.png");
 		hitSprite1 = (new PApplet()).loadImage("Sprites/boss_hit.png");

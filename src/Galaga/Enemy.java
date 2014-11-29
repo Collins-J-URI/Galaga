@@ -5,22 +5,38 @@ import processing.core.*;
 public abstract class Enemy implements ApplicationConstants {
 
 	private boolean destroyed;
+	protected boolean hit;
 	protected float x, y;
 	protected float vx, vy;
 	protected float r;
 
 	protected PImage sprite1;
 	protected PImage sprite2;
-	
+
+	/**
+	 * Explosion sprites to draw
+	 */
+	private PImage[] eSprites;
+
+	protected AnimationState animationState;
+	protected int cycleCount;
+	protected int animationCycleLength;
+	protected int explosionCycleLength;
+
 	public Enemy(float x, float y) {
 		this.x = x;
 		this.y = y;
 		this.vx = 0;
 		this.vy = 0;
+		this.r = 7 * PIXEL_WIDTH;
 		destroyed = false;
+		animationCycleLength = 40;
+		explosionCycleLength = 3;
+		cycleCount = (int) (Math.random() * animationCycleLength);
+		animationState = AnimationState.random();
 		createSprite();
 	}
-	
+
 	public Enemy(float x, float y, float vx, float vy) {
 		this.x = x;
 		this.y = y;
@@ -28,29 +44,111 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vy = vy;
 		destroyed = false;
 	}
-	
+
+	public void update(float elapsed) {
+
+		if (!animationState.explosionState()) {
+			if (cycleCount == 0)
+				animationState = animationState.getNext();
+			cycleCount = (cycleCount + 1) % animationCycleLength;
+		} else {
+			if (cycleCount == 0)
+				if (animationState == AnimationState.EXP_5)
+					destroy();
+				else
+					animationState = animationState.getNext();
+			cycleCount = (cycleCount + 1) % explosionCycleLength;
+		}
+	}
+
+	public void render(PApplet g) {
+		g.pushMatrix();
+		g.translate(x, y);
+		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.noSmooth();
+
+		switch (animationState) {
+		case UP:
+			g.translate(-sprite1.width / 2.0f, -sprite1.height / 2.0f);
+			g.image(sprite1, 0, 0);
+			break;
+		case DOWN:
+			g.translate(-sprite2.width / 2.0f, -sprite2.height / 2.0f);
+			g.image(sprite2, 0, 0);
+			break;
+		case EXP_1:
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[0], 0, 0);
+			break;
+		case EXP_2:
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[1], 0, 0);
+			break;
+		case EXP_3:
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[2], 0, 0);
+			break;
+		case EXP_4:
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[3], 0, 0);
+			break;
+		case EXP_5:
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[4], 0, 0);
+			break;
+		default:
+			break;
+		}
+
+		g.popMatrix();
+
+	}
+
 	public void detectCollision(Bullet bullet) {
 		float bx = bullet.getX();
 		float by = bullet.getY();
-		
+
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
-			destroy();
+			hit();
 			bullet.destroy();
 		}
 	}
-	
+
+	public boolean isHit() {
+		return hit;
+	}
+
+	public void hit() {
+		animationState = AnimationState.EXP_1;
+		hit = true;
+	}
+
 	public boolean isDestroyed() {
 		return destroyed;
 	}
-	
+
 	public void destroy() {
 		destroyed = true;
 	}
-	
-	public abstract void update(float elapsed);
-	public abstract void render(PApplet g);
-	public abstract void shoot(Bullet bullet);
+
+	/**
+	 * Return a bullet shot from the fighter
+	 * 
+	 * @return bullet shot from the fighter
+	 */
+	public Bullet shoot() {
+		return new EnemyBullet(x, y, vx);
+	}
+
 	public abstract Enemy clone();
-	protected abstract void createSprite();
+
+	protected void createSprite() {
+		eSprites = new PImage[5];
+		eSprites[0] = (new PApplet()).loadImage("Sprites/enemy_explosion_1.png");
+		eSprites[1] = (new PApplet()).loadImage("Sprites/enemy_explosion_2.png");
+		eSprites[2] = (new PApplet()).loadImage("Sprites/enemy_explosion_3.png");
+		eSprites[3] = (new PApplet()).loadImage("Sprites/enemy_explosion_4.png");
+		eSprites[4] = (new PApplet()).loadImage("Sprites/enemy_explosion_5.png");
+	}
 }
