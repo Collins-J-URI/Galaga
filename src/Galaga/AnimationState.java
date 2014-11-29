@@ -25,7 +25,14 @@ public enum AnimationState {
 		}
 	},
 
-	EXP_1, EXP_2, EXP_3, EXP_4, EXP_5;
+	EXP_1, EXP_2, EXP_3, EXP_4, 
+	
+	EXP_5 {
+		@Override
+		public AnimationState getNext() {
+			return EXP_5;
+		}
+	};
 
 	public AnimationState getNext() {
 		return values()[(ordinal() + 1) % values().length];

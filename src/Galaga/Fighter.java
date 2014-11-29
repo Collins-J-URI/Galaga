@@ -37,11 +37,6 @@ public class Fighter implements ApplicationConstants {
 	private float cycleCount;
 
 	/**
-	 * Length of a single animation cycle in frames
-	 */
-	private int cycleLength;
-
-	/**
 	 * Sprite to draw
 	 */
 	private PImage sprite;
@@ -88,8 +83,7 @@ public class Fighter implements ApplicationConstants {
 		r = 7 * PIXEL_WIDTH;
 		destroyed = false;
 		hit = false;
-		cycleLength = 5;
-		cycleCount = (int) (Math.random() * cycleLength);
+		cycleCount = 0;
 		joystick = Joystick.center;
 		commands = new Stack<Joystick>();
 		commands.push(Joystick.center);
