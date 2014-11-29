@@ -1,5 +1,7 @@
 package Galaga;
 
+import java.util.Stack;
+
 import processing.core.*;
 
 /**
@@ -32,7 +34,7 @@ public class Fighter implements ApplicationConstants {
 	/**
 	 * Current position in the animation cycle
 	 */
-	private int cycleCount;
+	private float cycleCount;
 
 	/**
 	 * Length of a single animation cycle in frames
@@ -42,17 +44,28 @@ public class Fighter implements ApplicationConstants {
 	/**
 	 * Sprite to draw
 	 */
-	private PImage sprite, eSprite1, eSprite2, eSprite3, eSprite4;
+	private PImage sprite;
+
+	/**
+	 * Explosion sprites to draw
+	 */
+	private PImage[] eSprites;
 
 	/**
 	 * Joystick position to define which direction the fighter should move
 	 */
 	private Joystick joystick;
+	private Stack<Joystick> commands;
 
 	/**
 	 * To keep track of whether the fighter is destroyed
 	 */
 	private boolean destroyed;
+
+	/**
+	 * To keep track of whether the fighter has been hit
+	 */
+	private boolean hit;
 
 	/**
 	 * Fetch the one instance of the fighter. If the instance does not exist,
@@ -74,9 +87,12 @@ public class Fighter implements ApplicationConstants {
 		y = WORLD_HEIGHT * 0.1f;
 		r = 7 * PIXEL_WIDTH;
 		destroyed = false;
+		hit = false;
 		cycleLength = 5;
 		cycleCount = (int) (Math.random() * cycleLength);
 		joystick = Joystick.center;
+		commands = new Stack<Joystick>();
+		commands.push(Joystick.center);
 		animationState = AnimationState.random();
 		createSprite();
 	}
@@ -89,16 +105,16 @@ public class Fighter implements ApplicationConstants {
 	 */
 	public void update(float elapsed) {
 
-		if (!animationState.explosionState()) {
+		if (!hit) {
 			// Move fighter according joystick position
-			switch (joystick) {
+			switch (commands.peek()) {
 			case left:
 				if (x > -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
-					x -= STRAFE_SPEED * elapsed * 0.001;
+					x -= STRAFE_SPEED * elapsed * 0.001f;
 				break;
 			case right:
 				if (x < WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
-					x += STRAFE_SPEED * elapsed * 0.001;
+					x += STRAFE_SPEED * elapsed * 0.001f;
 				break;
 			default:
 				break;
@@ -109,15 +125,16 @@ public class Fighter implements ApplicationConstants {
 				x = -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10;
 			else if (x > WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
 				x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
+
 		} else {
+			if (animationState == AnimationState.EXP_5)
+				destroy();
 
-			if (cycleCount == 0)
-				if (animationState == AnimationState.EXP_4)
-					destroy();
-				else
-					animationState = animationState.getNext();
-
-			cycleCount = (cycleCount + 1) % cycleLength;
+			cycleCount += elapsed * 0.001f;
+			if (cycleCount > EXPLOSION_FRAME) {
+				cycleCount = 0;
+				animationState = animationState.getNext();
+			}
 		}
 	}
 
@@ -132,9 +149,27 @@ public class Fighter implements ApplicationConstants {
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
-			animationState = AnimationState.EXP_1;
+			hit();
 			bullet.destroy();
 		}
+	}
+
+	/**
+	 * Returns true of the fighter is destroyed
+	 * 
+	 * @return true of the fighter is destroyed
+	 */
+	public boolean isHit() {
+		return hit;
+	}
+
+	/**
+	 * Destroys the fighter
+	 */
+	public void hit() {
+		animationState = AnimationState.EXP_1;
+		cycleCount = 0;
+		hit = true;
 	}
 
 	/**
@@ -174,6 +209,26 @@ public class Fighter implements ApplicationConstants {
 		joystick = Joystick.center;
 	}
 
+	public void push(Joystick j) {
+		if (commands.peek() != j)
+			commands.push(j);
+	}
+
+	public void pop(Joystick j) {
+		if (commands.peek() == j)
+			commands.pop();
+		else {
+			Joystick temp = commands.pop();
+			commands.pop();
+			commands.push(temp);
+		}
+<<<<<<< HEAD
+			
+=======
+
+>>>>>>> feature-explosion
+	}
+
 	/**
 	 * Return a bullet shot from the fighter
 	 * 
@@ -188,10 +243,12 @@ public class Fighter implements ApplicationConstants {
 	 */
 	private void createSprite() {
 		sprite = (new PApplet()).loadImage("Sprites/fighter.png");
-		eSprite1 = (new PApplet()).loadImage("Sprites/fighter_explode_1.png");
-		eSprite2 = (new PApplet()).loadImage("Sprites/fighter_explode_2.png");
-		eSprite3 = (new PApplet()).loadImage("Sprites/fighter_explode_3.png");
-		eSprite4 = (new PApplet()).loadImage("Sprites/fighter_explode_4.png");
+		eSprites = new PImage[5];
+		eSprites[0] = (new PApplet()).loadImage("Sprites/fighter_explosion_1.png");
+		eSprites[1] = (new PApplet()).loadImage("Sprites/fighter_explosion_2.png");
+		eSprites[2] = (new PApplet()).loadImage("Sprites/fighter_explosion_3.png");
+		eSprites[3] = (new PApplet()).loadImage("Sprites/fighter_explosion_4.png");
+		eSprites[4] = (new PApplet()).loadImage("Sprites/fighter_explosion_5.png");
 	}
 
 	/**
@@ -208,20 +265,24 @@ public class Fighter implements ApplicationConstants {
 
 		switch (animationState) {
 		case EXP_1:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite1, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[0], 0, 0);
 			break;
 		case EXP_2:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite2, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[1], 0, 0);
 			break;
 		case EXP_3:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite3, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[2], 0, 0);
 			break;
 		case EXP_4:
-			g.translate(-eSprite1.width / 2.0f, -eSprite1.height / 2.0f);
-			g.image(eSprite4, 0, 0);
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[3], 0, 0);
+			break;
+		case EXP_5:
+			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
+			g.image(eSprites[4], 0, 0);
 			break;
 		default:
 			g.translate(-sprite.width / 2.0f, -sprite.height / 2.0f);
