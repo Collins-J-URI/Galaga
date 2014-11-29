@@ -93,12 +93,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					e.detectCollision(b);
 
 		for (Bullet b : enemyBullets)
-<<<<<<< HEAD
-			fighter.detectCollision(b);
-=======
 			if (!fighter.isHit())
 				fighter.detectCollision(b);
->>>>>>> feature-explosion
 	}
 
 	/**
@@ -176,11 +172,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		} else
 			switch (key) {
 			case ' ':
-<<<<<<< HEAD
-				if (!fighter.isDestroyed() && fighterBullets.size() < 2)
-=======
 				if (!fighter.isHit() && fighterBullets.size() < 2)
->>>>>>> feature-explosion
 					fighterBullets.add(fighter.shoot());
 				break;
 			}

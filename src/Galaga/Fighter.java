@@ -222,11 +222,6 @@ public class Fighter implements ApplicationConstants {
 			commands.pop();
 			commands.push(temp);
 		}
-<<<<<<< HEAD
-			
-=======
-
->>>>>>> feature-explosion
 	}
 
 	/**
