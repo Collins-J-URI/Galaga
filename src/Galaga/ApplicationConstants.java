@@ -71,4 +71,14 @@ public interface ApplicationConstants {
 	 * Length of a frame of an explosion in seconds
 	 */
 	float EXPLOSION_FRAME = EXPLOSION_TIME / 5;
+
+	/**
+	 * Time it takes to complete one animation loop
+	 */
+	float LOOP_TIME = 0.7f;
+
+	/**
+	 * Length of a frame of an explosion in seconds
+	 */
+	float ANIMATION_FRAME = LOOP_TIME / 2;
 }
