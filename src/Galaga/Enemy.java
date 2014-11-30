@@ -19,9 +19,7 @@ public abstract class Enemy implements ApplicationConstants {
 	private PImage[] eSprites;
 
 	protected AnimationState animationState;
-	protected int cycleCount;
-	protected int animationCycleLength;
-	protected int explosionCycleLength;
+	protected float cycleCount;
 
 	public Enemy(float x, float y) {
 		this.x = x;
@@ -30,9 +28,7 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
 		destroyed = false;
-		animationCycleLength = 40;
-		explosionCycleLength = 3;
-		cycleCount = (int) (Math.random() * animationCycleLength);
+		cycleCount = (float)Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
 		createSprite();
 	}
@@ -47,17 +43,21 @@ public abstract class Enemy implements ApplicationConstants {
 
 	public void update(float elapsed) {
 
-		if (!animationState.explosionState()) {
-			if (cycleCount == 0)
+		if (!hit) {
+			cycleCount += elapsed * 0.001f;
+			if (cycleCount > ANIMATION_FRAME) {
+				cycleCount = 0;
 				animationState = animationState.getNext();
-			cycleCount = (cycleCount + 1) % animationCycleLength;
+			}
 		} else {
-			if (cycleCount == 0)
-				if (animationState == AnimationState.EXP_5)
-					destroy();
-				else
-					animationState = animationState.getNext();
-			cycleCount = (cycleCount + 1) % explosionCycleLength;
+			if (animationState == AnimationState.EXP_5)
+				destroy();
+
+			cycleCount += elapsed * 0.001f;
+			if (cycleCount > EXPLOSION_FRAME) {
+				cycleCount = 0;
+				animationState = animationState.getNext();
+			}
 		}
 	}
 
@@ -145,10 +145,15 @@ public abstract class Enemy implements ApplicationConstants {
 
 	protected void createSprite() {
 		eSprites = new PImage[5];
-		eSprites[0] = (new PApplet()).loadImage("Sprites/enemy_explosion_1.png");
-		eSprites[1] = (new PApplet()).loadImage("Sprites/enemy_explosion_2.png");
-		eSprites[2] = (new PApplet()).loadImage("Sprites/enemy_explosion_3.png");
-		eSprites[3] = (new PApplet()).loadImage("Sprites/enemy_explosion_4.png");
-		eSprites[4] = (new PApplet()).loadImage("Sprites/enemy_explosion_5.png");
+		eSprites[0] = (new PApplet())
+				.loadImage("Sprites/enemy_explosion_1.png");
+		eSprites[1] = (new PApplet())
+				.loadImage("Sprites/enemy_explosion_2.png");
+		eSprites[2] = (new PApplet())
+				.loadImage("Sprites/enemy_explosion_3.png");
+		eSprites[3] = (new PApplet())
+				.loadImage("Sprites/enemy_explosion_4.png");
+		eSprites[4] = (new PApplet())
+				.loadImage("Sprites/enemy_explosion_5.png");
 	}
 }
