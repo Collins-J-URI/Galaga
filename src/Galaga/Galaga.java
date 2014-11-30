@@ -1,5 +1,6 @@
 package Galaga;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -17,7 +18,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private float[] starvy;
 
 	private float lastDrawTime;
-
+	private GameState gameState;
+	private AOption[] menuOptions;
+	private AOption[] GameOverOptions;
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
@@ -52,7 +55,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			stary[i] = random(WORLD_HEIGHT);
 			starvy[i] = random(P2W, 5 * P2W);
 		}
-
+		
+		//set to default gamestate
+		//main menu
+		gameState = GameState.MENU;
+		menuOptions = new AOption[3];
+		
+		menuOptions[1] = new AOption("Play",Color.white,0,0);
+		menuOptions[2] = new AOption("Quit",Color.white,0,0);
 		lastDrawTime = millis();
 	}
 
@@ -109,8 +119,59 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		scale(W2P);
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
+		
+		//render to the screen depending on the GameState;
+		System.out.println(gameState);
+		//TODO: Create Menu and GameOver
+		if(gameState == GameState.MENU){
+			
+			//draw some stars and space
+			drawSpace();
+			
+			//draw the Title inthe center top of screen.
+			pushMatrix();
+			String title = "GALAGA";
+			translate(0,3*WORLD_HEIGHT/4);
+			PFont font = loadFont("Emulogic-36.vlw");
+			textFont(font,36);
+			textAlign(CENTER);
+			scale(P2W,-P2W);
+			fill(0,255,0);
+			stroke(0);
+			text(title,0,0);
+			//shift the play button just a bit
+			for(int i = 1; i < menuOptions.length; i++){
+				menuOptions[i].setY(2*i*36);
+				menuOptions[i].draw(this);
+			}
 
-		// Draw the stars first
+			popMatrix();
+			
+			//draw the menu selections
+			//Play or Quit
+			
+		}else if(gameState == GameState.PLAYING){
+			// Draw the stars first
+			drawSpace();
+			
+			//then draw everything else
+			fighter.render(this);
+			for (Bullet b : bullets)
+				b.render(this);
+			for (Enemy e : enemies)
+				e.render(this);
+		}else if(gameState == GameState.GAMEOVER){
+			//draw some states and space
+			drawSpace();
+			
+			//draw GameOver
+			
+			//Ask to play again
+		}
+
+	}
+
+	public void drawSpace(){
 		stroke(255);
 		fill(255);
 		g.strokeWeight(2 * P2W);
@@ -118,14 +179,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			point(starx[i], WORLD_HEIGHT - stary[i]);
 			stary[i] = (stary[i] + starvy[i]) % WORLD_HEIGHT;
 		}
-
-		fighter.render(this);
-		for (Bullet b : bullets)
-			b.render(this);
-		for (Enemy e : enemies)
-			e.render(this);
 	}
-
 	// TODO: Handle multiple keys being pressed at once
 	public void keyPressed() {
 		if (key == CODED) {
@@ -137,6 +191,20 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			case RIGHT:
 				fighter.right();
 				break;
+			case UP:
+				if(menuOptions[1].isSelected()){
+					menuOptions[2].changeSelected(2);
+				}else{
+					menuOptions[1].changeSelected(1);
+				}
+				break;
+			case DOWN:
+				if(menuOptions[1].isSelected()){
+					menuOptions[2].changeSelected(2);
+				}else{
+					menuOptions[1].changeSelected(1);
+				}
+				break;
 			default:
 				// do something (or ignore)
 				break;
@@ -144,7 +212,18 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		} else
 			switch (key) {
 			case ' ':
-				bullets.add(fighter.shoot());
+				if(gameState ==GameState.MENU){
+					if(menuOptions[1].isSelected()){
+						//we want to play our game so
+						gameState = GameState.PLAYING;
+					}else{
+						//we want to quit
+						System.exit(0);
+					}
+				}else if (gameState == GameState.PLAYING){
+					bullets.add(fighter.shoot());
+				}
+				
 				break;
 			}
 	}
