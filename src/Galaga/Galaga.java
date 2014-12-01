@@ -9,7 +9,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private Fighter fighter;
 	private ArrayList<Enemy> enemies;
-	private ArrayList<Bullet> bullets;
 	private ArrayList<Bullet> enemyBullets;
 	private ArrayList<Bullet> fighterBullets;
 
@@ -158,12 +157,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			switch (keyCode) {
 			case LEFT:
 				fighter.push(Joystick.left);
-				// fighter.left();
 				break;
 
 			case RIGHT:
 				fighter.push(Joystick.right);
-				// fighter.right();
 				break;
 			default:
 				// do something (or ignore)
@@ -184,12 +181,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			switch (keyCode) {
 			case LEFT:
 				fighter.pop(Joystick.left);
-				// fighter.center();
 				break;
 
 			case RIGHT:
 				fighter.pop(Joystick.right);
-				// fighter.center();
 				break;
 			default:
 				// do something (or ignore)

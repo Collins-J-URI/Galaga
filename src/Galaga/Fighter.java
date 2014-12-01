@@ -136,6 +136,7 @@ public class Fighter implements ApplicationConstants {
 	 * Detects if there is a collision between the fighter and the passed bullet
 	 * 
 	 * @param bullet
+	 *            the bullet to check against
 	 */
 	public void detectCollision(Bullet bullet) {
 		float bx = bullet.getX();
@@ -149,7 +150,7 @@ public class Fighter implements ApplicationConstants {
 	}
 
 	/**
-	 * Returns true of the fighter is destroyed
+	 * Returns true of the fighter is has been hit
 	 * 
 	 * @return true of the fighter is destroyed
 	 */
@@ -158,7 +159,7 @@ public class Fighter implements ApplicationConstants {
 	}
 
 	/**
-	 * Destroys the fighter
+	 * Hits the fighter
 	 */
 	public void hit() {
 		animationState = AnimationState.EXP_1;
@@ -233,11 +234,16 @@ public class Fighter implements ApplicationConstants {
 	private void createSprite() {
 		sprite = (new PApplet()).loadImage("Sprites/fighter.png");
 		eSprites = new PImage[5];
-		eSprites[0] = (new PApplet()).loadImage("Sprites/fighter_explosion_1.png");
-		eSprites[1] = (new PApplet()).loadImage("Sprites/fighter_explosion_2.png");
-		eSprites[2] = (new PApplet()).loadImage("Sprites/fighter_explosion_3.png");
-		eSprites[3] = (new PApplet()).loadImage("Sprites/fighter_explosion_4.png");
-		eSprites[4] = (new PApplet()).loadImage("Sprites/fighter_explosion_5.png");
+		eSprites[0] = (new PApplet())
+				.loadImage("Sprites/fighter_explosion_1.png");
+		eSprites[1] = (new PApplet())
+				.loadImage("Sprites/fighter_explosion_2.png");
+		eSprites[2] = (new PApplet())
+				.loadImage("Sprites/fighter_explosion_3.png");
+		eSprites[3] = (new PApplet())
+				.loadImage("Sprites/fighter_explosion_4.png");
+		eSprites[4] = (new PApplet())
+				.loadImage("Sprites/fighter_explosion_5.png");
 	}
 
 	/**
