@@ -9,7 +9,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private Fighter fighter;
 	private ArrayList<Enemy> enemies;
-	private ArrayList<Bullet> bullets;
 	private ArrayList<Bullet> enemyBullets;
 	private ArrayList<Bullet> fighterBullets;
 
@@ -19,6 +18,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private float[] starvy;
 
 	private float lastDrawTime;
+	private GameState gameState;
+	private AOption[] menuOptions;
+	private AOption[] GameOverOptions;
 
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -54,6 +56,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			stary[i] = random(WORLD_HEIGHT);
 			starvy[i] = random(P2W, 5 * P2W);
 		}
+
+		// set to default gamestate
+		// main menu
+		gameState = GameState.MENU;
+		menuOptions = new AOption[3];
+
+		menuOptions[1] = new AOption("Play", Color.white, 0, 0);
+		menuOptions[2] = new AOption("Quit", Color.white, 0, 0);
 
 		lastDrawTime = millis();
 	}
@@ -134,48 +144,131 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
 
-		// Draw the stars first
+		// render to the screen depending on the GameState;
+		System.out.println(gameState);
+		// TODO: Create Menu and GameOver
+		if (gameState == GameState.MENU) {
+
+			// draw some stars and space
+			drawSpace();
+
+			// draw the Title inthe center top of screen.
+			pushMatrix();
+			String title = "GALAGA";
+			translate(0, 3 * WORLD_HEIGHT / 4);
+			PFont font = loadFont("Emulogic-36.vlw");
+			textFont(font, 36);
+			textAlign(CENTER);
+			scale(P2W, -P2W);
+			fill(0, 255, 0);
+			stroke(0);
+			text(title, 0, 0);
+			// shift the play button just a bit
+			for (int i = 1; i < menuOptions.length; i++) {
+				menuOptions[i].setY(2 * i * 36);
+				menuOptions[i].draw(this);
+			}
+
+			popMatrix();
+
+			// draw the menu selections
+			// Play or Quit
+
+		} else if (gameState == GameState.PLAYING) {
+			// Draw the stars first
+			drawSpace();
+
+			// then draw everything else
+			fighter.render(this);
+			for (Bullet b : fighterBullets)
+				b.render(this);
+			for (Bullet b : enemyBullets)
+				b.render(this);
+			for (Enemy e : enemies)
+				e.render(this);
+
+		} else if (gameState == GameState.GAMEOVER) {
+			// draw some states and space
+			drawSpace();
+
+			// draw GameOver
+
+			// Ask to play again
+		}
+	}
+
+	public void drawSpace() {
 		stroke(255);
 		fill(255);
-		g.strokeWeight(PIXEL_WIDTH);
+		g.strokeWeight(2 * P2W);
 		for (int i = 0; i < numStars; i++) {
 			point(starx[i], WORLD_HEIGHT - stary[i]);
 			stary[i] = (stary[i] + starvy[i]) % WORLD_HEIGHT;
 		}
-
-		fighter.render(this);
-		for (Bullet b : fighterBullets)
-			b.render(this);
-		for (Bullet b : enemyBullets)
-			b.render(this);
-		for (Enemy e : enemies)
-			e.render(this);
 	}
 
 	// TODO: Handle multiple keys being pressed at once
 	public void keyPressed() {
-		if (key == CODED) {
-			switch (keyCode) {
-			case LEFT:
-				fighter.push(Joystick.left);
-				// fighter.left();
-				break;
+		if (gameState == GameState.MENU) {
+			if (key == CODED) {
+				switch (keyCode) {
+				case UP:
+					if (menuOptions[1].isSelected()) {
+						menuOptions[2].changeSelected(2);
+					} else {
+						menuOptions[1].changeSelected(1);
+					}
+					break;
+				case DOWN:
+					if (menuOptions[1].isSelected()) {
+						menuOptions[2].changeSelected(2);
+					} else {
+						menuOptions[1].changeSelected(1);
+					}
+					break;
+				default:
+					// do something (or ignore)
+					break;
+				}
+			} else
+				switch (key) {
+				case ' ':
+					if (menuOptions[1].isSelected())
+						gameState = GameState.PLAYING;
+					else
+						System.exit(0);
+					break;
+				}
 
-			case RIGHT:
-				fighter.push(Joystick.right);
-				// fighter.right();
-				break;
-			default:
-				// do something (or ignore)
-				break;
-			}
-		} else
+		} else if (gameState == GameState.PLAYING) {
+			if (key == CODED) {
+				switch (keyCode) {
+				case LEFT:
+					fighter.push(Joystick.left);
+					break;
+
+				case RIGHT:
+					fighter.push(Joystick.right);
+					break;
+				default:
+					// do something (or ignore)
+					break;
+				}
+			} else
+				switch (key) {
+				case ' ':
+					if (!fighter.isHit() && fighterBullets.size() < 2)
+						fighterBullets.add(fighter.shoot());
+					break;
+				}
+		} else {
 			switch (key) {
 			case ' ':
 				if (!fighter.isHit() && fighterBullets.size() < 2)
 					fighterBullets.add(fighter.shoot());
 				break;
 			}
+		}
 	}
 
 	// TODO: Handle multiple keys being pressed at once
@@ -184,12 +277,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			switch (keyCode) {
 			case LEFT:
 				fighter.pop(Joystick.left);
-				// fighter.center();
 				break;
 
 			case RIGHT:
 				fighter.pop(Joystick.right);
-				// fighter.center();
 				break;
 			default:
 				// do something (or ignore)
@@ -198,6 +289,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		} else
 			switch (key) {
 			case ' ':
+				System.exit(0);
 				break;
 			}
 	}

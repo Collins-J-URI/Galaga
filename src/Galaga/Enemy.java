@@ -4,7 +4,7 @@ import processing.core.*;
 
 public abstract class Enemy implements ApplicationConstants {
 
-	private boolean destroyed;
+	protected boolean destroyed;
 	protected boolean hit;
 	protected float x, y;
 	protected float vx, vy;

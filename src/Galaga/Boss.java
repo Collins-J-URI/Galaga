@@ -2,22 +2,42 @@ package Galaga;
 
 import processing.core.*;
 
+/**
+ * Defines a Boss Galaga enemy
+ * 
+ * @author Christopher Glasz
+ */
 public class Boss extends Enemy {
 
+	/**
+	 * Sprites for when we have been hit
+	 */
 	private PImage hitSprite1, hitSprite2;
+
+	/**
+	 * True if we havebeen hit once
+	 */
 	private boolean hitOnce;
 
+	/**
+	 * Constructor initializes variables
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @param y
+	 *            y coordinate
+	 */
 	public Boss(float x, float y) {
 		super(x, y);
 		hitOnce = false;
 	}
 
-	@Override
-	public void update(float elapsed) {
-		super.update(elapsed);
-
-	}
-
+	/**
+	 * Detects if there is a collision between the enemy and the passed bullet
+	 * 
+	 * @param bullet
+	 *            the bullet to check against
+	 */
 	public void detectCollision(Bullet bullet) {
 		float bx = bullet.getX();
 		float by = bullet.getY();
@@ -29,6 +49,9 @@ public class Boss extends Enemy {
 		}
 	}
 
+	/**
+	 * Hits the fighter
+	 */
 	public void hit() {
 		if (!hitOnce) {
 			hitOnce = true;
@@ -40,12 +63,25 @@ public class Boss extends Enemy {
 		}
 	}
 
-	@Override
+	/**
+	 * Returns a clone of the Boss
+	 * 
+	 * @return a clone of the Boss
+	 */
 	public Enemy clone() {
-		// TODO Auto-generated method stub
-		return null;
+		Boss temp = new Boss(x, y);
+		if (hitOnce)
+			temp.hit();
+		if (hit)
+			temp.hit();
+		if (destroyed)
+			temp.destroy();
+		return temp;
 	}
 
+	/**
+	 * Loads the sprites
+	 */
 	protected void createSprite() {
 		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/boss.png");
