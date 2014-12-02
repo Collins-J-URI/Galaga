@@ -1,4 +1,3 @@
-
 package Galaga;
 
 import java.awt.Color;
@@ -148,11 +147,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// TODO: Create Menu and GameOver
 		if (gameState == GameState.MENU) {
-
-			// draw some stars and space
 			drawSpace();
 
-			// draw the Title inthe center top of screen.
 			pushMatrix();
 			String title = "GALAGA";
 			translate(0, 3 * WORLD_HEIGHT / 4);
@@ -171,14 +167,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			popMatrix();
 
-			// draw the menu selections
-			// Play or Quit
-
 		} else if (gameState == GameState.PLAYING) {
-			// Draw the stars first
 			drawSpace();
 
-			// then draw everything else
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
 				b.render(this);
@@ -188,9 +179,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				e.render(this);
 
 		} else if (gameState == GameState.GAMEOVER) {
-			// draw some states and space
 			drawSpace();
-			
+
 			pushMatrix();
 			String title = "GAME OVER";
 			translate(0, WORLD_HEIGHT / 2);
@@ -201,12 +191,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			fill(255, 0, 0);
 			stroke(0);
 			text(title, 0, 0);
-			
+
 			popMatrix();
-
-			// draw GameOver
-
-			// Ask to play again
 		}
 	}
 
@@ -219,8 +205,37 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			stary[i] = (stary[i] + starvy[i]) % WORLD_HEIGHT;
 		}
 	}
+	
+	public void reset() {
+		
+		Fighter.reset();
+		fighter = Fighter.instance();
+		
+		fighterBullets = new ArrayList<Bullet>();
+		enemyBullets = new ArrayList<Bullet>();
+		enemies = new ArrayList<Enemy>();
 
-	// TODO: Handle multiple keys being pressed at once
+		for (int i = 0; i < 4; i++)
+			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+
+		for (int i = 0; i < 8; i++)
+			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
+					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
+		for (int i = 0; i < 8; i++)
+			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
+					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+
+		for (int i = 0; i < 10; i++)
+			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
+		for (int i = 0; i < 10; i++)
+			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
+		gameState = GameState.MENU;
+		
+	}
+
 	public void keyPressed() {
 		if (gameState == GameState.MENU) {
 			if (key == CODED) {
@@ -274,36 +289,36 @@ public class Galaga extends PApplet implements ApplicationConstants {
 						fighterBullets.add(fighter.shoot());
 					break;
 				}
-		} else {
+		} else if (gameState == GameState.GAMEOVER) {
 			switch (key) {
 			case ' ':
-				if (!fighter.isHit() && fighterBullets.size() < 2)
-					fighterBullets.add(fighter.shoot());
+				reset();
 				break;
 			}
 		}
 	}
 
-	// TODO: Handle multiple keys being pressed at once
 	public void keyReleased() {
-		if (key == CODED) {
-			switch (keyCode) {
-			case LEFT:
-				fighter.pop(Joystick.left);
-				break;
+		if (gameState == GameState.PLAYING) {
+			if (key == CODED) {
+				switch (keyCode) {
+				case LEFT:
+					fighter.pop(Joystick.left);
+					break;
 
-			case RIGHT:
-				fighter.pop(Joystick.right);
-				break;
-			default:
-				// do something (or ignore)
-				break;
-			}
-		} else
-			switch (key) {
-			case ' ':
-				break;
-			}
+				case RIGHT:
+					fighter.pop(Joystick.right);
+					break;
+				default:
+					// do something (or ignore)
+					break;
+				}
+			} else
+				switch (key) {
+				case ' ':
+					break;
+				}
+		}
 	}
 
 }

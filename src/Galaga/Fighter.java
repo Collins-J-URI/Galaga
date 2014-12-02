@@ -73,6 +73,10 @@ public class Fighter implements ApplicationConstants {
 			instance = new Fighter();
 		return instance;
 	}
+	
+	public static void reset() {
+		instance = new Fighter();
+	}
 
 	/**
 	 * Private constructor ensures that only once instance of the fighter exists
