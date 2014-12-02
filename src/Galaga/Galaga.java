@@ -156,7 +156,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			pushMatrix();
 			String title = "GALAGA";
 			translate(0, 3 * WORLD_HEIGHT / 4);
-			PFont font = loadFont("Emulogic-36.vlw");
+			PFont font = loadFont("Fonts/Emulogic-36.vlw");
 			textFont(font, 36);
 			textAlign(CENTER);
 			scale(P2W, -P2W);
@@ -194,7 +194,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			pushMatrix();
 			String title = "GAME OVER";
 			translate(0, WORLD_HEIGHT / 2);
-			PFont font = loadFont("Emulogic-36.vlw");
+			PFont font = loadFont("Fonts/Emulogic-36.vlw");
 			textFont(font, 36);
 			textAlign(CENTER);
 			scale(P2W, -P2W);
