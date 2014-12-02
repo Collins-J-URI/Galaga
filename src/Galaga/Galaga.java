@@ -145,8 +145,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
 
-		// render to the screen depending on the GameState;
-		System.out.println(gameState);
 		// TODO: Create Menu and GameOver
 		if (gameState == GameState.MENU) {
 
