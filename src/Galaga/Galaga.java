@@ -1,5 +1,7 @@
+
 package Galaga;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -131,7 +133,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				eit.remove();
 
 		if (fighter.isDestroyed())
-			noLoop();
+			gameState = GameState.GAMEOVER;
 
 	}
 
@@ -144,8 +146,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
 
-		// render to the screen depending on the GameState;
-		System.out.println(gameState);
 		// TODO: Create Menu and GameOver
 		if (gameState == GameState.MENU) {
 
@@ -156,7 +156,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			pushMatrix();
 			String title = "GALAGA";
 			translate(0, 3 * WORLD_HEIGHT / 4);
-			PFont font = loadFont("Emulogic-36.vlw");
+			PFont font = loadFont("Fonts/Emulogic-36.vlw");
 			textFont(font, 36);
 			textAlign(CENTER);
 			scale(P2W, -P2W);
@@ -190,6 +190,19 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		} else if (gameState == GameState.GAMEOVER) {
 			// draw some states and space
 			drawSpace();
+			
+			pushMatrix();
+			String title = "GAME OVER";
+			translate(0, WORLD_HEIGHT / 2);
+			PFont font = loadFont("Fonts/Emulogic-36.vlw");
+			textFont(font, 36);
+			textAlign(CENTER);
+			scale(P2W, -P2W);
+			fill(255, 0, 0);
+			stroke(0);
+			text(title, 0, 0);
+			
+			popMatrix();
 
 			// draw GameOver
 
@@ -289,7 +302,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		} else
 			switch (key) {
 			case ' ':
-				System.exit(0);
 				break;
 			}
 	}
