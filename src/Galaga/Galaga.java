@@ -8,10 +8,10 @@ import processing.core.*;
 
 public class Galaga extends PApplet implements ApplicationConstants {
 
-	private Fighter fighter;
-	private ArrayList<Enemy> enemies;
-	private ArrayList<Bullet> enemyBullets;
-	private ArrayList<Bullet> fighterBullets;
+	private static Fighter fighter;
+	private static ArrayList<Enemy> enemies;
+	private static ArrayList<Bullet> enemyBullets;
+	private static ArrayList<Bullet> fighterBullets;
 
 	private final int numStars = 200;
 	private float[] starx;
@@ -20,7 +20,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private float lastDrawTime;
 	private static GameState gameState;
-	private Menu main;
+	private Menu main, gameOver;
 
 	private PImage sprite;
 
@@ -70,9 +70,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		Option play = new Option("Play", new Play());
 		Option quit = new Option("Quit", new Quit());
 		Option highscore = new Option("High Scores", new HighScore());
+		Option returnToMenu = new Option("Return to Menu", new Return());
 
-		Option[] options = { play, highscore, quit };
-		main = new Menu(options);
+		Option[] mainOptions = { play, highscore, quit };
+		main = new Menu(mainOptions);
+		
+		Option[] gameOverOptions = { returnToMenu, quit};
+		gameOver = new Menu(gameOverOptions);
 
 		sprite = loadImage("Sprites/Galaga.png");
 
@@ -183,18 +187,18 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				e.render(this);
 
 		} else if (gameState == GameState.GAMEOVER) {
-
 			pushMatrix();
-			String title = "GAME OVER";
-			translate(0, WORLD_HEIGHT / 2);
-			PFont font = loadFont("Fonts/Emulogic-36.vlw");
-			textFont(font, 36);
-			textAlign(CENTER);
+			translate(0, 3 * WORLD_HEIGHT / 4);
+			pushMatrix();
+			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+			imageMode(CENTER);
+			image(sprite, 0, 0);
+			popMatrix();
 			scale(P2W, -P2W);
-			fill(255, 0, 0);
-			stroke(0);
-			text(title, 0, 0);
+			
+			translate(0, 200);
 
+			gameOver.render(this);
 			popMatrix();
 		}
 	}
@@ -283,11 +287,24 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					break;
 				}
 		} else if (gameState == GameState.GAMEOVER) {
-			switch (key) {
-			case ' ':
-				reset();
-				break;
-			}
+			if (key == CODED) {
+				switch (keyCode) {
+				case UP:
+					gameOver.cycle(Joystick.up);
+					break;
+				case DOWN:
+					gameOver.cycle(Joystick.down);
+					break;
+				default:
+					// do something (or ignore)
+					break;
+				}
+			} else
+				switch (key) {
+				case ' ':
+					gameOver.execute();
+					break;
+				}
 		}
 	}
 
@@ -314,21 +331,72 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * Select action associated with Play
+	 * 
+	 * @author Christopher Glasz
+	 */
 	private static class Play implements SelectAction {
 		public void execute() {
 			gameState = GameState.PLAYING;
 		}
 	}
 
+	/**
+	 * Select action associated with Quit
+	 * 
+	 * @author Christopher Glasz
+	 */
 	private static class Quit implements SelectAction {
 		public void execute() {
 			System.exit(0);
 		}
 	}
 
+	/**
+	 * Select action associated with Quit
+	 * 
+	 * @author Christopher Glasz
+	 */
 	private static class HighScore implements SelectAction {
 		public void execute() {
 			System.exit(0);
+		}
+	}
+
+	/**
+	 * Select action associated with Return to Main Menu
+	 * 
+	 * @author Christopher Glasz
+	 */
+	private static class Return implements SelectAction {
+		public void execute() {
+
+			Fighter.reset();
+			fighter = Fighter.instance();
+
+			fighterBullets = new ArrayList<Bullet>();
+			enemyBullets = new ArrayList<Bullet>();
+			enemies = new ArrayList<Enemy>();
+
+			for (int i = 0; i < 4; i++)
+				enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
+						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+
+			for (int i = 0; i < 8; i++)
+				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
+						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
+			for (int i = 0; i < 8; i++)
+				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
+						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+
+			for (int i = 0; i < 10; i++)
+				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
+			for (int i = 0; i < 10; i++)
+				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
+			gameState = GameState.MENU;
 		}
 	}
 
