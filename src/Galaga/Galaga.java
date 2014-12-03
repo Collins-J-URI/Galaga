@@ -19,9 +19,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private float[] starvy;
 
 	private float lastDrawTime;
-	private GameState gameState;
-	private AOption[] menuOptions;
-	private AOption[] GameOverOptions;
+	private static GameState gameState;
+	private Option[] menuOptions;
+	private Option[] GameOverOptions;
+	private Menu main;
 
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -61,11 +62,19 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// set to default gamestate
 		// main menu
 		gameState = GameState.MENU;
-		menuOptions = new AOption[3];
+		menuOptions = new Option[3];
 
-		menuOptions[1] = new AOption("Play", Color.white, 0, 0);
-		menuOptions[2] = new AOption("Quit", Color.white, 0, 0);
-
+		//menuOptions[1] = new Option("Play", Color.white, 0, 0);
+		//menuOptions[2] = new Option("Quit", Color.white, 0, 0);
+		
+		//String[] options = {"Play", "High Scores", "Quit"};
+		Option play = new Option("Play", new Play());
+		Option quit = new Option("Quit", new Quit());
+		Option highscore = new Option("High Scores", new HighScore());
+		
+		Option[] options = {play, highscore, quit};
+		main = new Menu(options);
+		
 		lastDrawTime = millis();
 	}
 
@@ -159,12 +168,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			fill(0, 255, 0);
 			stroke(0);
 			text(title, 0, 0);
+			translate(0, 80);
 			// shift the play button just a bit
-			for (int i = 1; i < menuOptions.length; i++) {
-				menuOptions[i].setY(2 * i * 36);
-				menuOptions[i].draw(this);
-			}
+			//for (int i = 1; i < menuOptions.length; i++) {
+			//	menuOptions[i].setY(2 * i * 36);
+			//	menuOptions[i].draw(this);
+			//}
 
+			main.render(this);
 			popMatrix();
 
 		} else if (gameState == GameState.PLAYING) {
@@ -241,18 +252,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
-					if (menuOptions[1].isSelected()) {
-						menuOptions[2].changeSelected(2);
-					} else {
-						menuOptions[1].changeSelected(1);
-					}
+					main.cycle(Joystick.up);
 					break;
 				case DOWN:
-					if (menuOptions[1].isSelected()) {
-						menuOptions[2].changeSelected(2);
-					} else {
-						menuOptions[1].changeSelected(1);
-					}
+					main.cycle(Joystick.down);
 					break;
 				default:
 					// do something (or ignore)
@@ -261,10 +264,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			} else
 				switch (key) {
 				case ' ':
-					if (menuOptions[1].isSelected())
-						gameState = GameState.PLAYING;
-					else
-						System.exit(0);
+					main.execute();
 					break;
 				}
 
@@ -318,6 +318,24 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				case ' ':
 					break;
 				}
+		}
+	}
+	
+	private static class Play implements SelectAction {
+		public void execute() {
+			gameState = GameState.PLAYING;
+		}
+	}
+	
+	private static class Quit implements SelectAction {
+		public void execute() {
+			System.exit(0);
+		}
+	}
+	
+	private static class HighScore implements SelectAction {
+		public void execute() {
+			System.exit(0);
 		}
 	}
 
