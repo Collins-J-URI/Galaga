@@ -10,6 +10,11 @@ import processing.core.*;
 public abstract class Bullet implements ApplicationConstants {
 
 	/**
+	 * X velocity of the bullet
+	 */
+	protected float vx, vy;
+
+	/**
 	 * Coordinates of the bullet
 	 */
 	protected float x, y;
@@ -37,6 +42,38 @@ public abstract class Bullet implements ApplicationConstants {
 		this.y = y;
 		this.destroyed = false;
 		createSprite();
+	}
+
+	/**
+	 * Update position of bullet
+	 * 
+	 * @param elapsed
+	 *            time since last draw
+	 */
+	public void update(float elapsed) {
+		y += vy * elapsed * 0.001;
+		x += vx * elapsed * 0.001;
+		
+		if (y > WORLD_HEIGHT || y < 0)
+			destroy();
+	}
+
+	/**
+	 * Draws the bullet to the passed PApplet
+	 * 
+	 * @param g
+	 *            PApplet to draw to
+	 */
+	public void render(PApplet g) {
+		g.pushMatrix();
+		g.translate(x, y);
+		g.scale(PIXEL_WIDTH);
+		g.rotate(PApplet.atan2(vy, vx) + PConstants.PI/2);
+		g.noSmooth();
+
+		g.image(sprite, 0, 0);
+
+		g.popMatrix();
 	}
 
 	/**
@@ -72,10 +109,6 @@ public abstract class Bullet implements ApplicationConstants {
 	public float getY() {
 		return y;
 	}
-
-	public abstract void update(float elapsed);
-
-	public abstract void render(PApplet g);
 
 	protected abstract void createSprite();
 }

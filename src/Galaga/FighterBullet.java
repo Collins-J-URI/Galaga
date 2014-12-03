@@ -20,36 +20,8 @@ public class FighterBullet extends Bullet {
 	 */
 	public FighterBullet(float x, float y) {
 		super(x, y);
-	}
-
-	/**
-	 * Update position of bullet
-	 * 
-	 * @param elapsed
-	 *            time since last draw
-	 */
-	public void update(float elapsed) {
-		y += BULLET_SPEED * elapsed * 0.001;
-		if (y > WORLD_HEIGHT)
-			destroy();
-	}
-
-	/**
-	 * Draws the bullet to the passed PApplet
-	 * 
-	 * @param g
-	 *            PApplet to draw to
-	 */
-	public void render(PApplet g) {
-		g.pushMatrix();
-		g.translate(x, y);
-		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-		g.translate(-7.5f, 0);
-		g.noSmooth();
-
-		g.image(sprite, 0, 0);
-
-		g.popMatrix();
+		vx = 0;
+		vy = BULLET_SPEED;
 	}
 
 	/**

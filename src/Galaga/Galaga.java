@@ -20,9 +20,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private float lastDrawTime;
 	private static GameState gameState;
-	private Option[] menuOptions;
-	private Option[] GameOverOptions;
 	private Menu main;
+
+	private PImage sprite;
 
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -62,19 +62,20 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// set to default gamestate
 		// main menu
 		gameState = GameState.MENU;
-		menuOptions = new Option[3];
 
-		//menuOptions[1] = new Option("Play", Color.white, 0, 0);
-		//menuOptions[2] = new Option("Quit", Color.white, 0, 0);
-		
-		//String[] options = {"Play", "High Scores", "Quit"};
+		// menuOptions[1] = new Option("Play", Color.white, 0, 0);
+		// menuOptions[2] = new Option("Quit", Color.white, 0, 0);
+
+		// String[] options = {"Play", "High Scores", "Quit"};
 		Option play = new Option("Play", new Play());
 		Option quit = new Option("Quit", new Quit());
 		Option highscore = new Option("High Scores", new HighScore());
-		
-		Option[] options = {play, highscore, quit};
+
+		Option[] options = { play, highscore, quit };
 		main = new Menu(options);
-		
+
+		sprite = loadImage("Sprites/Galaga.png");
+
 		lastDrawTime = millis();
 	}
 
@@ -153,33 +154,25 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		scale(W2P);
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
+		drawSpace();
+		noSmooth();
 
-		// TODO: Create Menu and GameOver
 		if (gameState == GameState.MENU) {
-			drawSpace();
-
 			pushMatrix();
-			String title = "GALAGA";
 			translate(0, 3 * WORLD_HEIGHT / 4);
-			PFont font = loadFont("Fonts/Emulogic-36.vlw");
-			textFont(font, 36);
-			textAlign(CENTER);
+			pushMatrix();
+			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+			imageMode(CENTER);
+			image(sprite, 0, 0);
+			popMatrix();
 			scale(P2W, -P2W);
-			fill(0, 255, 0);
-			stroke(0);
-			text(title, 0, 0);
-			translate(0, 80);
-			// shift the play button just a bit
-			//for (int i = 1; i < menuOptions.length; i++) {
-			//	menuOptions[i].setY(2 * i * 36);
-			//	menuOptions[i].draw(this);
-			//}
+			
+			translate(0, 200);
 
 			main.render(this);
 			popMatrix();
 
 		} else if (gameState == GameState.PLAYING) {
-			drawSpace();
 
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
@@ -190,7 +183,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				e.render(this);
 
 		} else if (gameState == GameState.GAMEOVER) {
-			drawSpace();
 
 			pushMatrix();
 			String title = "GAME OVER";
@@ -210,18 +202,19 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void drawSpace() {
 		stroke(255);
 		fill(255);
-		g.strokeWeight(2 * P2W);
+		strokeWeight(2 * P2W);
+		noSmooth();
 		for (int i = 0; i < numStars; i++) {
 			point(starx[i], WORLD_HEIGHT - stary[i]);
 			stary[i] = (stary[i] + starvy[i]) % WORLD_HEIGHT;
 		}
 	}
-	
+
 	public void reset() {
-		
+
 		Fighter.reset();
 		fighter = Fighter.instance();
-		
+
 		fighterBullets = new ArrayList<Bullet>();
 		enemyBullets = new ArrayList<Bullet>();
 		enemies = new ArrayList<Enemy>();
@@ -244,7 +237,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
 					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
 		gameState = GameState.MENU;
-		
+
 	}
 
 	public void keyPressed() {
@@ -320,19 +313,19 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				}
 		}
 	}
-	
+
 	private static class Play implements SelectAction {
 		public void execute() {
 			gameState = GameState.PLAYING;
 		}
 	}
-	
+
 	private static class Quit implements SelectAction {
 		public void execute() {
 			System.exit(0);
 		}
 	}
-	
+
 	private static class HighScore implements SelectAction {
 		public void execute() {
 			System.exit(0);

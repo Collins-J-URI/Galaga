@@ -3,6 +3,8 @@ package Galaga;
 import java.awt.Color;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PFont;
 
 public class Option {
 
@@ -36,9 +38,11 @@ public class Option {
 	}
 
 	public void render(PApplet g) {
-		int color = selected ? g.color(255, 0, 0) : g.color(0, 255, 0);
+		int color = selected ? g.color(0, 255, 0) : g.color(255, 0, 0);
 		g.fill(color);
-		g.textSize(24);
+		g.textAlign(PConstants.CENTER);
+		PFont font = g.loadFont("Fonts/Emulogic-36.vlw");
+		g.textFont(font, 36);
 		g.text(text, 0, 0);
 	}
 

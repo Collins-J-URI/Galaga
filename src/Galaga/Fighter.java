@@ -264,27 +264,21 @@ public class Fighter implements ApplicationConstants {
 
 		switch (animationState) {
 		case EXP_1:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[0], 0, 0);
 			break;
 		case EXP_2:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[1], 0, 0);
 			break;
 		case EXP_3:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[2], 0, 0);
 			break;
 		case EXP_4:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[3], 0, 0);
 			break;
 		case EXP_5:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[4], 0, 0);
 			break;
 		default:
-			g.translate(-sprite.width / 2.0f, -sprite.height / 2.0f);
 			g.image(sprite, 0, 0);
 			break;
 		}
