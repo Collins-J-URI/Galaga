@@ -76,7 +76,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		Option[] gameOverOptions = { returnToMenu, quit };
 		gameOver = new Menu(gameOverOptions);
 
-		sprite = loadImage("Sprites/Galaga.png");
+		sprite = loadImage("Sprites/galaga.png");
 
 		lastDrawTime = millis();
 	}
