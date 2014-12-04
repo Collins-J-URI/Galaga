@@ -69,31 +69,24 @@ public abstract class Enemy implements ApplicationConstants {
 
 		switch (animationState) {
 		case UP:
-			g.translate(-sprite1.width / 2.0f, -sprite1.height / 2.0f);
 			g.image(sprite1, 0, 0);
 			break;
 		case DOWN:
-			g.translate(-sprite2.width / 2.0f, -sprite2.height / 2.0f);
 			g.image(sprite2, 0, 0);
 			break;
 		case EXP_1:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[0], 0, 0);
 			break;
 		case EXP_2:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[1], 0, 0);
 			break;
 		case EXP_3:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[2], 0, 0);
 			break;
 		case EXP_4:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[3], 0, 0);
 			break;
 		case EXP_5:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[4], 0, 0);
 			break;
 		default:
