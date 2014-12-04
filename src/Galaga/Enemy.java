@@ -167,6 +167,8 @@ public abstract class Enemy implements ApplicationConstants {
 		else if (state == EnemyState.DIVE)
 			score = attackingScore;
 
+		formationScore = attackingScore = 0;
+		
 		return score;
 	}
 
