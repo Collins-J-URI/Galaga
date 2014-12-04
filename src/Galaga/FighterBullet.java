@@ -1,7 +1,6 @@
 package Galaga;
 
 import processing.core.PApplet;
-import processing.core.PConstants;
 
 /**
  * Defines a bullet fired by the fighter

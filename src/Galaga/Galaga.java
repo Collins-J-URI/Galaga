@@ -56,26 +56,24 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (int i = 0; i < numStars; i++) {
 			starx[i] = random(-WORLD_WIDTH / 2, WORLD_WIDTH / 2);
 			stary[i] = random(WORLD_HEIGHT);
-			starvy[i] = random(P2W, 5 * P2W);
+			starvy[i] = random(BULLET_SPEED / 6, BULLET_SPEED / 4);
 		}
 
 		// set to default gamestate
-		// main menu
 		gameState = GameState.MENU;
-
-		// menuOptions[1] = new Option("Play", Color.white, 0, 0);
-		// menuOptions[2] = new Option("Quit", Color.white, 0, 0);
-
-		// String[] options = {"Play", "High Scores", "Quit"};
+		
+		// Different options for the menus
 		Option play = new Option("Play", new Play());
 		Option quit = new Option("Quit", new Quit());
 		Option highscore = new Option("High Scores", new HighScore());
 		Option returnToMenu = new Option("Return to Menu", new Return());
 
+		// Initialize main menu
 		Option[] mainOptions = { play, highscore, quit };
 		main = new Menu(mainOptions);
-		
-		Option[] gameOverOptions = { returnToMenu, quit};
+
+		// Initialize game over menu
+		Option[] gameOverOptions = { returnToMenu, quit };
 		gameOver = new Menu(gameOverOptions);
 
 		sprite = loadImage("Sprites/Galaga.png");
@@ -98,6 +96,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		lastDrawTime = drawTime;
 
 		fighter.update(elapsed);
+		updateSpace(elapsed);
 
 		for (Bullet b : fighterBullets)
 			b.update(elapsed);
@@ -158,7 +157,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		scale(W2P);
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
-		drawSpace();
+		renderSpace();
 		noSmooth();
 
 		if (gameState == GameState.MENU) {
@@ -170,7 +169,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			image(sprite, 0, 0);
 			popMatrix();
 			scale(P2W, -P2W);
-			
+
 			translate(0, 200);
 
 			main.render(this);
@@ -195,7 +194,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			image(sprite, 0, 0);
 			popMatrix();
 			scale(P2W, -P2W);
-			
+
 			translate(0, 200);
 
 			gameOver.render(this);
@@ -203,45 +202,29 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 	}
 
-	public void drawSpace() {
+	/**
+	 * Draws stars and space going by
+	 * 
+	 * @param elapsed
+	 *            time elapsed since last update
+	 */
+	public void updateSpace(float elapsed) {
+		for (int i = 0; i < numStars; i++) {
+			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
+		}
+	}
+
+	/**
+	 * Draws stars and space going by
+	 */
+	public void renderSpace() {
 		stroke(255);
 		fill(255);
 		strokeWeight(2 * P2W);
 		noSmooth();
 		for (int i = 0; i < numStars; i++) {
 			point(starx[i], WORLD_HEIGHT - stary[i]);
-			stary[i] = (stary[i] + starvy[i]) % WORLD_HEIGHT;
 		}
-	}
-
-	public void reset() {
-
-		Fighter.reset();
-		fighter = Fighter.instance();
-
-		fighterBullets = new ArrayList<Bullet>();
-		enemyBullets = new ArrayList<Bullet>();
-		enemies = new ArrayList<Enemy>();
-
-		for (int i = 0; i < 4; i++)
-			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
-
-		for (int i = 0; i < 8; i++)
-			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
-		for (int i = 0; i < 8; i++)
-			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
-
-		for (int i = 0; i < 10; i++)
-			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
-		for (int i = 0; i < 10; i++)
-			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
-		gameState = GameState.MENU;
-
 	}
 
 	public void keyPressed() {
@@ -249,10 +232,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
-					main.cycle(Joystick.up);
+					main.cycle(Joystick.UP);
 					break;
 				case DOWN:
-					main.cycle(Joystick.down);
+					main.cycle(Joystick.DOWN);
+					break;
+				case LEFT:
+					main.cycle(Joystick.LEFT);
+					break;
+				case RIGHT:
+					main.cycle(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
@@ -269,11 +258,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:
-					fighter.push(Joystick.left);
+					fighter.push(Joystick.LEFT);
 					break;
 
 				case RIGHT:
-					fighter.push(Joystick.right);
+					fighter.push(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
@@ -290,10 +279,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
-					gameOver.cycle(Joystick.up);
+					gameOver.cycle(Joystick.UP);
 					break;
 				case DOWN:
-					gameOver.cycle(Joystick.down);
+					gameOver.cycle(Joystick.DOWN);
+					break;
+				case LEFT:
+					gameOver.cycle(Joystick.LEFT);
+					break;
+				case RIGHT:
+					gameOver.cycle(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
@@ -313,11 +308,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:
-					fighter.pop(Joystick.left);
+					fighter.pop(Joystick.LEFT);
 					break;
 
 				case RIGHT:
-					fighter.pop(Joystick.right);
+					fighter.pop(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
@@ -380,15 +375,15 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			enemies = new ArrayList<Enemy>();
 
 			for (int i = 0; i < 4; i++)
-				enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
-						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+				enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20
+						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
 
 			for (int i = 0; i < 8; i++)
-				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
+				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH
+						/ 20 + i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
 			for (int i = 0; i < 8; i++)
-				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH
+						/ 20 + i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
 
 			for (int i = 0; i < 10; i++)
 				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
