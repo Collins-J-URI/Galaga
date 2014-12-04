@@ -30,6 +30,8 @@ public class Boss extends Enemy {
 	public Boss(float x, float y) {
 		super(x, y);
 		hitOnce = false;
+		formationScore = 130;
+		attackingScore = 400;
 	}
 
 	/**

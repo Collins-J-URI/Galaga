@@ -6,6 +6,8 @@ public class Butterfly extends Enemy {
 
 	public Butterfly(float x, float y) {
 		super(x, y);
+		formationScore = 80;
+		attackingScore = 160;
 	}
 
 	@Override

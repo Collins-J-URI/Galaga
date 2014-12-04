@@ -13,12 +13,16 @@ public abstract class Enemy implements ApplicationConstants {
 	protected PImage sprite1;
 	protected PImage sprite2;
 
+	protected int formationScore, attackingScore;
+
 	/**
 	 * Explosion sprites to draw
 	 */
 	private PImage[] eSprites;
 
 	protected AnimationState animationState;
+	protected EnemyState state;
+
 	protected float cycleCount;
 
 	public Enemy(float x, float y) {
@@ -27,8 +31,10 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vx = 0;
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
+
+		state = EnemyState.FORMATION;
 		destroyed = false;
-		cycleCount = (float)Math.random() * ANIMATION_FRAME;
+		cycleCount = (float) Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
 		createSprite();
 	}
@@ -69,31 +75,24 @@ public abstract class Enemy implements ApplicationConstants {
 
 		switch (animationState) {
 		case UP:
-			g.translate(-sprite1.width / 2.0f, -sprite1.height / 2.0f);
 			g.image(sprite1, 0, 0);
 			break;
 		case DOWN:
-			g.translate(-sprite2.width / 2.0f, -sprite2.height / 2.0f);
 			g.image(sprite2, 0, 0);
 			break;
 		case EXP_1:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[0], 0, 0);
 			break;
 		case EXP_2:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[1], 0, 0);
 			break;
 		case EXP_3:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[2], 0, 0);
 			break;
 		case EXP_4:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[3], 0, 0);
 			break;
 		case EXP_5:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[4], 0, 0);
 			break;
 		default:
@@ -155,5 +154,25 @@ public abstract class Enemy implements ApplicationConstants {
 				.loadImage("Sprites/enemy_explosion_4.png");
 		eSprites[4] = (new PApplet())
 				.loadImage("Sprites/enemy_explosion_5.png");
+	}
+
+	/**
+	 * 
+	 * @return the score of the enemy dying.
+	 */
+	public int getScore() {
+		int score = 0;
+		if (state == EnemyState.FORMATION)
+			score = formationScore;
+		else if (state == EnemyState.DIVE)
+			score = attackingScore;
+
+		formationScore = attackingScore = 0;
+		
+		return score;
+	}
+
+	protected enum EnemyState {
+		FORMATION, DIVE, RETURN;
 	}
 }
