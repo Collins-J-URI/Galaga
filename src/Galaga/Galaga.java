@@ -23,6 +23,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private AOption[] menuOptions;
 	private AOption[] GameOverOptions;
 
+	private int score;
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
@@ -65,7 +66,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		menuOptions[1] = new AOption("Play", Color.white, 0, 0);
 		menuOptions[2] = new AOption("Quit", Color.white, 0, 0);
-
+		
+		//set the initial score to 0
+		score = 0;
 		lastDrawTime = millis();
 	}
 
@@ -82,7 +85,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		float drawTime = millis();
 		float elapsed = drawTime - lastDrawTime;
 		lastDrawTime = drawTime;
-
+		
 		fighter.update(elapsed);
 
 		for (Bullet b : fighterBullets)
@@ -102,6 +105,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (!e.isHit())
 				for (Bullet b : fighterBullets)
 					e.detectCollision(b);
+
 
 		for (Bullet b : enemyBullets)
 			if (!fighter.isHit())
