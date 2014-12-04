@@ -19,6 +19,8 @@ public abstract class Enemy implements ApplicationConstants {
 	private PImage[] eSprites;
 
 	protected AnimationState animationState;
+	protected AttackingState state;
+	
 	protected float cycleCount;
 
 	public Enemy(float x, float y) {
@@ -27,6 +29,8 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vx = 0;
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
+		
+		state = AttackingState.inFormation;
 		destroyed = false;
 		cycleCount = (float)Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
@@ -148,5 +152,15 @@ public abstract class Enemy implements ApplicationConstants {
 				.loadImage("Sprites/enemy_explosion_4.png");
 		eSprites[4] = (new PApplet())
 				.loadImage("Sprites/enemy_explosion_5.png");
+	}
+	
+	/**
+	 * 
+	 * @return the score of the enemy dying.
+	 */
+	public abstract int getScore();
+	
+	protected enum AttackingState {
+		diving,inFormation;
 	}
 }
