@@ -23,7 +23,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private Menu main, gameOver;
 
 	private PImage sprite;
-
+	
+	private static int score;
+	
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
@@ -61,7 +63,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// set to default gamestate
 		gameState = GameState.MENU;
-		
+
 		// Different options for the menus
 		Option play = new Option("Play", new Play());
 		Option quit = new Option("Quit", new Quit());
@@ -77,7 +79,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		gameOver = new Menu(gameOverOptions);
 
 		sprite = loadImage("Sprites/galaga.png");
-
+		
+		//initialize the score
+		score = 0;
 		lastDrawTime = millis();
 	}
 
@@ -140,10 +144,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Get rid of bullets once they're outside the window
 		Iterator<Enemy> eit = enemies.iterator();
-		while (eit.hasNext())
-			if (eit.next().isDestroyed())
+		while (eit.hasNext()) {
+			Enemy temp = eit.next();
+			if (temp.isDestroyed()){
+				score += temp.getScore();
+				System.out.println("Score: " + score);
 				eit.remove();
-
+			}
+		}
 		if (fighter.isDestroyed())
 			gameState = GameState.GAMEOVER;
 
@@ -366,7 +374,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static class Return implements SelectAction {
 		public void execute() {
-
+			
+			score = 0;
 			Fighter.reset();
 			fighter = Fighter.instance();
 

@@ -90,4 +90,15 @@ public class Boss extends Enemy {
 		hitSprite2 = (new PApplet()).loadImage("Sprites/boss2_hit.png");
 	}
 
+	@Override
+	public int getScore() {
+		if(state == AttackingState.inFormation){
+			return 1000;
+		}else if (state == AttackingState.diving){
+			return 2000;
+		}
+		
+		return 0;
+	}
+
 }
