@@ -6,7 +6,8 @@ public class Bee extends Enemy {
 
 	public Bee(float x, float y) {
 		super(x, y);
-		r = 7 * PIXEL_WIDTH;
+		formationScore = 50;
+		attackingScore = 100;
 	}
 
 	@Override

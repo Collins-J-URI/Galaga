@@ -1,4 +1,3 @@
-
 package Galaga;
 
 import java.awt.Color;
@@ -9,10 +8,10 @@ import processing.core.*;
 
 public class Galaga extends PApplet implements ApplicationConstants {
 
-	private Fighter fighter;
-	private ArrayList<Enemy> enemies;
-	private ArrayList<Bullet> enemyBullets;
-	private ArrayList<Bullet> fighterBullets;
+	private static Fighter fighter;
+	private static ArrayList<Enemy> enemies;
+	private static ArrayList<Bullet> enemyBullets;
+	private static ArrayList<Bullet> fighterBullets;
 
 	private final int numStars = 200;
 	private float[] starx;
@@ -20,10 +19,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private float[] starvy;
 
 	private float lastDrawTime;
-	private GameState gameState;
-	private AOption[] menuOptions;
-	private AOption[] GameOverOptions;
+	private static GameState gameState;
+	private Menu main, gameOver;
 
+	private PImage sprite;
+	
+	private static int score;
+	
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
@@ -56,17 +58,30 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (int i = 0; i < numStars; i++) {
 			starx[i] = random(-WORLD_WIDTH / 2, WORLD_WIDTH / 2);
 			stary[i] = random(WORLD_HEIGHT);
-			starvy[i] = random(P2W, 5 * P2W);
+			starvy[i] = random(BULLET_SPEED / 6, BULLET_SPEED / 4);
 		}
 
 		// set to default gamestate
-		// main menu
 		gameState = GameState.MENU;
-		menuOptions = new AOption[3];
 
-		menuOptions[1] = new AOption("Play", Color.white, 0, 0);
-		menuOptions[2] = new AOption("Quit", Color.white, 0, 0);
+		// Different options for the menus
+		Option play = new Option("Play", new Play());
+		Option quit = new Option("Quit", new Quit());
+		Option highscore = new Option("High Scores", new HighScore());
+		Option returnToMenu = new Option("Return to Menu", new Return());
 
+		// Initialize main menu
+		Option[] mainOptions = { play, highscore, quit };
+		main = new Menu(mainOptions);
+
+		// Initialize game over menu
+		Option[] gameOverOptions = { returnToMenu, quit };
+		gameOver = new Menu(gameOverOptions);
+
+		sprite = loadImage("Sprites/galaga.png");
+		
+		//initialize the score
+		score = 0;
 		lastDrawTime = millis();
 	}
 
@@ -85,6 +100,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		lastDrawTime = drawTime;
 
 		fighter.update(elapsed);
+		updateSpace(elapsed);
 
 		for (Bullet b : fighterBullets)
 			b.update(elapsed);
@@ -128,10 +144,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Get rid of bullets once they're outside the window
 		Iterator<Enemy> eit = enemies.iterator();
-		while (eit.hasNext())
-			if (eit.next().isDestroyed())
+		while (eit.hasNext()) {
+			Enemy temp = eit.next();
+			if (temp.isDestroyed()){
+				score += temp.getScore();
+				System.out.println("Score: " + score);
 				eit.remove();
-
+			}
+		}
 		if (fighter.isDestroyed())
 			gameState = GameState.GAMEOVER;
 
@@ -145,40 +165,26 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		scale(W2P);
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
+		renderSpace();
+		noSmooth();
 
-		// TODO: Create Menu and GameOver
 		if (gameState == GameState.MENU) {
-
-			// draw some stars and space
-			drawSpace();
-
-			// draw the Title inthe center top of screen.
 			pushMatrix();
-			String title = "GALAGA";
 			translate(0, 3 * WORLD_HEIGHT / 4);
-			PFont font = loadFont("Fonts/Emulogic-36.vlw");
-			textFont(font, 36);
-			textAlign(CENTER);
+			pushMatrix();
+			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+			imageMode(CENTER);
+			image(sprite, 0, 0);
+			popMatrix();
 			scale(P2W, -P2W);
-			fill(0, 255, 0);
-			stroke(0);
-			text(title, 0, 0);
-			// shift the play button just a bit
-			for (int i = 1; i < menuOptions.length; i++) {
-				menuOptions[i].setY(2 * i * 36);
-				menuOptions[i].draw(this);
-			}
 
+			translate(0, 200);
+
+			main.render(this);
 			popMatrix();
 
-			// draw the menu selections
-			// Play or Quit
-
 		} else if (gameState == GameState.PLAYING) {
-			// Draw the stars first
-			drawSpace();
 
-			// then draw everything else
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
 				b.render(this);
@@ -188,56 +194,62 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				e.render(this);
 
 		} else if (gameState == GameState.GAMEOVER) {
-			// draw some states and space
-			drawSpace();
-			
 			pushMatrix();
-			String title = "GAME OVER";
-			translate(0, WORLD_HEIGHT / 2);
-			PFont font = loadFont("Fonts/Emulogic-36.vlw");
-			textFont(font, 36);
-			textAlign(CENTER);
-			scale(P2W, -P2W);
-			fill(255, 0, 0);
-			stroke(0);
-			text(title, 0, 0);
-			
+			translate(0, 3 * WORLD_HEIGHT / 4);
+			pushMatrix();
+			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+			imageMode(CENTER);
+			image(sprite, 0, 0);
 			popMatrix();
+			scale(P2W, -P2W);
 
-			// draw GameOver
+			translate(0, 200);
 
-			// Ask to play again
+			gameOver.render(this);
+			popMatrix();
 		}
 	}
 
-	public void drawSpace() {
+	/**
+	 * Draws stars and space going by
+	 * 
+	 * @param elapsed
+	 *            time elapsed since last update
+	 */
+	public void updateSpace(float elapsed) {
+		for (int i = 0; i < numStars; i++) {
+			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
+		}
+	}
+
+	/**
+	 * Draws stars and space going by
+	 */
+	public void renderSpace() {
 		stroke(255);
 		fill(255);
-		g.strokeWeight(2 * P2W);
+		strokeWeight(2 * P2W);
+		noSmooth();
 		for (int i = 0; i < numStars; i++) {
 			point(starx[i], WORLD_HEIGHT - stary[i]);
-			stary[i] = (stary[i] + starvy[i]) % WORLD_HEIGHT;
 		}
 	}
 
-	// TODO: Handle multiple keys being pressed at once
 	public void keyPressed() {
 		if (gameState == GameState.MENU) {
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
-					if (menuOptions[1].isSelected()) {
-						menuOptions[2].changeSelected(2);
-					} else {
-						menuOptions[1].changeSelected(1);
-					}
+					main.cycle(Joystick.UP);
 					break;
 				case DOWN:
-					if (menuOptions[1].isSelected()) {
-						menuOptions[2].changeSelected(2);
-					} else {
-						menuOptions[1].changeSelected(1);
-					}
+					main.cycle(Joystick.DOWN);
+					break;
+				case LEFT:
+					main.cycle(Joystick.LEFT);
+					break;
+				case RIGHT:
+					main.cycle(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
@@ -246,10 +258,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			} else
 				switch (key) {
 				case ' ':
-					if (menuOptions[1].isSelected())
-						gameState = GameState.PLAYING;
-					else
-						System.exit(0);
+					main.execute();
 					break;
 				}
 
@@ -257,11 +266,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:
-					fighter.push(Joystick.left);
+					fighter.push(Joystick.LEFT);
 					break;
 
 				case RIGHT:
-					fighter.push(Joystick.right);
+					fighter.push(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
@@ -274,36 +283,125 @@ public class Galaga extends PApplet implements ApplicationConstants {
 						fighterBullets.add(fighter.shoot());
 					break;
 				}
-		} else {
-			switch (key) {
-			case ' ':
-				if (!fighter.isHit() && fighterBullets.size() < 2)
-					fighterBullets.add(fighter.shoot());
-				break;
-			}
+		} else if (gameState == GameState.GAMEOVER) {
+			if (key == CODED) {
+				switch (keyCode) {
+				case UP:
+					gameOver.cycle(Joystick.UP);
+					break;
+				case DOWN:
+					gameOver.cycle(Joystick.DOWN);
+					break;
+				case LEFT:
+					gameOver.cycle(Joystick.LEFT);
+					break;
+				case RIGHT:
+					gameOver.cycle(Joystick.RIGHT);
+					break;
+				default:
+					// do something (or ignore)
+					break;
+				}
+			} else
+				switch (key) {
+				case ' ':
+					gameOver.execute();
+					break;
+				}
 		}
 	}
 
-	// TODO: Handle multiple keys being pressed at once
 	public void keyReleased() {
-		if (key == CODED) {
-			switch (keyCode) {
-			case LEFT:
-				fighter.pop(Joystick.left);
-				break;
+		if (gameState == GameState.PLAYING) {
+			if (key == CODED) {
+				switch (keyCode) {
+				case LEFT:
+					fighter.pop(Joystick.LEFT);
+					break;
 
-			case RIGHT:
-				fighter.pop(Joystick.right);
-				break;
-			default:
-				// do something (or ignore)
-				break;
-			}
-		} else
-			switch (key) {
-			case ' ':
-				break;
-			}
+				case RIGHT:
+					fighter.pop(Joystick.RIGHT);
+					break;
+				default:
+					// do something (or ignore)
+					break;
+				}
+			} else
+				switch (key) {
+				case ' ':
+					break;
+				}
+		}
+	}
+
+	/**
+	 * Select action associated with Play
+	 * 
+	 * @author Christopher Glasz
+	 */
+	private static class Play implements SelectAction {
+		public void execute() {
+			gameState = GameState.PLAYING;
+		}
+	}
+
+	/**
+	 * Select action associated with Quit
+	 * 
+	 * @author Christopher Glasz
+	 */
+	private static class Quit implements SelectAction {
+		public void execute() {
+			System.exit(0);
+		}
+	}
+
+	/**
+	 * Select action associated with Quit
+	 * 
+	 * @author Christopher Glasz
+	 */
+	private static class HighScore implements SelectAction {
+		public void execute() {
+			System.exit(0);
+		}
+	}
+
+	/**
+	 * Select action associated with Return to Main Menu
+	 * 
+	 * @author Christopher Glasz
+	 */
+	private static class Return implements SelectAction {
+		public void execute() {
+			
+			score = 0;
+			Fighter.reset();
+			fighter = Fighter.instance();
+
+			fighterBullets = new ArrayList<Bullet>();
+			enemyBullets = new ArrayList<Bullet>();
+			enemies = new ArrayList<Enemy>();
+
+			for (int i = 0; i < 4; i++)
+				enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20
+						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+
+			for (int i = 0; i < 8; i++)
+				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH
+						/ 20 + i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
+			for (int i = 0; i < 8; i++)
+				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH
+						/ 20 + i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+
+			for (int i = 0; i < 10; i++)
+				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
+			for (int i = 0; i < 10; i++)
+				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
+						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
+			gameState = GameState.MENU;
+		}
 	}
 
 }
