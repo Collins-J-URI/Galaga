@@ -6,6 +6,8 @@ public class Butterfly extends Enemy {
 
 	public Butterfly(float x, float y) {
 		super(x, y);
+		formationScore = 80;
+		attackingScore = 160;
 	}
 
 	@Override
@@ -24,17 +26,6 @@ public class Butterfly extends Enemy {
 		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/butterfly.png");
 		sprite2 = (new PApplet()).loadImage("Sprites/butterfly2.png");
-	}
-
-	@Override
-	public int getScore() {
-		if(state == AttackingState.inFormation){
-			return 50;
-		}else if (state == AttackingState.diving){
-			return 100;
-		}
-		
-		return 0;
 	}
 
 }

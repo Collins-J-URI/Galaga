@@ -30,6 +30,8 @@ public class Boss extends Enemy {
 	public Boss(float x, float y) {
 		super(x, y);
 		hitOnce = false;
+		formationScore = 150;
+		attackingScore = 400;
 	}
 
 	/**
@@ -88,17 +90,6 @@ public class Boss extends Enemy {
 		sprite2 = (new PApplet()).loadImage("Sprites/boss2.png");
 		hitSprite1 = (new PApplet()).loadImage("Sprites/boss_hit.png");
 		hitSprite2 = (new PApplet()).loadImage("Sprites/boss2_hit.png");
-	}
-
-	@Override
-	public int getScore() {
-		if(state == AttackingState.inFormation){
-			return 1000;
-		}else if (state == AttackingState.diving){
-			return 2000;
-		}
-		
-		return 0;
 	}
 
 }

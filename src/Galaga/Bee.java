@@ -6,7 +6,8 @@ public class Bee extends Enemy {
 
 	public Bee(float x, float y) {
 		super(x, y);
-		r = 7 * PIXEL_WIDTH;
+		formationScore = 50;
+		attackingScore = 100;
 	}
 
 	@Override
@@ -25,17 +26,6 @@ public class Bee extends Enemy {
 		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/bee.png");
 		sprite2 = (new PApplet()).loadImage("Sprites/bee2.png");
-	}
-
-	@Override
-	public int getScore() {
-		if(state == AttackingState.inFormation){
-			return 80;
-		}else if (state == AttackingState.diving){
-			return 160;
-		}
-		
-		return 0;
 	}
 
 }
