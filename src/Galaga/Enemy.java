@@ -31,6 +31,7 @@ public abstract class Enemy implements ApplicationConstants {
 		destroyed = false;
 		cycleCount = (float)Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
+		state = AttackingState.inFormation;
 		createSprite();
 	}
 
@@ -40,6 +41,7 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vx = vx;
 		this.vy = vy;
 		destroyed = false;
+		state = AttackingState.inFormation;
 	}
 
 	public void update(float elapsed) {

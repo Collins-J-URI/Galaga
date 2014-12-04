@@ -10,12 +10,12 @@ public interface ApplicationConstants {
 	/**
 	 * Dimensions of the window
 	 */
-	int WINDOW_WIDTH = 700;
+	int WINDOW_WIDTH = 800;
 
 	/**
 	 * Dimensions of the window
 	 */
-	int WINDOW_HEIGHT = 800;
+	int WINDOW_HEIGHT = 680;
 
 	/**
 	 * Width of the world

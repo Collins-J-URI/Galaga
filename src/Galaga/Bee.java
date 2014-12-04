@@ -29,6 +29,7 @@ public class Bee extends Enemy {
 
 	@Override
 	public int getScore() {
+		
 		if(state == AttackingState.inFormation){
 			return 80;
 		}else if (state == AttackingState.diving){

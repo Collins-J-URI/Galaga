@@ -129,12 +129,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (bit.next().isDestroyed())
 				bit.remove();
 
-		// Get rid of bullets once they're outside the window
+		// Get rid of enemies once they're destroyed
 		Iterator<Enemy> eit = enemies.iterator();
-		while (eit.hasNext())
-			if (eit.next().isDestroyed())
+		while (eit.hasNext()){
+			Enemy temp = eit.next();
+			if (temp.isDestroyed()){
+				score += temp.getScore();
+				System.out.println("SCORE: " + score + temp.getClass());
 				eit.remove();
-
+			}
+		}
 		if (fighter.isDestroyed())
 			gameState = GameState.GAMEOVER;
 
@@ -211,7 +215,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 	
 	public void reset() {
-		
+		score = 0;
 		Fighter.reset();
 		fighter = Fighter.instance();
 		
