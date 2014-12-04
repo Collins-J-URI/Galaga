@@ -23,7 +23,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private AOption[] menuOptions;
 	private AOption[] GameOverOptions;
 
-	private int score;
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 		fighter = Fighter.instance();
@@ -66,9 +65,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		menuOptions[1] = new AOption("Play", Color.white, 0, 0);
 		menuOptions[2] = new AOption("Quit", Color.white, 0, 0);
-		
-		//set the initial score to 0
-		score = 0;
+
 		lastDrawTime = millis();
 	}
 
@@ -85,7 +82,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		float drawTime = millis();
 		float elapsed = drawTime - lastDrawTime;
 		lastDrawTime = drawTime;
-		
+
 		fighter.update(elapsed);
 
 		for (Bullet b : fighterBullets)
@@ -105,7 +102,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (!e.isHit())
 				for (Bullet b : fighterBullets)
 					e.detectCollision(b);
-
 
 		for (Bullet b : enemyBullets)
 			if (!fighter.isHit())
@@ -129,16 +125,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (bit.next().isDestroyed())
 				bit.remove();
 
-		// Get rid of enemies once they're destroyed
+		// Get rid of bullets once they're outside the window
 		Iterator<Enemy> eit = enemies.iterator();
-		while (eit.hasNext()){
-			Enemy temp = eit.next();
-			if (temp.isDestroyed()){
-				score += temp.getScore();
-				System.out.println("SCORE: " + score + temp.getClass());
+		while (eit.hasNext())
+			if (eit.next().isDestroyed())
 				eit.remove();
-			}
-		}
+
 		if (fighter.isDestroyed())
 			gameState = GameState.GAMEOVER;
 
@@ -215,7 +207,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 	
 	public void reset() {
-		score = 0;
+		
 		Fighter.reset();
 		fighter = Fighter.instance();
 		

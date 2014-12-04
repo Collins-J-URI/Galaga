@@ -1,6 +1,5 @@
 package Galaga;
 
-import Galaga.Enemy.AttackingState;
 import processing.core.*;
 
 /**
@@ -90,17 +89,5 @@ public class Boss extends Enemy {
 		hitSprite1 = (new PApplet()).loadImage("Sprites/boss_hit.png");
 		hitSprite2 = (new PApplet()).loadImage("Sprites/boss2_hit.png");
 	}
-
-	@Override
-	public int getScore() {
-		if(state == AttackingState.inFormation){
-			return 50;
-		}else if (state == AttackingState.diving){
-			return 100;
-		}
-		
-		return 0;
-	}
-	
 
 }
