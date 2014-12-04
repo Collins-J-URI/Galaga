@@ -88,9 +88,9 @@ public class Fighter implements ApplicationConstants {
 		destroyed = false;
 		hit = false;
 		cycleCount = 0;
-		joystick = Joystick.center;
+		joystick = Joystick.CENTER;
 		commands = new Stack<Joystick>();
-		commands.push(Joystick.center);
+		commands.push(Joystick.CENTER);
 		animationState = AnimationState.random();
 		createSprite();
 	}
@@ -106,11 +106,11 @@ public class Fighter implements ApplicationConstants {
 		if (!hit) {
 			// Move fighter according joystick position
 			switch (commands.peek()) {
-			case left:
+			case LEFT:
 				if (x > -WORLD_WIDTH / 2 + PIXEL_WIDTH * 10)
 					x -= STRAFE_SPEED * elapsed * 0.001f;
 				break;
-			case right:
+			case RIGHT:
 				if (x < WORLD_WIDTH / 2 - PIXEL_WIDTH * 10)
 					x += STRAFE_SPEED * elapsed * 0.001f;
 				break;
@@ -191,21 +191,21 @@ public class Fighter implements ApplicationConstants {
 	 * Set the joystick to the right position
 	 */
 	public void right() {
-		joystick = Joystick.right;
+		joystick = Joystick.RIGHT;
 	}
 
 	/**
 	 * Set the joystick to the left position
 	 */
 	public void left() {
-		joystick = Joystick.left;
+		joystick = Joystick.LEFT;
 	}
 
 	/**
 	 * Set the joystick to the center position
 	 */
 	public void center() {
-		joystick = Joystick.center;
+		joystick = Joystick.CENTER;
 	}
 
 	public void push(Joystick j) {
@@ -264,27 +264,21 @@ public class Fighter implements ApplicationConstants {
 
 		switch (animationState) {
 		case EXP_1:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[0], 0, 0);
 			break;
 		case EXP_2:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[1], 0, 0);
 			break;
 		case EXP_3:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[2], 0, 0);
 			break;
 		case EXP_4:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[3], 0, 0);
 			break;
 		case EXP_5:
-			g.translate(-eSprites[0].width / 2.0f, -eSprites[0].height / 2.0f);
 			g.image(eSprites[4], 0, 0);
 			break;
 		default:
-			g.translate(-sprite.width / 2.0f, -sprite.height / 2.0f);
 			g.image(sprite, 0, 0);
 			break;
 		}
