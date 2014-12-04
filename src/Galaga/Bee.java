@@ -27,4 +27,15 @@ public class Bee extends Enemy {
 		sprite2 = (new PApplet()).loadImage("Sprites/bee2.png");
 	}
 
+	@Override
+	public int getScore() {
+		
+		if(state == AttackingState.inFormation){
+			return 80;
+		}else if (state == AttackingState.diving){
+			return 160;
+		}
+		
+		return 0;
+	}
 }
