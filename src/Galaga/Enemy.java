@@ -104,15 +104,18 @@ public abstract class Enemy implements ApplicationConstants {
 
 	}
 
-	public void detectCollision(Bullet bullet) {
+	public boolean detectCollision(Bullet bullet) {
+		boolean h = false;
 		float bx = bullet.getX();
 		float by = bullet.getY();
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
+			h = true;
 			hit();
 			bullet.destroy();
 		}
+		return h;
 	}
 
 	public boolean isHit() {

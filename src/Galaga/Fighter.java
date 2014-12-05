@@ -61,7 +61,7 @@ public class Fighter implements ApplicationConstants {
 	 * To keep track of whether the fighter has been hit
 	 */
 	private boolean hit;
-
+	private int fired;
 	private int lives;
 
 	/**
@@ -155,15 +155,19 @@ public class Fighter implements ApplicationConstants {
 	 * @param bullet
 	 *            the bullet to check against
 	 */
-	public void detectCollision(Bullet bullet) {
+	public boolean detectCollision(Bullet bullet) {
+		boolean h = false;
 		float bx = bullet.getX();
 		float by = bullet.getY();
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
+			h = true;
 			hit();
 			bullet.destroy();
 		}
+		
+		return h;
 	}
 
 	/**
@@ -209,6 +213,10 @@ public class Fighter implements ApplicationConstants {
 	public int lives() {
 		return lives;
 	}
+	
+	public int fired() {
+		return fired;
+	}
 
 	/**
 	 * Set the joystick to the right position
@@ -252,6 +260,7 @@ public class Fighter implements ApplicationConstants {
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
+		fired++;
 		return new FighterBullet(x, y);
 	}
 

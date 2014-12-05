@@ -33,24 +33,7 @@ public class Boss extends Enemy {
 		formationScore = 130;
 		attackingScore = 400;
 	}
-
-	/**
-	 * Detects if there is a collision between the enemy and the passed bullet
-	 * 
-	 * @param bullet
-	 *            the bullet to check against
-	 */
-	public void detectCollision(Bullet bullet) {
-		float bx = bullet.getX();
-		float by = bullet.getY();
-
-		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
-		if (dist2 < r * r) {
-			hit();
-			bullet.destroy();
-		}
-	}
-
+	
 	/**
 	 * Hits the fighter
 	 */

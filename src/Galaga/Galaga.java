@@ -25,6 +25,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private PImage sprite;
 
 	private static int score;
+	private static int hits;
 
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -82,6 +83,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// initialize the score
 		score = 0;
+		hits = 0;
 		lastDrawTime = millis();
 	}
 
@@ -89,8 +91,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		update();
 		switch (gameState) {
 		case PLAYING:
-			purge();
-			break;
 		case GAMEOVER:
 			purge();
 			break;
@@ -110,8 +110,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		updateSpace(elapsed);
 
 		switch (gameState) {
-		case MENU:
-			break;
 		case PLAYING:
 
 			fighter.update(elapsed);
@@ -132,15 +130,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (Enemy e : enemies)
 				if (!e.isHit())
 					for (Bullet b : fighterBullets)
-						e.detectCollision(b);
+						if (e.detectCollision(b))
+							hits++;
 
 			for (Bullet b : enemyBullets)
 				if (!fighter.isHit())
 					fighter.detectCollision(b);
 
 			for (Enemy e : enemies)
-				if (e.isHit())
+				if (e.isHit()) 
 					score += e.getScore();
+				
 			break;
 
 		case GAMEOVER:
@@ -152,9 +152,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			for (Enemy e : enemies)
 				e.update(elapsed);
-			break;
-
-		case POSTGAME:
 			break;
 
 		default:
@@ -245,12 +242,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			translate(0, -s.height);
 			imageMode(CORNER);
 			for (int i = 0; i < fighter.lives(); i++)
-				image(s, i * s.width + 2*i, 0);
+				image(s, i * s.width + 2 * i, 0);
 			popMatrix();
 			break;
 
 		case GAMEOVER:
-
 			pushMatrix();
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
@@ -271,7 +267,45 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
-		case POSTGAME:
+		case RESULTS:
+			pushMatrix();
+			translate(0, WORLD_HEIGHT / 2);
+			scale(P2W, -P2W);
+
+			textSize(18);
+			textAlign(CENTER);
+			noSmooth();
+
+			fill(255, 2, 4);
+			translate(0, -textAscent());
+			text("-Results-", 0, 0);
+
+			translate(textWidth("-Results-")/2, 0);
+
+			fill(255, 255, 2);
+			translate(0, 2 * textAscent());
+			textAlign(RIGHT);
+			text("Shots fired", 0, 0);
+			textAlign(LEFT);
+			text("   " + fighter.fired(), 0, 0);
+			
+			translate(0, 2 * textAscent());
+			textAlign(RIGHT);
+			text("Number of Hits", 0, 0);
+			textAlign(LEFT);
+			text("   " + hits, 0, 0);
+
+			fill(218, 218, 218);
+			translate(0, 2 * textAscent());
+			textAlign(RIGHT);
+			text("Hit miss ratio", 0, 0);
+			textAlign(LEFT);
+			text("   " + 0.1f * (1000 * hits / fighter.fired()) + " %", 0, 0);
+			
+			popMatrix();
+			break;
+
+		case POSTGAME_MENU:
 			pushMatrix();
 			translate(0, WORLD_HEIGHT / 2);
 			scale(P2W, -P2W);
@@ -361,10 +395,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			break;
 
 		case GAMEOVER:
-			gameState = GameState.POSTGAME;
+			gameState = GameState.RESULTS;
 			break;
 
-		case POSTGAME:
+		case RESULTS:
+			gameState = GameState.POSTGAME_MENU;
+			break;
+
+		case POSTGAME_MENU:
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
@@ -459,6 +497,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		public void execute() {
 
 			score = 0;
+			hits = 0;
 			Fighter.resetInstance();
 			fighter = Fighter.instance();
 
