@@ -1,5 +1,5 @@
 package Galaga;
 
 public enum GameState {
-	MENU, PLAYING, GAMEOVER;
+	MENU, PLAYING, GAMEOVER, POSTGAME;
 }

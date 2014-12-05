@@ -72,6 +72,7 @@ public abstract class Enemy implements ApplicationConstants {
 		g.translate(x, y);
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
 		g.noSmooth();
+		g.imageMode(PConstants.CENTER);
 
 		switch (animationState) {
 		case UP:

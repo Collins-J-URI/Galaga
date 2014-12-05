@@ -62,6 +62,8 @@ public class Fighter implements ApplicationConstants {
 	 */
 	private boolean hit;
 
+	private int lives;
+
 	/**
 	 * Fetch the one instance of the fighter. If the instance does not exist,
 	 * create it.
@@ -73,8 +75,8 @@ public class Fighter implements ApplicationConstants {
 			instance = new Fighter();
 		return instance;
 	}
-	
-	public static void reset() {
+
+	public static void resetInstance() {
 		instance = new Fighter();
 	}
 
@@ -87,6 +89,7 @@ public class Fighter implements ApplicationConstants {
 		r = 7 * PIXEL_WIDTH;
 		destroyed = false;
 		hit = false;
+		lives = 3;
 		cycleCount = 0;
 		joystick = Joystick.CENTER;
 		commands = new Stack<Joystick>();
@@ -125,13 +128,23 @@ public class Fighter implements ApplicationConstants {
 				x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
 
 		} else {
-			if (animationState == AnimationState.EXP_5)
+			if (animationState == AnimationState.EXP_5 && lives == 0)
 				destroy();
-
-			cycleCount += elapsed * 0.001f;
-			if (cycleCount > EXPLOSION_FRAME) {
-				cycleCount = 0;
-				animationState = animationState.getNext();
+			else if (animationState == AnimationState.EXP_5) {
+				cycleCount += elapsed * 0.001f;
+				if (cycleCount > EXPLOSION_FRAME * 10) {
+					resetPosition();
+					lives--;
+					hit = false;
+					destroyed = false;
+					animationState = AnimationState.random();
+				}
+			} else {
+				cycleCount += elapsed * 0.001f;
+				if (cycleCount > EXPLOSION_FRAME) {
+					cycleCount = 0;
+					animationState = animationState.getNext();
+				}
 			}
 		}
 	}
@@ -169,6 +182,7 @@ public class Fighter implements ApplicationConstants {
 		animationState = AnimationState.EXP_1;
 		cycleCount = 0;
 		hit = true;
+		System.out.println(lives);
 	}
 
 	/**
@@ -185,6 +199,15 @@ public class Fighter implements ApplicationConstants {
 	 */
 	public void destroy() {
 		destroyed = true;
+	}
+	
+	public void resetPosition() {
+		x = 0;
+		y = WORLD_HEIGHT * 0.1f;
+	}
+
+	public int lives() {
+		return lives;
 	}
 
 	/**
@@ -261,6 +284,7 @@ public class Fighter implements ApplicationConstants {
 		g.translate(x, y);
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
 		g.noSmooth();
+		g.imageMode(PConstants.CENTER);
 
 		switch (animationState) {
 		case EXP_1:
