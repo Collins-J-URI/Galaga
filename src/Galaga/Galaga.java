@@ -20,7 +20,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private float lastDrawTime;
 	private static GameState gameState;
-	private Menu main, gameOver;
+	private Menu main, postgame;
 
 	private PImage sprite;
 
@@ -76,7 +76,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Initialize game over menu
 		Option[] gameOverOptions = { returnToMenu, quit };
-		gameOver = new Menu(gameOverOptions);
+		postgame = new Menu(gameOverOptions);
 
 		sprite = loadImage("Sprites/galaga.png");
 
@@ -87,7 +87,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	public void draw() {
 		update();
-		purge();
+		switch (gameState) {
+		case PLAYING:
+			purge();
+			break;
+		case GAMEOVER:
+			purge();
+			break;
+		default:
+			break;
+		}
 		render();
 	}
 
@@ -98,35 +107,59 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		float drawTime = millis();
 		float elapsed = drawTime - lastDrawTime;
 		lastDrawTime = drawTime;
-
-		fighter.update(elapsed);
 		updateSpace(elapsed);
 
-		for (Bullet b : fighterBullets)
-			b.update(elapsed);
+		switch (gameState) {
+		case MENU:
+			break;
+		case PLAYING:
 
-		for (Bullet b : enemyBullets)
-			b.update(elapsed);
+			fighter.update(elapsed);
 
-		for (Enemy e : enemies)
-			e.update(elapsed);
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
 
-		for (Enemy e : enemies)
-			if (random(1) < 0.001f)
-				enemyBullets.add(e.shoot());
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
 
-		for (Enemy e : enemies)
-			if (!e.isHit())
-				for (Bullet b : fighterBullets)
-					e.detectCollision(b);
+			for (Enemy e : enemies)
+				e.update(elapsed);
 
-		for (Bullet b : enemyBullets)
-			if (!fighter.isHit())
-				fighter.detectCollision(b);
+			for (Enemy e : enemies)
+				if (random(1) < 0.001f)
+					enemyBullets.add(e.shoot());
 
-		for (Enemy e : enemies)
-			if (e.isHit())
-				score += e.getScore();
+			for (Enemy e : enemies)
+				if (!e.isHit())
+					for (Bullet b : fighterBullets)
+						e.detectCollision(b);
+
+			for (Bullet b : enemyBullets)
+				if (!fighter.isHit())
+					fighter.detectCollision(b);
+
+			for (Enemy e : enemies)
+				if (e.isHit())
+					score += e.getScore();
+			break;
+
+		case GAMEOVER:
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
+
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
+
+			for (Enemy e : enemies)
+				e.update(elapsed);
+			break;
+
+		case POSTGAME:
+			break;
+
+		default:
+			break;
+		}
 
 	}
 
@@ -169,7 +202,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		renderSpace();
 		noSmooth();
 
-		if (gameState == GameState.MENU) {
+		switch (gameState) {
+		case MENU:
 			pushMatrix();
 			translate(0, 3 * WORLD_HEIGHT / 4);
 			pushMatrix();
@@ -183,9 +217,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			main.render(this);
 			popMatrix();
+			break;
 
-		} else if (gameState == GameState.PLAYING) {
-
+		case PLAYING:
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
 				b.render(this);
@@ -204,20 +238,46 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			text("SCORE " + score, 0, 0);
 			popMatrix();
 
-		} else if (gameState == GameState.GAMEOVER) {
 			pushMatrix();
-			translate(0, 3 * WORLD_HEIGHT / 4);
-			pushMatrix();
+			PImage s = loadImage("Sprites/fighter.png");
+			translate(-WORLD_WIDTH / 2, 0);
 			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-			imageMode(CENTER);
-			image(sprite, 0, 0);
+			translate(0, -s.height);
+			imageMode(CORNER);
+			for (int i = 0; i < fighter.lives(); i++)
+				image(s, i * s.width + 2*i, 0);
 			popMatrix();
+			break;
+
+		case GAMEOVER:
+
+			pushMatrix();
+			fighter.render(this);
+			for (Bullet b : fighterBullets)
+				b.render(this);
+			for (Bullet b : enemyBullets)
+				b.render(this);
+			for (Enemy e : enemies)
+				e.render(this);
+			translate(0, WORLD_HEIGHT / 2);
 			scale(P2W, -P2W);
 
-			translate(0, 200);
-
-			gameOver.render(this);
+			fill(4, 255, 222);
+			textSize(18);
+			textAlign(CENTER);
+			noSmooth();
+			translate(0, -textAscent());
+			text("GAME OVER", 0, 0);
 			popMatrix();
+			break;
+
+		case POSTGAME:
+			pushMatrix();
+			translate(0, WORLD_HEIGHT / 2);
+			scale(P2W, -P2W);
+			postgame.render(this);
+			popMatrix();
+			break;
 		}
 	}
 
@@ -247,7 +307,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 
 	public void keyPressed() {
-		if (gameState == GameState.MENU) {
+		switch (gameState) {
+		case MENU:
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
@@ -266,14 +327,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					// do something (or ignore)
 					break;
 				}
-			} else
+			} else {
 				switch (key) {
 				case ' ':
 					main.execute();
 					break;
 				}
+			}
+			break;
 
-		} else if (gameState == GameState.PLAYING) {
+		case PLAYING:
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:
@@ -287,38 +350,47 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					// do something (or ignore)
 					break;
 				}
-			} else
+			} else {
 				switch (key) {
 				case ' ':
 					if (!fighter.isHit() && fighterBullets.size() < 2)
 						fighterBullets.add(fighter.shoot());
 					break;
 				}
-		} else if (gameState == GameState.GAMEOVER) {
+			}
+			break;
+
+		case GAMEOVER:
+			gameState = GameState.POSTGAME;
+			break;
+
+		case POSTGAME:
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
-					gameOver.cycle(Joystick.UP);
+					postgame.cycle(Joystick.UP);
 					break;
 				case DOWN:
-					gameOver.cycle(Joystick.DOWN);
+					postgame.cycle(Joystick.DOWN);
 					break;
 				case LEFT:
-					gameOver.cycle(Joystick.LEFT);
+					postgame.cycle(Joystick.LEFT);
 					break;
 				case RIGHT:
-					gameOver.cycle(Joystick.RIGHT);
+					postgame.cycle(Joystick.RIGHT);
 					break;
 				default:
 					// do something (or ignore)
 					break;
 				}
-			} else
+			} else {
 				switch (key) {
 				case ' ':
-					gameOver.execute();
+					postgame.execute();
 					break;
 				}
+			}
+			break;
 		}
 	}
 
@@ -387,7 +459,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		public void execute() {
 
 			score = 0;
-			Fighter.reset();
+			Fighter.resetInstance();
 			fighter = Fighter.instance();
 
 			fighterBullets = new ArrayList<Bullet>();

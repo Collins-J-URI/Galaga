@@ -70,6 +70,7 @@ public abstract class Bullet implements ApplicationConstants {
 		g.scale(PIXEL_WIDTH);
 		g.rotate(PApplet.atan2(vy, vx) + PConstants.PI/2);
 		g.noSmooth();
+		g.imageMode(PConstants.CENTER);
 
 		g.image(sprite, 0, 0);
 
