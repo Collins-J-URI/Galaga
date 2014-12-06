@@ -144,7 +144,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 
 		// set to default gamestate
-		gameState = GameState.MENU;
+		gameState = GameState.MAIN_MENU;
 
 		// Different options for the menus
 		Option play = new Option("Play", new Play());
@@ -318,7 +318,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		switch (gameState) {
 
 		// Draw the Galaga logo and the main menu
-		case MENU:
+		case MAIN_MENU:
 			pushMatrix();
 			translate(0, 3 * WORLD_HEIGHT / 4);
 			pushMatrix();
@@ -468,7 +468,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		switch (gameState) {
 
 		// Navigate the menu
-		case MENU:
+		case MAIN_MENU:
 			if (key == CODED) {
 				switch (keyCode) {
 				case UP:
@@ -647,7 +647,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (int i = 0; i < 10; i++)
 				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
 						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
-			gameState = GameState.MENU;
+			gameState = GameState.MAIN_MENU;
 		}
 	}
 
