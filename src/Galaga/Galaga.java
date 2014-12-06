@@ -1,6 +1,5 @@
 package Galaga;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -15,6 +14,11 @@ import processing.core.*;
  * @author Christopher Glasz
  */
 public class Galaga extends PApplet implements ApplicationConstants {
+
+	/**
+	 * Serial version UID to get rid of the warning
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The player's ship
