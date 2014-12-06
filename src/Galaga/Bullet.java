@@ -111,5 +111,8 @@ public abstract class Bullet implements ApplicationConstants {
 		return y;
 	}
 
+	/**
+	 * Loads the sprite for the bullet
+	 */
 	protected abstract void createSprite();
 }
