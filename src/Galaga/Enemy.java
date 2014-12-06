@@ -224,6 +224,9 @@ public abstract class Enemy implements ApplicationConstants {
 		return destroyed;
 	}
 
+	/**
+	 * Destroys the enemy
+	 */
 	public void destroy() {
 		destroyed = true;
 	}
