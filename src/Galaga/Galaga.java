@@ -115,23 +115,23 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Four bosses up top
 		for (int i = 0; i < 4; i++)
 			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+					* WORLD_WIDTH / 10, BOSS_Y));
 
 		// Sixteen butterflies in the middle
 		for (int i = 0; i < 8; i++)
 			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
+					+ i * WORLD_WIDTH / 10, BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < 8; i++)
 			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+					+ i * WORLD_WIDTH / 10, BOSS_Y - 2*ENEMY_BUFFER));
 
 		// Twenty bees down under
 		for (int i = 0; i < 10; i++)
 			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
+					* WORLD_WIDTH / 10, BOSS_Y - 3*ENEMY_BUFFER));
 		for (int i = 0; i < 10; i++)
 			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
+					* WORLD_WIDTH / 10, BOSS_Y - 4*ENEMY_BUFFER));
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -344,26 +344,29 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (Enemy e : enemies)
 				e.render(this);
 
+			/*
 			pushMatrix();
 			translate(-WORLD_WIDTH / 2, WORLD_HEIGHT);
 
 			scale(P2W, -P2W);
 			textSize(18);
-			
+
 			pushMatrix();
 			fill(255, 2, 4);
 			translate(textWidth("999999"), textAscent() * 1.1f);
 			textAlign(RIGHT);
 			text("SCORE", 0, 0);
-			
+
 			fill(218);
 			translate(0, textAscent() * 1.1f);
 			textAlign(RIGHT);
-			text((int)scoreDisplay, 0, 0);
+			text((int) scoreDisplay, 0, 0);
 			popMatrix();
-			
-			
+
 			popMatrix();
+			*/
+			
+			renderScore();
 
 			pushMatrix();
 			PImage s = loadImage("Sprites/fighter.png");
@@ -470,6 +473,42 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (int i = 0; i < numStars; i++) {
 			point(starx[i], WORLD_HEIGHT - stary[i]);
 		}
+	}
+
+	/**
+	 * Draws score and high score
+	 */
+	public void renderScore() {
+		pushMatrix();
+		translate(0, WORLD_HEIGHT);
+		
+		pushMatrix();
+		translate(-WORLD_WIDTH / 2, 0);
+		scale(P2W, -P2W);
+		
+		fill(255, 2, 4);
+		translate(textWidth("999999"), textAscent() * 1.1f);
+		textAlign(RIGHT);
+		textSize(18);
+		text("SCORE", 0, 0);
+		
+		fill(218);
+		translate(0, textAscent() * 1.1f);
+		text((int) scoreDisplay, 0, 0);
+		popMatrix();
+
+		scale(P2W, -P2W);
+		fill(255, 2, 4);
+		translate(0, textAscent() * 1.1f);
+		textAlign(CENTER);
+		textSize(18);
+		text("HIGH SCORE", 0, 0);
+		
+		fill(218);
+		translate(0, textAscent() * 1.1f);
+		text(20000, 0, 0);
+
+		popMatrix();
 	}
 
 	/**

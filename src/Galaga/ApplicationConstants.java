@@ -40,7 +40,15 @@ public interface ApplicationConstants {
 	/**
 	 * Width of one game pixel
 	 */
-	float PIXEL_WIDTH = WORLD_HEIGHT / 255.f;
+	float PIXEL_WIDTH = WORLD_WIDTH / 256.f;
+
+	float FIGHTER_Y = PIXEL_WIDTH * 20;
+	
+	
+	float BOSS_Y = WORLD_HEIGHT - PIXEL_WIDTH * 30;
+	
+	
+	float ENEMY_BUFFER = PIXEL_WIDTH * 15;
 
 	/**
 	 * Time it takes to strafe from one side of the screen to the other
