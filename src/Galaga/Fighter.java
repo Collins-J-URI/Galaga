@@ -186,7 +186,6 @@ public class Fighter implements ApplicationConstants {
 		animationState = AnimationState.EXP_1;
 		cycleCount = 0;
 		hit = true;
-		System.out.println(lives);
 	}
 
 	/**
