@@ -26,7 +26,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private static int score;
 	private static int hits;
-	private static int scoreDisplay;
+	private static float scoreDisplay;
 
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -139,17 +139,18 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					fighter.detectCollision(b);
 
 			for (Enemy e : enemies)
-				if (e.isHit()) 
+				if (e.isHit())
 					score += e.getScore();
-			
-			//Update the score to be displayed
-			if(score != scoreDisplay){
-				scoreDisplay += random(1,2);
-				if(scoreDisplay >= score){
+
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 10);
+
+				if (scoreDisplay >= score) {
 					scoreDisplay = score;
 				}
 			}
-				
+
 			break;
 
 		case GAMEOVER:
@@ -240,7 +241,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			scale(P2W, -P2W);
 			textSize(18);
 			translate(0, textAscent() * 1.1f);
-			text("SCORE " + scoreDisplay, 0, 0);
+			text("SCORE " + (int) scoreDisplay, 0, 0);
 			popMatrix();
 
 			pushMatrix();
@@ -288,7 +289,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			translate(0, -textAscent());
 			text("-Results-", 0, 0);
 
-			translate(textWidth("-Results-")/2, 0);
+			translate(textWidth("-Results-") / 2, 0);
 
 			fill(255, 255, 2);
 			translate(0, 2 * textAscent());
@@ -296,7 +297,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			text("Shots fired", 0, 0);
 			textAlign(LEFT);
 			text("   " + fighter.fired(), 0, 0);
-			
+
 			translate(0, 2 * textAscent());
 			textAlign(RIGHT);
 			text("Number of Hits", 0, 0);
@@ -309,7 +310,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			text("Hit miss ratio", 0, 0);
 			textAlign(LEFT);
 			text("   " + 0.1f * (1000 * hits / fighter.fired()) + " %", 0, 0);
-			
+
 			popMatrix();
 			break;
 
