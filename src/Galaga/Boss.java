@@ -15,7 +15,7 @@ public class Boss extends Enemy {
 	private PImage hitSprite1, hitSprite2;
 
 	/**
-	 * True if we havebeen hit once
+	 * True if the boss has been hit once
 	 */
 	private boolean hitOnce;
 
@@ -33,7 +33,7 @@ public class Boss extends Enemy {
 		formationScore = 130;
 		attackingScore = 400;
 	}
-	
+
 	/**
 	 * Hits the fighter
 	 */
@@ -48,11 +48,7 @@ public class Boss extends Enemy {
 		}
 	}
 
-	/**
-	 * Returns a clone of the Boss
-	 * 
-	 * @return a clone of the Boss
-	 */
+	@Override
 	public Enemy clone() {
 		Boss temp = new Boss(x, y);
 		if (hitOnce)
@@ -64,9 +60,7 @@ public class Boss extends Enemy {
 		return temp;
 	}
 
-	/**
-	 * Loads the sprites
-	 */
+	@Override
 	protected void createSprite() {
 		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/boss.png");
