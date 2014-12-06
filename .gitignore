@@ -2,3 +2,5 @@
 src/Galaga/Galaga.java
 
 bin/Galaga/Galaga.class
+*.class
+*.class
