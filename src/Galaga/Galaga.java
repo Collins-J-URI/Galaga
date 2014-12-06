@@ -25,6 +25,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private PImage sprite;
 
 	private static int score;
+	private static int scoreDisplay;
 
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -127,7 +128,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (Enemy e : enemies)
 			if (e.isHit())
 				score += e.getScore();
-
+		
+		//Update the score to be displayed
+		if(score != scoreDisplay){
+			scoreDisplay += random(1,2);
+			if(scoreDisplay >= score){
+				scoreDisplay = score;
+			}
+		}
 	}
 
 	/**
@@ -201,7 +209,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			scale(P2W, -P2W);
 			textSize(18);
 			translate(0, textAscent() * 1.1f);
-			text("SCORE " + score, 0, 0);
+			text("SCORE " + scoreDisplay, 0, 0);
 			popMatrix();
 
 		} else if (gameState == GameState.GAMEOVER) {
