@@ -1,44 +1,123 @@
 package Galaga;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import processing.core.*;
 
+/**
+ * A Processing implementation of GALAGA, the classic 80's arcade game. The
+ * objective of GALAGA is to destroy all the enemies on the screen by shooting
+ * them from a ship on the bottom. The user can strafe the ship left and right,
+ * and shoot bullets directly upward.
+ * 
+ * @author Christopher Glasz
+ */
 public class Galaga extends PApplet implements ApplicationConstants {
 
+	/**
+	 * Serial version UID to get rid of the warning
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * The player's ship
+	 */
 	private static Fighter fighter;
+
+	/**
+	 * Array list of enemies
+	 */
 	private static ArrayList<Enemy> enemies;
+
+	/**
+	 * Array list of bullets shot my enemies
+	 */
 	private static ArrayList<Bullet> enemyBullets;
+
+	/**
+	 * Array list of bullets shot by fighter
+	 */
 	private static ArrayList<Bullet> fighterBullets;
 
+	/**
+	 * Number of stars to be drawn
+	 */
 	private final int numStars = 200;
+
+	/**
+	 * X coordinate of each star
+	 */
 	private float[] starx;
+
+	/**
+	 * Y coordinate of each star
+	 */
 	private float[] stary;
+
+	/**
+	 * Y velocity of each star
+	 */
 	private float[] starvy;
 
+	/**
+	 * Time of the last draw
+	 */
 	private float lastDrawTime;
+
+	/**
+	 * Current game state
+	 */
 	private static GameState gameState;
+
+	/**
+	 * Both menus
+	 */
 	private Menu main, postgame;
 
-	private PImage sprite;
+	/**
+	 * Galaga logo
+	 */
+	private PImage logoSprite;
 
+	/**
+	 * Player score
+	 */
 	private static int score;
-	private static int hits;
+
+	/**
+	 * Score being displyed on the screen
+	 */
 	private static float scoreDisplay;
 
+	/**
+	 * Number of enemies hit
+	 */
+	private static int hits;
+
+	/**
+	 * Initializes all fields, including the stars, the array list of enemies,
+	 * and the player ship
+	 */
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+		// Create the player ship
 		fighter = Fighter.instance();
+
+		// Somewhere to put bullets
 		fighterBullets = new ArrayList<Bullet>();
 		enemyBullets = new ArrayList<Bullet>();
+
+		// Array list to hold enemies
 		enemies = new ArrayList<Enemy>();
 
+		// Four bosses up top
 		for (int i = 0; i < 4; i++)
 			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
 					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
 
+		// Sixteen butterflies in the middle
 		for (int i = 0; i < 8; i++)
 			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
 					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
@@ -46,6 +125,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
 					+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
 
+		// Twenty bees down under
 		for (int i = 0; i < 10; i++)
 			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
 					* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
@@ -80,16 +160,26 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		Option[] gameOverOptions = { returnToMenu, quit };
 		postgame = new Menu(gameOverOptions);
 
-		sprite = loadImage("Sprites/galaga.png");
+		logoSprite = loadImage("Sprites/galaga.png");
 
-		// initialize the score
+		// Initialize the score
 		score = 0;
+		scoreDisplay = 0;
 		hits = 0;
+
+		// Initialize the draw time
 		lastDrawTime = millis();
 	}
 
+	/**
+	 * Method to be run at each frame
+	 */
 	public void draw() {
+
+		// Update all positions
 		update();
+
+		// Only purge during the necessary game states
 		switch (gameState) {
 		case PLAYING:
 		case GAMEOVER:
@@ -98,6 +188,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		default:
 			break;
 		}
+
+		// Draw everything to the window
 		render();
 	}
 
@@ -105,39 +197,53 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * Move all objects
 	 */
 	public void update() {
+
+		// Get the elapsed time
 		float drawTime = millis();
 		float elapsed = drawTime - lastDrawTime;
 		lastDrawTime = drawTime;
+
+		// Update star position
 		updateSpace(elapsed);
 
 		switch (gameState) {
+
+		// When playing, we want everything to be updated
 		case PLAYING:
 
+			// Move the player ship
 			fighter.update(elapsed);
 
+			// Move the bullets fired by the fighter
 			for (Bullet b : fighterBullets)
 				b.update(elapsed);
 
+			// Move the bullets fired by the enemies
 			for (Bullet b : enemyBullets)
 				b.update(elapsed);
 
+			// Move the enemies
 			for (Enemy e : enemies)
 				e.update(elapsed);
 
+			// Have enemies fire bullets every once in a while
 			for (Enemy e : enemies)
 				if (random(1) < 0.001f)
 					enemyBullets.add(e.shoot());
 
+			// Check to see if enemies have been hit
 			for (Enemy e : enemies)
 				if (!e.isHit())
 					for (Bullet b : fighterBullets)
 						if (e.detectCollision(b))
 							hits++;
 
+			// Check to see if the player has been hit
 			for (Bullet b : enemyBullets)
 				if (!fighter.isHit())
 					fighter.detectCollision(b);
 
+			// Get points for enemies hit
 			for (Enemy e : enemies)
 				if (e.isHit())
 					score += e.getScore();
@@ -145,14 +251,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			// Update the score to be displayed
 			if (score != scoreDisplay) {
 				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 10);
-
-				if (scoreDisplay >= score) {
+				if (scoreDisplay >= score)
 					scoreDisplay = score;
-				}
 			}
-
 			break;
 
+		// After the player is out of lives, only update enemies and bullets
 		case GAMEOVER:
 			for (Bullet b : fighterBullets)
 				b.update(elapsed);
@@ -192,6 +296,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (eit.next().isDestroyed())
 				eit.remove();
 
+		// If the fighter is destroyed, game over
 		if (fighter.isDestroyed())
 			gameState = GameState.GAMEOVER;
 
@@ -205,17 +310,21 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		scale(W2P);
 		translate(WORLD_WIDTH / 2, WORLD_HEIGHT);
 		scale(1, -1);
-		renderSpace();
 		noSmooth();
 
+		// Draw stars
+		renderSpace();
+
 		switch (gameState) {
+
+		// Draw the Galaga logo and the main menu
 		case MENU:
 			pushMatrix();
 			translate(0, 3 * WORLD_HEIGHT / 4);
 			pushMatrix();
 			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
 			imageMode(CENTER);
-			image(sprite, 0, 0);
+			image(logoSprite, 0, 0);
 			popMatrix();
 			scale(P2W, -P2W);
 
@@ -225,6 +334,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
+		// Draw all bullets, enemies, the fighter, the score, all that jazz
 		case PLAYING:
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
@@ -255,9 +365,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
+		// Only draw bullets and enemies, as well as 'GAME OVER'
 		case GAMEOVER:
 			pushMatrix();
-			fighter.render(this);
 			for (Bullet b : fighterBullets)
 				b.render(this);
 			for (Bullet b : enemyBullets)
@@ -276,6 +386,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
+		// Draw the player's hit-miss ratio
 		case RESULTS:
 			pushMatrix();
 			translate(0, WORLD_HEIGHT / 2);
@@ -314,6 +425,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
+		// Draw the postgame menu
 		case POSTGAME_MENU:
 			pushMatrix();
 			translate(0, WORLD_HEIGHT / 2);
@@ -349,8 +461,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * What do be done when the player presses keys
+	 */
 	public void keyPressed() {
 		switch (gameState) {
+
+		// Navigate the menu
 		case MENU:
 			if (key == CODED) {
 				switch (keyCode) {
@@ -367,7 +484,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					main.cycle(Joystick.RIGHT);
 					break;
 				default:
-					// do something (or ignore)
 					break;
 				}
 			} else {
@@ -379,6 +495,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			}
 			break;
 
+		// Control the ship
 		case PLAYING:
 			if (key == CODED) {
 				switch (keyCode) {
@@ -390,7 +507,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					fighter.push(Joystick.RIGHT);
 					break;
 				default:
-					// do something (or ignore)
 					break;
 				}
 			} else {
@@ -403,6 +519,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			}
 			break;
 
+		// Go to next game state when any key is pressed
 		case GAMEOVER:
 			gameState = GameState.RESULTS;
 			break;
@@ -411,6 +528,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			gameState = GameState.POSTGAME_MENU;
 			break;
 
+		// Navigate the menu
 		case POSTGAME_MENU:
 			if (key == CODED) {
 				switch (keyCode) {
@@ -427,7 +545,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					postgame.cycle(Joystick.RIGHT);
 					break;
 				default:
-					// do something (or ignore)
 					break;
 				}
 			} else {
@@ -441,26 +558,25 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * What to be done when the user releases keys
+	 */
 	public void keyReleased() {
-		if (gameState == GameState.PLAYING) {
-			if (key == CODED) {
-				switch (keyCode) {
-				case LEFT:
-					fighter.pop(Joystick.LEFT);
-					break;
 
-				case RIGHT:
-					fighter.pop(Joystick.RIGHT);
-					break;
-				default:
-					// do something (or ignore)
-					break;
-				}
-			} else
-				switch (key) {
-				case ' ':
-					break;
-				}
+		// Control the ship
+		if (gameState == GameState.PLAYING) {
+			switch (keyCode) {
+			case LEFT:
+				fighter.pop(Joystick.LEFT);
+				break;
+
+			case RIGHT:
+				fighter.pop(Joystick.RIGHT);
+				break;
+			default:
+				break;
+			}
+
 		}
 	}
 
