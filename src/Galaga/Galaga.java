@@ -250,7 +250,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Update the score to be displayed
 			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 10);
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 20);
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
@@ -346,12 +346,23 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			pushMatrix();
 			translate(-WORLD_WIDTH / 2, WORLD_HEIGHT);
-			textAlign(LEFT);
 
 			scale(P2W, -P2W);
 			textSize(18);
+			
+			pushMatrix();
+			fill(255, 2, 4);
+			translate(textWidth("999999"), textAscent() * 1.1f);
+			textAlign(RIGHT);
+			text("SCORE", 0, 0);
+			
+			fill(218);
 			translate(0, textAscent() * 1.1f);
-			text("SCORE " + (int) scoreDisplay, 0, 0);
+			textAlign(RIGHT);
+			text((int)scoreDisplay, 0, 0);
+			popMatrix();
+			
+			
 			popMatrix();
 
 			pushMatrix();
@@ -415,7 +426,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			textAlign(LEFT);
 			text("   " + hits, 0, 0);
 
-			fill(218, 218, 218);
+			fill(218);
 			translate(0, 2 * textAscent());
 			textAlign(RIGHT);
 			text("Hit miss ratio", 0, 0);
