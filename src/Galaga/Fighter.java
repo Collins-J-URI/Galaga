@@ -147,15 +147,6 @@ public class Fighter implements ApplicationConstants {
 					animationState = animationState.getNext();
 				}
 			}
-			/*
-			 * if (animationState == AnimationState.EXP_5 && lives == 0)
-			 * destroy(); else if (animationState == AnimationState.EXP_5) {
-			 * cycleCount += elapsed * 0.001f; if (cycleCount > EXPLOSION_FRAME
-			 * * 10) { resetPosition(); lives--; hit = false; destroyed = false;
-			 * animationState = AnimationState.random(); } } else { cycleCount
-			 * += elapsed * 0.001f; if (cycleCount > EXPLOSION_FRAME) {
-			 * cycleCount = 0; animationState = animationState.getNext(); } }
-			 */
 		}
 	}
 
