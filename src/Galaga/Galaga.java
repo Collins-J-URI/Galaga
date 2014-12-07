@@ -113,25 +113,25 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		enemies = new ArrayList<Enemy>();
 
 		// Four bosses up top
-		for (int i = 0; i < 4; i++)
-			enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, BOSS_Y));
+		for (int i = 0; i < NUM_BOSSES; i++)
+			enemies.add(new Boss((i - NUM_BOSSES / 2) * ENEMY_BUFFER
+					+ ENEMY_BUFFER / 2, BOSS_Y));
 
 		// Sixteen butterflies in the middle
-		for (int i = 0; i < 8; i++)
-			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-					+ i * WORLD_WIDTH / 10, BOSS_Y - ENEMY_BUFFER));
-		for (int i = 0; i < 8; i++)
-			enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH / 20
-					+ i * WORLD_WIDTH / 10, BOSS_Y - 2*ENEMY_BUFFER));
+		for (int i = 0; i < NUM_BUTTERFLIES; i++)
+			enemies.add(new Butterfly((i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER
+					+ ENEMY_BUFFER / 2, BOSS_Y - ENEMY_BUFFER));
+		for (int i = 0; i < NUM_BUTTERFLIES; i++)
+			enemies.add(new Butterfly((i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER
+					+ ENEMY_BUFFER / 2, BOSS_Y - 2 * ENEMY_BUFFER));
 
 		// Twenty bees down under
-		for (int i = 0; i < 10; i++)
-			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, BOSS_Y - 3*ENEMY_BUFFER));
-		for (int i = 0; i < 10; i++)
-			enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-					* WORLD_WIDTH / 10, BOSS_Y - 4*ENEMY_BUFFER));
+		for (int i = 0; i < NUM_BEES; i++)
+			enemies.add(new Bee((i - NUM_BEES / 2) * ENEMY_BUFFER
+					+ ENEMY_BUFFER / 2, BOSS_Y - 3 * ENEMY_BUFFER));
+		for (int i = 0; i < NUM_BEES; i++)
+			enemies.add(new Bee((i - NUM_BEES / 2) * ENEMY_BUFFER
+					+ ENEMY_BUFFER / 2, BOSS_Y - 4 * ENEMY_BUFFER));
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -344,28 +344,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (Enemy e : enemies)
 				e.render(this);
 
-			/*
-			pushMatrix();
-			translate(-WORLD_WIDTH / 2, WORLD_HEIGHT);
-
-			scale(P2W, -P2W);
-			textSize(18);
-
-			pushMatrix();
-			fill(255, 2, 4);
-			translate(textWidth("999999"), textAscent() * 1.1f);
-			textAlign(RIGHT);
-			text("SCORE", 0, 0);
-
-			fill(218);
-			translate(0, textAscent() * 1.1f);
-			textAlign(RIGHT);
-			text((int) scoreDisplay, 0, 0);
-			popMatrix();
-
-			popMatrix();
-			*/
-			
 			renderScore();
 
 			pushMatrix();
@@ -388,6 +366,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				b.render(this);
 			for (Enemy e : enemies)
 				e.render(this);
+
+			renderScore();
+
 			translate(0, WORLD_HEIGHT / 2);
 			scale(P2W, -P2W);
 
@@ -402,6 +383,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Draw the player's hit-miss ratio
 		case RESULTS:
+			renderScore();
 			pushMatrix();
 			translate(0, WORLD_HEIGHT / 2);
 			scale(P2W, -P2W);
@@ -434,7 +416,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			textAlign(RIGHT);
 			text("Hit miss ratio", 0, 0);
 			textAlign(LEFT);
-			text("   " + 0.1f * (1000 * hits / fighter.fired()) + " %", 0, 0);
+			if (fighter.fired() > 0) {
+				float ratio = (int) ((hits / (float) fighter.fired()) * 1000) / 10.f;
+				text("   " + ratio + " %", 0, 0);
+			} else
+				text("   0 %", 0, 0);
 
 			popMatrix();
 			break;
@@ -481,17 +467,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void renderScore() {
 		pushMatrix();
 		translate(0, WORLD_HEIGHT);
-		
+
 		pushMatrix();
 		translate(-WORLD_WIDTH / 2, 0);
 		scale(P2W, -P2W);
-		
+
 		fill(255, 2, 4);
 		translate(textWidth("999999"), textAscent() * 1.1f);
 		textAlign(RIGHT);
 		textSize(18);
 		text("SCORE", 0, 0);
-		
+
 		fill(218);
 		translate(0, textAscent() * 1.1f);
 		text((int) scoreDisplay, 0, 0);
@@ -503,7 +489,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		textAlign(CENTER);
 		textSize(18);
 		text("HIGH SCORE", 0, 0);
-		
+
 		fill(218);
 		translate(0, textAscent() * 1.1f);
 		text(20000, 0, 0);
@@ -680,23 +666,29 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			enemyBullets = new ArrayList<Bullet>();
 			enemies = new ArrayList<Enemy>();
 
-			for (int i = 0; i < 4; i++)
-				enemies.add(new Boss(-WORLD_WIDTH / 2 + 7 * WORLD_WIDTH / 20
-						+ i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.95f));
+			// Four bosses up top
+			for (int i = 0; i < NUM_BOSSES; i++)
+				enemies.add(new Boss((i - NUM_BOSSES / 2) * ENEMY_BUFFER
+						+ ENEMY_BUFFER / 2, BOSS_Y));
 
-			for (int i = 0; i < 8; i++)
-				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH
-						/ 20 + i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.875f));
-			for (int i = 0; i < 8; i++)
-				enemies.add(new Butterfly(-WORLD_WIDTH / 2 + 3 * WORLD_WIDTH
-						/ 20 + i * WORLD_WIDTH / 10, WORLD_HEIGHT * 0.8f));
+			// Sixteen butterflies in the middle
+			for (int i = 0; i < NUM_BUTTERFLIES; i++)
+				enemies.add(new Butterfly((i - NUM_BUTTERFLIES / 2)
+						* ENEMY_BUFFER + ENEMY_BUFFER / 2, BOSS_Y
+						- ENEMY_BUFFER));
+			for (int i = 0; i < NUM_BUTTERFLIES; i++)
+				enemies.add(new Butterfly((i - NUM_BUTTERFLIES / 2)
+						* ENEMY_BUFFER + ENEMY_BUFFER / 2, BOSS_Y - 2
+						* ENEMY_BUFFER));
 
-			for (int i = 0; i < 10; i++)
-				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.725f));
-			for (int i = 0; i < 10; i++)
-				enemies.add(new Bee(-WORLD_WIDTH / 2 + WORLD_WIDTH / 20 + i
-						* WORLD_WIDTH / 10, WORLD_HEIGHT * 0.65f));
+			// Twenty bees down under
+			for (int i = 0; i < NUM_BEES; i++)
+				enemies.add(new Bee((i - NUM_BEES / 2) * ENEMY_BUFFER
+						+ ENEMY_BUFFER / 2, BOSS_Y - 3 * ENEMY_BUFFER));
+			for (int i = 0; i < NUM_BEES; i++)
+				enemies.add(new Bee((i - NUM_BEES / 2) * ENEMY_BUFFER
+						+ ENEMY_BUFFER / 2, BOSS_Y - 4 * ENEMY_BUFFER));
+
 			gameState = GameState.MAIN_MENU;
 		}
 	}
