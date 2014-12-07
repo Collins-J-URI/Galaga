@@ -140,7 +140,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (int i = 0; i < numStars; i++) {
 			starx[i] = random(-WORLD_WIDTH / 2, WORLD_WIDTH / 2);
 			stary[i] = random(WORLD_HEIGHT);
-			starvy[i] = random(BULLET_SPEED / 6, BULLET_SPEED / 4);
+			starvy[i] = random(BULLET_SPEED / 16, BULLET_SPEED / 4);
 		}
 
 		// set to default gamestate
