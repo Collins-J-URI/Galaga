@@ -81,6 +81,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private PImage logoSprite;
 
 	/**
+	 * Fighter sprite
+	 */
+	PImage lifeSprite;
+
+	/**
 	 * Player score
 	 */
 	private static int score;
@@ -140,7 +145,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (int i = 0; i < numStars; i++) {
 			starx[i] = random(-WORLD_WIDTH / 2, WORLD_WIDTH / 2);
 			stary[i] = random(WORLD_HEIGHT);
-			starvy[i] = random(BULLET_SPEED / 6, BULLET_SPEED / 4);
+			starvy[i] = random(BULLET_SPEED / 16, BULLET_SPEED / 4);
 		}
 
 		// set to default gamestate
@@ -161,6 +166,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		postgame = new Menu(gameOverOptions);
 
 		logoSprite = loadImage("Sprites/galaga.png");
+		lifeSprite = loadImage("Sprites/fighter.png");
 
 		// Initialize the score
 		score = 0;
@@ -230,6 +236,46 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (Enemy e : enemies)
 				if (random(1) < 0.001f)
 					enemyBullets.add(e.shoot());
+
+			// Check to see if enemies have been hit
+			for (Enemy e : enemies)
+				if (!e.isHit())
+					for (Bullet b : fighterBullets)
+						if (e.detectCollision(b))
+							hits++;
+
+			// Check to see if the player has been hit
+			for (Bullet b : enemyBullets)
+				if (!fighter.isHit())
+					fighter.detectCollision(b);
+
+			// Get points for enemies hit
+			for (Enemy e : enemies)
+				if (e.isHit())
+					score += e.getScore();
+
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 20);
+				if (scoreDisplay >= score)
+					scoreDisplay = score;
+			}
+			break;
+
+		// When ready, we want everything to be updated
+		case READY:
+
+			// Move the bullets fired by the fighter
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
+
+			// Move the bullets fired by the enemies
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
+
+			// Move the enemies
+			for (Enemy e : enemies)
+				e.update(elapsed);
 
 			// Check to see if enemies have been hit
 			for (Enemy e : enemies)
@@ -331,11 +377,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			translate(0, 200);
 
 			main.render(this);
+
 			popMatrix();
 			break;
 
 		// Draw all bullets, enemies, the fighter, the score, all that jazz
 		case PLAYING:
+			pushMatrix();
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
 				b.render(this);
@@ -345,15 +393,35 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				e.render(this);
 
 			renderScore();
+			renderLives();
 
+			popMatrix();
+			break;
+
+		// Draw all bullets, enemies, the fighter, the score, all that jazz
+		case READY:
 			pushMatrix();
-			PImage s = loadImage("Sprites/fighter.png");
-			translate(-WORLD_WIDTH / 2, 0);
-			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
-			translate(0, -s.height);
-			imageMode(CORNER);
-			for (int i = 0; i < fighter.lives(); i++)
-				image(s, i * s.width + 2 * i, 0);
+			fighter.render(this);
+			for (Bullet b : fighterBullets)
+				b.render(this);
+			for (Bullet b : enemyBullets)
+				b.render(this);
+			for (Enemy e : enemies)
+				e.render(this);
+
+			renderScore();
+			renderLives();
+
+			translate(0, WORLD_HEIGHT / 2);
+			scale(P2W, -P2W);
+
+			fill(4, 255, 222);
+			textSize(18);
+			textAlign(CENTER);
+			noSmooth();
+			translate(0, -textAscent());
+			text("READY", 0, 0);
+
 			popMatrix();
 			break;
 
@@ -462,20 +530,36 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 
 	/**
+	 * Draws stars and space going by
+	 */
+	public void renderLives() {
+		pushMatrix();
+		translate(-WORLD_WIDTH / 2, 0);
+		scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		translate(0, -lifeSprite.height);
+		imageMode(CORNER);
+		for (int i = 0; i < fighter.lives(); i++)
+			image(lifeSprite, i * lifeSprite.width + 2 * i, 0);
+		popMatrix();
+	}
+
+	/**
 	 * Draws score and high score
 	 */
 	public void renderScore() {
 		pushMatrix();
 		translate(0, WORLD_HEIGHT);
+		PFont font = loadFont("Fonts/Emulogic-36.vlw");
+		textFont(font);
 
 		pushMatrix();
 		translate(-WORLD_WIDTH / 2, 0);
 		scale(P2W, -P2W);
 
 		fill(255, 2, 4);
+		textSize(18);
 		translate(textWidth("999999"), textAscent() * 1.1f);
 		textAlign(RIGHT);
-		textSize(18);
 		text("SCORE", 0, 0);
 
 		fill(218);
@@ -485,9 +569,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		scale(P2W, -P2W);
 		fill(255, 2, 4);
+		textSize(18);
 		translate(0, textAscent() * 1.1f);
 		textAlign(CENTER);
-		textSize(18);
 		text("HIGH SCORE", 0, 0);
 
 		fill(218);
@@ -533,6 +617,30 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Control the ship
 		case PLAYING:
+			if (key == CODED) {
+				switch (keyCode) {
+				case LEFT:
+					fighter.push(Joystick.LEFT);
+					break;
+
+				case RIGHT:
+					fighter.push(Joystick.RIGHT);
+					break;
+				default:
+					break;
+				}
+			} else {
+				switch (key) {
+				case ' ':
+					if (!fighter.isHit() && fighterBullets.size() < 2)
+						fighterBullets.add(fighter.shoot());
+					break;
+				}
+			}
+			break;
+
+		// Control the ship
+		case READY:
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:

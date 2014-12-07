@@ -1,6 +1,7 @@
 package Galaga;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 
 /**
  * Defines a menu composed of one or more options. Options are stored in a
@@ -115,6 +116,8 @@ public class Menu {
 	 *            PApplet to draw to
 	 */
 	public void render(PApplet g) {
+		PFont font = g.loadFont("Fonts/Emulogic-36.vlw");
+		g.textFont(font, 36);
 		Node current = head.getNext();
 		do {
 			current.getOption().render(g);

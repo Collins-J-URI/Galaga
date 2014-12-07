@@ -18,6 +18,11 @@ public enum GameState {
 	PLAYING, 
 	
 	/**
+	 * Between lives
+	 */
+	READY, 
+	
+	/**
 	 * Game over
 	 */
 	GAMEOVER, 
