@@ -47,9 +47,9 @@ public class Fighter implements ApplicationConstants {
 	private PImage[] eSprites;
 
 	/**
-	 * Joystick position to define which direction the fighter should move
+	 * Stack of joystick commands to define which direction the fighter should
+	 * move
 	 */
-	private Joystick joystick;
 	private Stack<Joystick> commands;
 
 	/**
@@ -62,6 +62,14 @@ public class Fighter implements ApplicationConstants {
 	 */
 	private boolean hit;
 
+	/**
+	 * Number of bullets that the fighter has fired
+	 */
+	private int fired;
+
+	/**
+	 * Number of lives that the fighter has left
+	 */
 	private int lives;
 
 	/**
@@ -76,6 +84,9 @@ public class Fighter implements ApplicationConstants {
 		return instance;
 	}
 
+	/**
+	 * Replaces the current instance of the fighter
+	 */
 	public static void resetInstance() {
 		instance = new Fighter();
 	}
@@ -89,9 +100,8 @@ public class Fighter implements ApplicationConstants {
 		r = 7 * PIXEL_WIDTH;
 		destroyed = false;
 		hit = false;
-		lives = 3;
+		lives = 2;
 		cycleCount = 0;
-		joystick = Joystick.CENTER;
 		commands = new Stack<Joystick>();
 		commands.push(Joystick.CENTER);
 		animationState = AnimationState.random();
@@ -150,20 +160,27 @@ public class Fighter implements ApplicationConstants {
 	}
 
 	/**
-	 * Detects if there is a collision between the fighter and the passed bullet
+	 * Detects if there is a collision between the fighter and the passed
+	 * bullet. If there is, the fighter is hit, the bullet destroyed, and the
+	 * method returns true. If not, the method only returns false
 	 * 
 	 * @param bullet
 	 *            the bullet to check against
+	 * @return true if there is a collision between the enemy and the bullet
 	 */
-	public void detectCollision(Bullet bullet) {
+	public boolean detectCollision(Bullet bullet) {
+		boolean h = false;
 		float bx = bullet.getX();
 		float by = bullet.getY();
 
 		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
 		if (dist2 < r * r) {
+			h = true;
 			hit();
 			bullet.destroy();
 		}
+
+		return h;
 	}
 
 	/**
@@ -182,7 +199,6 @@ public class Fighter implements ApplicationConstants {
 		animationState = AnimationState.EXP_1;
 		cycleCount = 0;
 		hit = true;
-		System.out.println(lives);
 	}
 
 	/**
@@ -200,50 +216,62 @@ public class Fighter implements ApplicationConstants {
 	public void destroy() {
 		destroyed = true;
 	}
-	
+
+	/**
+	 * Puts the fighter back in its starting position
+	 */
 	public void resetPosition() {
 		x = 0;
 		y = WORLD_HEIGHT * 0.1f;
 	}
 
+	/**
+	 * Accessor method for lives
+	 * 
+	 * @return number of lives
+	 */
 	public int lives() {
 		return lives;
 	}
 
 	/**
-	 * Set the joystick to the right position
+	 * Accessor method for number of bullets fired
+	 * 
+	 * @return fired
 	 */
-	public void right() {
-		joystick = Joystick.RIGHT;
+	public int fired() {
+		return fired;
 	}
 
 	/**
-	 * Set the joystick to the left position
+	 * Pushes a command onto the stack
+	 * 
+	 * @param command
+	 *            command to be pushed onto the stack
 	 */
-	public void left() {
-		joystick = Joystick.LEFT;
+	public void push(Joystick command) {
+		if (commands.peek() != command)
+			commands.push(command);
 	}
 
 	/**
-	 * Set the joystick to the center position
+	 * Pops a command from the stack. If the passed in command is not the one on
+	 * top of the stack, removes the first instance of that command found
+	 * 
+	 * @param command
+	 *            command to be popped from the stack
+	 * @return popped command
 	 */
-	public void center() {
-		joystick = Joystick.CENTER;
-	}
-
-	public void push(Joystick j) {
-		if (commands.peek() != j)
-			commands.push(j);
-	}
-
-	public void pop(Joystick j) {
-		if (commands.peek() == j)
-			commands.pop();
+	public Joystick pop(Joystick command) {
+		Joystick popped;
+		if (commands.peek() == command)
+			popped = commands.pop();
 		else {
 			Joystick temp = commands.pop();
-			commands.pop();
+			popped = commands.pop();
 			commands.push(temp);
 		}
+		return popped;
 	}
 
 	/**
@@ -252,6 +280,7 @@ public class Fighter implements ApplicationConstants {
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
+		fired++;
 		return new FighterBullet(x, y);
 	}
 
