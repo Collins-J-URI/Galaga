@@ -138,24 +138,24 @@ public class Fighter implements ApplicationConstants {
 				x = WORLD_WIDTH / 2 - PIXEL_WIDTH * 10;
 
 		} else {
-			if (animationState == AnimationState.EXP_5 && lives == 0)
+			if (animationState == AnimationState.EXP_5)
 				destroy();
-			else if (animationState == AnimationState.EXP_5) {
-				cycleCount += elapsed * 0.001f;
-				if (cycleCount > EXPLOSION_FRAME * 10) {
-					resetPosition();
-					lives--;
-					hit = false;
-					destroyed = false;
-					animationState = AnimationState.random();
-				}
-			} else {
+			else {
 				cycleCount += elapsed * 0.001f;
 				if (cycleCount > EXPLOSION_FRAME) {
 					cycleCount = 0;
 					animationState = animationState.getNext();
 				}
 			}
+			/*
+			 * if (animationState == AnimationState.EXP_5 && lives == 0)
+			 * destroy(); else if (animationState == AnimationState.EXP_5) {
+			 * cycleCount += elapsed * 0.001f; if (cycleCount > EXPLOSION_FRAME
+			 * * 10) { resetPosition(); lives--; hit = false; destroyed = false;
+			 * animationState = AnimationState.random(); } } else { cycleCount
+			 * += elapsed * 0.001f; if (cycleCount > EXPLOSION_FRAME) {
+			 * cycleCount = 0; animationState = animationState.getNext(); } }
+			 */
 		}
 	}
 
@@ -223,6 +223,18 @@ public class Fighter implements ApplicationConstants {
 	public void resetPosition() {
 		x = 0;
 		y = WORLD_HEIGHT * 0.1f;
+		commands = new Stack<Joystick>();
+		commands.push(Joystick.CENTER);
+	}
+
+	/**
+	 * Revives the fighter using one of its lives without altering its position
+	 */
+	public void revive() {
+		animationState = AnimationState.random();
+		hit = false;
+		destroyed = false;
+		lives--;
 	}
 
 	/**
@@ -241,6 +253,15 @@ public class Fighter implements ApplicationConstants {
 	 */
 	public int fired() {
 		return fired;
+	}
+
+	/**
+	 * Peeks at the top of the command stack
+	 * 
+	 * @return the command at the top of the stack
+	 */
+	public Joystick peek() {
+		return commands.peek();
 	}
 
 	/**
