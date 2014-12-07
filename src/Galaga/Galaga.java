@@ -336,6 +336,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Draw all bullets, enemies, the fighter, the score, all that jazz
 		case PLAYING:
+			pushMatrix();
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
 				b.render(this);
@@ -345,8 +346,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				e.render(this);
 
 			renderScore();
-
-			pushMatrix();
+			
 			PImage s = loadImage("Sprites/fighter.png");
 			translate(-WORLD_WIDTH / 2, 0);
 			scale(PIXEL_WIDTH, -PIXEL_WIDTH);
@@ -467,15 +467,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void renderScore() {
 		pushMatrix();
 		translate(0, WORLD_HEIGHT);
+		PFont font = loadFont("Fonts/Emulogic-36.vlw");
+		textFont(font);
 
 		pushMatrix();
 		translate(-WORLD_WIDTH / 2, 0);
 		scale(P2W, -P2W);
 
 		fill(255, 2, 4);
+		textSize(18);
 		translate(textWidth("999999"), textAscent() * 1.1f);
 		textAlign(RIGHT);
-		textSize(18);
 		text("SCORE", 0, 0);
 
 		fill(218);
@@ -485,9 +487,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		scale(P2W, -P2W);
 		fill(255, 2, 4);
+		textSize(18);
 		translate(0, textAscent() * 1.1f);
 		textAlign(CENTER);
-		textSize(18);
 		text("HIGH SCORE", 0, 0);
 
 		fill(218);
