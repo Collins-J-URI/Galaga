@@ -263,7 +263,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			}
 			break;
 
-		// When ready, we want everything to be updated
+		// When ready, we want everything to be updated, but not for the fighter
+		// to be hit
 		case READY:
 
 			// Move the bullets fired by the fighter
@@ -284,11 +285,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					for (Bullet b : fighterBullets)
 						if (e.detectCollision(b))
 							hits++;
-
-			// Check to see if the player has been hit
-			for (Bullet b : enemyBullets)
-				if (!fighter.isHit())
-					fighter.detectCollision(b);
 
 			// Get points for enemies hit
 			for (Enemy e : enemies)
@@ -406,7 +402,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
-		// Draw all bullets, enemies, the fighter, the score, all that jazz
+		// Draw all everything including the "READY" text
 		case READY:
 			pushMatrix();
 			fighter.render(this);
