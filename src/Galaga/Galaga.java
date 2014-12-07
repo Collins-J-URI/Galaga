@@ -188,6 +188,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Only purge during the necessary game states
 		switch (gameState) {
 		case PLAYING:
+		case READY:
 		case GAMEOVER:
 			purge();
 			break;
@@ -234,7 +235,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Have enemies fire bullets every once in a while
 			for (Enemy e : enemies)
-				if (random(1) < 0.001f)
+				if (random(1) < 0.005f)
 					enemyBullets.add(e.shoot());
 
 			// Check to see if enemies have been hit
@@ -342,8 +343,15 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (eit.next().isDestroyed())
 				eit.remove();
 
-		// If the fighter is destroyed, game over
-		if (fighter.isDestroyed())
+		// If the fighter is destroyed, take a life and reset it
+		if (fighter.isDestroyed() && fighter.lives() > 0) {
+			gameState = GameState.READY;
+			fighter.resetPosition();
+			fighter.revive();
+		}
+
+		// If the fighter is destroyed with no lives left, game over
+		else if (fighter.isDestroyed())
 			gameState = GameState.GAMEOVER;
 
 	}
@@ -609,6 +617,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			} else {
 				switch (key) {
 				case ' ':
+				case ENTER:
 					main.execute();
 					break;
 				}
@@ -641,26 +650,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Control the ship
 		case READY:
-			if (key == CODED) {
-				switch (keyCode) {
-				case LEFT:
-					fighter.push(Joystick.LEFT);
-					break;
-
-				case RIGHT:
-					fighter.push(Joystick.RIGHT);
-					break;
-				default:
-					break;
-				}
-			} else {
-				switch (key) {
-				case ' ':
-					if (!fighter.isHit() && fighterBullets.size() < 2)
-						fighterBullets.add(fighter.shoot());
-					break;
-				}
-			}
+			if (key == ENTER)
+				gameState = GameState.PLAYING;
 			break;
 
 		// Go to next game state when any key is pressed
@@ -694,6 +685,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			} else {
 				switch (key) {
 				case ' ':
+				case ENTER:
 					postgame.execute();
 					break;
 				}
@@ -708,7 +700,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void keyReleased() {
 
 		// Control the ship
-		if (gameState == GameState.PLAYING) {
+		if (gameState == GameState.PLAYING && fighter.peek() != Joystick.CENTER) {
 			switch (keyCode) {
 			case LEFT:
 				fighter.pop(Joystick.LEFT);
