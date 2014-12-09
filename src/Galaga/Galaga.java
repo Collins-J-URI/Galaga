@@ -100,6 +100,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static int hits;
 
+	private Timer readyTimer;
+
 	/**
 	 * Initializes all fields, including the stars, the array list of enemies,
 	 * and the player ship
@@ -172,6 +174,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		score = 0;
 		scoreDisplay = 0;
 		hits = 0;
+
+		readyTimer = new Timer(this);
 
 		// Initialize the draw time
 		lastDrawTime = millis();
@@ -297,6 +301,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
+
 			break;
 
 		// After the player is out of lives, only update enemies and bullets
@@ -333,22 +338,38 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (bit.next().isDestroyed())
 				bit.remove();
 
-		// Get rid of bullets once they're outside the window
+		// Get rid of enemies if they're destroyed
 		Iterator<Enemy> eit = enemies.iterator();
 		while (eit.hasNext())
 			if (eit.next().isDestroyed())
 				eit.remove();
 
-		// If the fighter is destroyed, take a life and reset it
-		if (fighter.isDestroyed() && fighter.lives() > 0) {
-			gameState = GameState.READY;
-			fighter.resetPosition();
-			fighter.revive();
-		}
+		switch (gameState) {
+		case PLAYING:
+			// If the fighter is destroyed, take a life and reset it
+			if (fighter.isDestroyed() && fighter.lives() > 0) {
+				gameState = GameState.READY;
+				fighter.resetPosition();
+				fighter.revive();
+				readyTimer.start(READY_TIME);
+			}
 
-		// If the fighter is destroyed with no lives left, game over
-		else if (fighter.isDestroyed())
-			gameState = GameState.GAMEOVER;
+			// If the fighter is destroyed with no lives left, game over
+			else if (fighter.isDestroyed())
+				gameState = GameState.GAMEOVER;
+
+			break;
+		case READY:
+
+			if (readyTimer.isDone())
+				gameState = GameState.PLAYING;
+
+			break;
+		case GAMEOVER:
+			break;
+		default:
+			break;
+		}
 
 	}
 
@@ -642,12 +663,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					break;
 				}
 			}
-			break;
-
-		// Control the ship
-		case READY:
-			if (key == ENTER)
-				gameState = GameState.PLAYING;
 			break;
 
 		// Go to next game state when any key is pressed
