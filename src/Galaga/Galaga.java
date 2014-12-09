@@ -100,6 +100,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static int hits;
 
+	/**
+	 * Timer for the READY game state
+	 */
 	private Timer readyTimer;
 
 	/**
@@ -344,6 +347,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (eit.next().isDestroyed())
 				eit.remove();
 
+		// Game state switching is dependent on what state we're in
 		switch (gameState) {
 		case PLAYING:
 			// If the fighter is destroyed, take a life and reset it
@@ -360,7 +364,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			break;
 		case READY:
-
+			// Resume play after a short wait
 			if (readyTimer.isDone())
 				gameState = GameState.PLAYING;
 
@@ -702,6 +706,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					break;
 				}
 			}
+			break;
+		default:
 			break;
 		}
 	}
