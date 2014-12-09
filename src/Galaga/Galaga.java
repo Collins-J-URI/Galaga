@@ -671,12 +671,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Go to next game state when any key is pressed
 		case GAMEOVER:
-			gameState = GameState.RESULTS;
-			break;
-
-		// Go to next game state when any key is pressed
 		case RESULTS:
-			gameState = GameState.POSTGAME_MENU;
+			gameState = gameState.getNext();
 			break;
 
 		// Navigate the menu
