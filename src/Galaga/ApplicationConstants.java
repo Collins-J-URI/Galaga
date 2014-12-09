@@ -111,4 +111,9 @@ public interface ApplicationConstants {
 	 * Length of a frame of an explosion in seconds
 	 */
 	float ANIMATION_FRAME = LOOP_TIME / 2;
+
+	/**
+	 * Time to spend in the READY game state
+	 */
+	float READY_TIME = 2;
 }
