@@ -18,6 +18,11 @@ public enum GameState {
 	PLAYING, 
 	
 	/**
+	 * Between lives
+	 */
+	READY, 
+	
+	/**
 	 * Game over
 	 */
 	GAMEOVER, 
@@ -30,5 +35,19 @@ public enum GameState {
 	/**
 	 * Postgame menu
 	 */
-	POSTGAME_MENU;
+	POSTGAME_MENU,
+	
+	/**
+	 * HighScore Screen
+	 */
+	HIGHSCORE_LIST;
+
+	/**
+	 * Returns the next game state in the cycle
+	 * 
+	 * @return the next game state in the cycle
+	 */
+	public GameState getNext() {
+		return values()[(ordinal() + 1) % values().length];
+	}
 }
