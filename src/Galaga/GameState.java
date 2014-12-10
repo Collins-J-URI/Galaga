@@ -35,7 +35,12 @@ public enum GameState {
 	/**
 	 * Postgame menu
 	 */
-	POSTGAME_MENU;
+	POSTGAME_MENU,
+	
+	/**
+	 * HighScore Screen
+	 */
+	HIGHSCORE_LIST;
 
 	/**
 	 * Returns the next game state in the cycle
