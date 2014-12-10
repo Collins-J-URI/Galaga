@@ -1,5 +1,7 @@
 package Galaga;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -100,12 +102,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static int hits;
 
+	/**
+	 * Timer for the READY game state
+	 */
 	private Timer readyTimer;
 
 	/**
 	 * Initializes all fields, including the stars, the array list of enemies,
 	 * and the player ship
 	 */
+	
+	private Option play, quit, highscore, returnToMenu;
 	public void setup() {
 		size(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -154,17 +161,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		gameState = GameState.MAIN_MENU;
 
 		// Different options for the menus
-		Option play = new Option("Play", new Play());
-		Option quit = new Option("Quit", new Quit());
-		Option highscore = new Option("High Scores", new HighScore());
-		Option returnToMenu = new Option("Return to Menu", new Return());
+		play = new Option("Play", new Play());
+		quit = new Option("Quit", new Quit());
+		highscore = new Option("High Scores", new HighScore(this));
+		returnToMenu = new Option("Return to Menu", new Return());
 
 		// Initialize main menu
 		Option[] mainOptions = { play, highscore, quit };
 		main = new Menu(mainOptions);
 
 		// Initialize game over menu
-		Option[] gameOverOptions = { returnToMenu, quit };
+		Option[] gameOverOptions = { returnToMenu,highscore, quit };
 		postgame = new Menu(gameOverOptions);
 
 		logoSprite = loadImage("Sprites/galaga.png");
@@ -344,6 +351,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (eit.next().isDestroyed())
 				eit.remove();
 
+		// Game state switching is dependent on what state we're in
 		switch (gameState) {
 		case PLAYING:
 			// If the fighter is destroyed, take a life and reset it
@@ -360,7 +368,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			break;
 		case READY:
-
+			// Resume play after a short wait
 			if (readyTimer.isDone())
 				gameState = GameState.PLAYING;
 
@@ -526,6 +534,34 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			postgame.render(this);
 			popMatrix();
 			break;
+		
+		//draw the HighScores Page
+		case HIGHSCORE_LIST:
+			
+			pushMatrix();
+			translate(0,WORLD_HEIGHT/1.5f);
+			scale(P2W, -P2W);
+			textAlign(CENTER);
+			text("-HIGHSCORES-",0,0);
+			
+			fill(255,255,127);
+
+			
+			Node current = ((HighScore)highscore.getAction()).getScores();
+			
+			while(current != null){
+				translate(0,2*textAscent());
+				textAlign(RIGHT);
+				text(current.getName() + " ",0,0);
+				
+				textAlign(LEFT);
+				text(current.getScore(),0,0);
+
+				current = current.getNext();
+			}
+			
+			popMatrix();
+			break;
 		}
 	}
 
@@ -667,11 +703,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Go to next game state when any key is pressed
 		case GAMEOVER:
-			gameState = GameState.RESULTS;
-			break;
-
 		case RESULTS:
-			gameState = GameState.POSTGAME_MENU;
+			gameState = gameState.getNext();
 			break;
 
 		// Navigate the menu
@@ -701,6 +734,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					break;
 				}
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -755,8 +790,87 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * @author Christopher Glasz
 	 */
 	private static class HighScore implements SelectAction {
+		private PApplet _theApp;
+		private BufferedReader reader;
+		
+		
+		private final int  MAX_SCORES = 3;
+		
+		private Node scoreList;
+		private Node tail;
+		public HighScore(PApplet app){
+			_theApp = app;
+			
+			loadScores();
+		}
+		
+		public void loadScores(){
+			reader = _theApp.createReader("highscores.txt");
+			String temp = null;
+			
+			tail = null;
+			try {
+				temp = reader.readLine();
+			
+			
+			int count = 1;
+			
+			while(temp != null){
+					
+				System.out.println("TEXT == " + temp);
+				String[] line = temp.split(",");
+
+				if(scoreList == null){
+					scoreList = new Node(line[0],Integer.parseInt(line[1]));
+					tail = scoreList;
+				}else{
+					Node newNode = new Node(line[0],Integer.parseInt(line[1]));
+					
+					newNode.setPrevious(tail);
+					tail.setNext(newNode);
+					tail = newNode;
+					System.out.println("NAME " + newNode.getName());
+					System.out.println("SCORE " + newNode.getScore());
+				}
+
+				
+				count++;
+				temp = reader.readLine();
+
+			}
+			
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
+		}
+		
+		public void updateScores(String name, int score){
+			Node current = scoreList;
+			int insertIndex = 1;
+			boolean isFound = false;
+			while(current != null && !isFound){
+				if(score > current.getScore()){
+					isFound = true;
+					Node temp = new Node(name,score,current.getPrevious(),current);
+					
+				}
+				insertIndex++;
+			}
+			
+			if(insertIndex <= MAX_SCORES){
+				tail.getPrevious().setNext(null);
+				tail = tail.getPrevious();
+			}
+		}
+		public Node getScores(){
+			return scoreList;
+		}
 		public void execute() {
-			System.exit(0);
+			gameState = GameState.HIGHSCORE_LIST;
+			//System.exit(0);
 		}
 	}
 
