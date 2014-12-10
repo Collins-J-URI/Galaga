@@ -101,6 +101,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private static int hits;
 
 	/**
+	 * Timer for the READY game state
+	 */
+	private Timer readyTimer;
+
+	/**
 	 * Initializes all fields, including the stars, the array list of enemies,
 	 * and the player ship
 	 */
@@ -172,6 +177,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		score = 0;
 		scoreDisplay = 0;
 		hits = 0;
+
+		readyTimer = new Timer(this);
 
 		// Initialize the draw time
 		lastDrawTime = millis();
@@ -297,6 +304,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
+
 			break;
 
 		// After the player is out of lives, only update enemies and bullets
@@ -333,22 +341,39 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (bit.next().isDestroyed())
 				bit.remove();
 
-		// Get rid of bullets once they're outside the window
+		// Get rid of enemies if they're destroyed
 		Iterator<Enemy> eit = enemies.iterator();
 		while (eit.hasNext())
 			if (eit.next().isDestroyed())
 				eit.remove();
 
-		// If the fighter is destroyed, take a life and reset it
-		if (fighter.isDestroyed() && fighter.lives() > 0) {
-			gameState = GameState.READY;
-			fighter.resetPosition();
-			fighter.revive();
-		}
+		// Game state switching is dependent on what state we're in
+		switch (gameState) {
+		case PLAYING:
+			// If the fighter is destroyed, take a life and reset it
+			if (fighter.isDestroyed() && fighter.lives() > 0) {
+				gameState = GameState.READY;
+				fighter.resetPosition();
+				fighter.revive();
+				readyTimer.start(READY_TIME);
+			}
 
-		// If the fighter is destroyed with no lives left, game over
-		else if (fighter.isDestroyed())
-			gameState = GameState.GAMEOVER;
+			// If the fighter is destroyed with no lives left, game over
+			else if (fighter.isDestroyed())
+				gameState = GameState.GAMEOVER;
+
+			break;
+		case READY:
+			// Resume play after a short wait
+			if (readyTimer.isDone())
+				gameState = GameState.PLAYING;
+
+			break;
+		case GAMEOVER:
+			break;
+		default:
+			break;
+		}
 
 	}
 
@@ -644,19 +669,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			}
 			break;
 
-		// Control the ship
-		case READY:
-			if (key == ENTER)
-				gameState = GameState.PLAYING;
-			break;
-
 		// Go to next game state when any key is pressed
 		case GAMEOVER:
-			gameState = GameState.RESULTS;
-			break;
-
 		case RESULTS:
-			gameState = GameState.POSTGAME_MENU;
+			gameState = gameState.getNext();
 			break;
 
 		// Navigate the menu
@@ -686,6 +702,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					break;
 				}
 			}
+			break;
+		default:
 			break;
 		}
 	}
