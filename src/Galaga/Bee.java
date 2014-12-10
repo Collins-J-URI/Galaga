@@ -2,11 +2,25 @@ package Galaga;
 
 import processing.core.*;
 
+/**
+ * Defines a Bee, the front line of the Galaga force
+ * 
+ * @author Christopher Glasz
+ */
 public class Bee extends Enemy {
 
+	/**
+	 * Constructor initializes variables
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @param y
+	 *            y coordinate
+	 */
 	public Bee(float x, float y) {
 		super(x, y);
-		r = 7 * PIXEL_WIDTH;
+		formationScore = 50;
+		attackingScore = 100;
 	}
 
 	@Override
@@ -21,6 +35,7 @@ public class Bee extends Enemy {
 		return null;
 	}
 
+	@Override
 	protected void createSprite() {
 		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/bee.png");

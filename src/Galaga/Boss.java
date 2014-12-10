@@ -15,7 +15,7 @@ public class Boss extends Enemy {
 	private PImage hitSprite1, hitSprite2;
 
 	/**
-	 * True if we havebeen hit once
+	 * True if the boss has been hit once
 	 */
 	private boolean hitOnce;
 
@@ -30,23 +30,8 @@ public class Boss extends Enemy {
 	public Boss(float x, float y) {
 		super(x, y);
 		hitOnce = false;
-	}
-
-	/**
-	 * Detects if there is a collision between the enemy and the passed bullet
-	 * 
-	 * @param bullet
-	 *            the bullet to check against
-	 */
-	public void detectCollision(Bullet bullet) {
-		float bx = bullet.getX();
-		float by = bullet.getY();
-
-		float dist2 = (bx - x) * (bx - x) + (by - y) * (by - y);
-		if (dist2 < r * r) {
-			hit();
-			bullet.destroy();
-		}
+		formationScore = 130;
+		attackingScore = 400;
 	}
 
 	/**
@@ -63,11 +48,7 @@ public class Boss extends Enemy {
 		}
 	}
 
-	/**
-	 * Returns a clone of the Boss
-	 * 
-	 * @return a clone of the Boss
-	 */
+	@Override
 	public Enemy clone() {
 		Boss temp = new Boss(x, y);
 		if (hitOnce)
@@ -79,9 +60,7 @@ public class Boss extends Enemy {
 		return temp;
 	}
 
-	/**
-	 * Loads the sprites
-	 */
+	@Override
 	protected void createSprite() {
 		super.createSprite();
 		sprite1 = (new PApplet()).loadImage("Sprites/boss.png");
