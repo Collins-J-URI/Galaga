@@ -68,6 +68,10 @@ public class Option {
 	public void execute() {
 		action.execute();
 	}
+	
+	public SelectAction getAction(){
+		return action;
+	}
 
 	/**
 	 * Renders the option to the passed in PApplet
