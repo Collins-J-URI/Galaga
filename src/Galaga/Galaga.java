@@ -103,7 +103,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * The Highest Score
 	 */
 	private static int topScore;
-
+	
+	private static String playerName;
 	/**
 	 * Current Highscores
 	 */
@@ -190,6 +191,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		score = 0;
 		scoreDisplay = 0;
 		hits = 0;
+		playerName = "";
 
 		//Initialize the HighScores
 		try {
@@ -339,6 +341,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			for (Enemy e : enemies)
 				e.update(elapsed);
+			
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1, 20);
+				if (scoreDisplay >= score)
+					scoreDisplay = score;
+			}
 			break;
 
 		default:
@@ -503,6 +512,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Draw the player's hit-miss ratio
 		case RESULTS:
 			renderScore();
+			
 			pushMatrix();
 			translate(0, WORLD_HEIGHT / 2);
 			scale(P2W, -P2W);
@@ -542,6 +552,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				text("   0 %", 0, 0);
 
 			popMatrix();
+			
+			//If Player has New HighScore, Have them Enter their INITIALS
+			if(checkScore())
+				renderNewScore();
 			break;
 
 		// Draw the postgame menu
@@ -670,7 +684,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		fill(218);
 		translate(0, textAscent() * 1.1f);
 		
-		if(score >= topScore){		//if player has beaten the HighScore
+		if(checkScore()){		//if player has beaten the HighScore
 			if(scoreDisplay > topScore){
 				text(scoreDisplay,0,0);
 			}else{
@@ -684,10 +698,58 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		popMatrix();
 	}
-
+	
+	float i = 0;
+	private void renderNewScore(){
+		//System.out.println("NEW HIGHSCORE");
+		pushMatrix();
+		
+		translate(0,WORLD_HEIGHT/1.25f);
+		scale(P2W, -P2W);
+		float rf = 0.2f;
+		float gf = 0.3f;
+		float bf = 0.4f;
+		i++;
+		i = i%32;
+		float red   = (float) (Math.sin(rf*i + 0) * 127 + 128);
+		float green = (float) (Math.sin(gf*i + 2*PI/3) * 127 + 128);
+		float blue  = (float) (Math.sin(bf*i + 4*PI/3) * 127 + 128);
+		
+		fill(red,green,blue);
+		textAlign(CENTER);
+		text("NEW HIGHSCORE!",0,0);
+		
+		translate(0,4*textAscent());
+		textSize(32);
+		fill(255);
+		text(playerName,0,0);
+		
+		
+		translate(0,2*textAscent());
+		textSize(18);
+		fill(red,green,blue);
+		text("Press [ENTER] WHEN FINISHED",0,0);
+		popMatrix();
+	}
+	private boolean checkScore(){
+		
+		highscoreList.reset();
+		Node current = highscoreList.next();
+		
+		while(current != null){
+			if(score > current.getScore()){
+				return true;
+			}
+			
+			current = highscoreList.next();
+		}
+		return false;
+	}
 	/**
 	 * What do be done when the player presses keys
 	 */
+	
+
 	public void keyPressed() {
 		switch (gameState) {
 
@@ -746,8 +808,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Go to next game state when any key is pressed
 		case GAMEOVER:
+			gameState = GameState.RESULTS;
+			break;
 		case RESULTS:
-			gameState = gameState.getNext();
+
+			
 			break;
 
 		// Navigate the menu
@@ -793,22 +858,70 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * What to be done when the user releases keys
 	 */
 	public void keyReleased() {
+		
+		switch(gameState){
+		case PLAYING:
+			// Control the ship
+			if (gameState == GameState.PLAYING && fighter.peek() != Joystick.CENTER) {
+				switch (keyCode) {
+				case LEFT:
+					fighter.pop(Joystick.LEFT);
+					break;
 
-		// Control the ship
-		if (gameState == GameState.PLAYING && fighter.peek() != Joystick.CENTER) {
-			switch (keyCode) {
-			case LEFT:
-				fighter.pop(Joystick.LEFT);
-				break;
+				case RIGHT:
+					fighter.pop(Joystick.RIGHT);
+					break;
+				default:
+					break;
+				}
 
-			case RIGHT:
-				fighter.pop(Joystick.RIGHT);
-				break;
-			default:
+			}
+			break;
+		case RESULTS:
+			
+			if(checkScore()){
+				
+
+				if(playerName.length() < 3 && keyCode != BACKSPACE && keyCode != ' '){
+					playerName += key;
+					System.out.println("LETTER ENTERED");
+				}
+				
+				switch(keyCode){
+				case ENTER:
+					gameState = gameState.HIGHSCORE_LIST;
+					break;
+				case BACKSPACE: //delete letters in Name
+
+					//Rugged Way -- BRUTEFORCED
+					switch(playerName.length()){
+					case 1:
+						playerName = "";
+						break;
+					case 2:
+						playerName = "" + playerName.charAt(0);
+						break;
+					case 3:
+						playerName = playerName.substring(0,2);
+						break;
+					
+					default:
+						break;
+						
+					}
+				}
+				
+				
+			}
+			System.out.println(playerName + " " + playerName.length());
+			switch(keyCode){
+			case ENTER:
+				gameState = gameState.POSTGAME_MENU;
 				break;
 			}
-
+			break; //end case RESULTS
 		}
+
 	}
 	
 	
@@ -888,7 +1001,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static class Return implements SelectAction {
 		public void execute() {
-
+			playerName = "";
 			score = 0;
 			hits = 0;
 			Fighter.resetInstance();
