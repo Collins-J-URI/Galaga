@@ -872,7 +872,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				switch(keyCode){
 				case ENTER:
 					//if nothing entered, do not add to list
-					if(playerName != ""){
+					if(playerName == ""){
 						gameState = GameState.HIGHSCORE_LIST;
 					}else{
 							insertHighscore();
