@@ -841,7 +841,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 				while (temp != null) {
 
-					System.out.println("TEXT == " + temp);
 					String[] line = temp.split(",");
 
 					if (scoreList == null) {
@@ -854,8 +853,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 						newNode.setPrevious(tail);
 						tail.setNext(newNode);
 						tail = newNode;
-						System.out.println("NAME " + newNode.getName());
-						System.out.println("SCORE " + newNode.getScore());
 					}
 
 					temp = reader.readLine();
