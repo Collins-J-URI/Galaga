@@ -40,6 +40,11 @@ public enum GameState {
 	/**
 	 * HighScore Screen
 	 */
+	ENTER_NAME,
+	
+	/**
+	 * HighScore Screen
+	 */
 	HIGHSCORE_LIST;
 
 	/**
