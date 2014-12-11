@@ -695,7 +695,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 	
 	/**
-	 * Renders that the player has recieved a new high score.
+	 * Renders that the player has received a new high score.
 	 */
 	private void renderNewScore(){
 		
