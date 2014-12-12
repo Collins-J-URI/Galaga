@@ -107,6 +107,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * Name of the player
 	 */
 	private static String playerName;
+	
+	private static NameEntry nameEntry;
 
 	/**
 	 * Current Highscores
@@ -192,6 +194,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Initialize game over menu
 		Option[] gameOverOptions = { returnToMenu, highscore, quit };
 		postgame = new Menu(gameOverOptions);
+		
+		nameEntry = new NameEntry();
 
 		logoSprite = loadImage("Sprites/galaga.png");
 		lifeSprite = loadImage("Sprites/fighter.png");
@@ -732,8 +736,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		translate(0, 1.5f * textAscent());
 		textAlign(RIGHT);
 		text(score + "    ", 0, 0);
-		textAlign(LEFT);
-		text("    " + playerName, 0, 0);
+		translate(textWidth("    "), 0);
+		nameEntry.render(this);
 
 		translate(0, 2 * textAscent());
 
@@ -815,43 +819,33 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			break;
 
 		case ENTER_NAME:
-			if (playerName.length() < 3 && keyCode != BACKSPACE
-					&& keyCode != ' ') {
-				playerName += key;
-			}
-
-			switch (keyCode) {
-			case ENTER:
-				// if nothing entered, do not add to list
-				if (playerName == "") {
-					gameState = GameState.HIGHSCORE_LIST;
-				} else {
-					insertHighscore();
-
-					// set the HighestScore
-					highscoreList.reset();
-					topScore = highscoreList.next().getScore();
-
-					gameState = GameState.HIGHSCORE_LIST;
-				}
-
-				break;
-			case BACKSPACE: // delete letters in Name
-
-				// Rugged Way -- BRUTEFORCED
-				switch (playerName.length()) {
-				case 1:
-					playerName = "";
+			if (key == CODED) {
+				switch (keyCode) {
+				case UP:
+					nameEntry.cycle(Joystick.UP);
 					break;
-				case 2:
-					playerName = "" + playerName.charAt(0);
+				case DOWN:
+					nameEntry.cycle(Joystick.DOWN);
 					break;
-				case 3:
-					playerName = playerName.substring(0, 2);
+				case LEFT:
+					nameEntry.cycle(Joystick.LEFT);
 					break;
-
+				case RIGHT:
+					nameEntry.cycle(Joystick.RIGHT);
+					break;
 				default:
 					break;
+				}
+			} else {
+				switch (key) {
+				case ENTER:
+					playerName = nameEntry.getName();
+					nameEntry = new NameEntry();
+					insertHighscore();
+					gameState = GameState.POSTGAME_MENU;
+					break;
+					default:
+						nameEntry.setLetter(key);
 				}
 			}
 			break;
