@@ -968,8 +968,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// until End of File, add lines to highscoreList
 		while (temp != null) {
 
-			System.out.println("TEXT == " + temp);
-
 			// split each line using the ',' delimiter
 			String[] line = temp.split(",");
 			highscoreList.add(line[0], Integer.parseInt(line[1]));
@@ -1023,7 +1021,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			writer.println(tempItem.getName() + "," + tempItem.getScore());
 		}
 
-		System.out.println(writer.checkError());
 		writer.flush(); // write the rest of the data
 		writer.close();
 	}
