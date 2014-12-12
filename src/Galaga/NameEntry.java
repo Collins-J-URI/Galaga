@@ -1,9 +1,13 @@
 package Galaga;
 
-import Galaga.Menu.Node;
 import processing.core.PApplet;
 import processing.core.PFont;
 
+/**
+ * Defines a field for name entry using cycleable letters
+ * 
+ * @author Christopher Glasz
+ */
 public class NameEntry {
 
 	/**
@@ -22,17 +26,17 @@ public class NameEntry {
 	public NameEntry() {
 		head = new Node(null);
 
-		// Head points to the first option, which points only to itself
+		// Head points to the first letter, which points only to itself
 		Node first = new Node(new CycleableLetter('a'));
 		first.setNext(first);
 		first.setPrev(first);
 		head.setNext(first);
 
-		// Add the rest of the options to the loop
+		// Add the rest of the letters to the loop
 		for (int i = 1; i < 3; i++)
 			add(new CycleableLetter('a'));
 
-		// Select the top option
+		// Select the first letter
 		selected = first;
 		selected.getLetter().select();
 	}
@@ -46,17 +50,17 @@ public class NameEntry {
 	public NameEntry(CycleableLetter[] letters) {
 		head = new Node(null);
 
-		// Head points to the first option, which points only to itself
+		// Head points to the first letter, which points only to itself
 		Node first = new Node(letters[0]);
 		first.setNext(first);
 		first.setPrev(first);
 		head.setNext(first);
 
-		// Add the rest of the options to the loop
+		// Add the rest of the letters to the loop
 		for (int i = 1; i < letters.length; i++)
 			add(letters[i]);
 
-		// Select the top option
+		// Select the first letter
 		selected = first;
 		selected.getLetter().select();
 	}
@@ -70,17 +74,17 @@ public class NameEntry {
 	public NameEntry(char[] letters) {
 		head = new Node(null);
 
-		// Head points to the first option, which points only to itself
+		// Head points to the first letter, which points only to itself
 		Node first = new Node(new CycleableLetter(letters[0]));
 		first.setNext(first);
 		first.setPrev(first);
 		head.setNext(first);
 
-		// Add the rest of the options to the loop
+		// Add the rest of the letters to the loop
 		for (int i = 1; i < letters.length; i++)
 			add(new CycleableLetter(letters[i]));
 
-		// Select the top option
+		// Select the first letter
 		selected = first;
 		selected.getLetter().select();
 	}
@@ -167,6 +171,11 @@ public class NameEntry {
 		} while (!current.equals(head.getNext()));
 	}
 
+	/**
+	 * Returns the entered name in the form of a string
+	 * 
+	 * @return the entered name in the form of a string
+	 */
 	public String getName() {
 		String name = "";
 

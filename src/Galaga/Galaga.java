@@ -102,7 +102,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * The Highest Score
 	 */
 	private static int topScore;
-	
+
 	private static NameEntry nameEntry;
 
 	/**
@@ -189,7 +189,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Initialize game over menu
 		Option[] gameOverOptions = { returnToMenu, quit };
 		postgame = new Menu(gameOverOptions);
-		
+
+		// Initializes name entry
 		nameEntry = new NameEntry();
 
 		logoSprite = loadImage("Sprites/galaga.png");
@@ -561,6 +562,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			popMatrix();
 			break;
 
+		// Show the highscore name entry stuff
 		case ENTER_NAME:
 			renderScore();
 			renderNameEntry();
@@ -685,14 +687,15 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		fill(218);
 		translate(0, textAscent() * 1.1f);
 
-		if (score > topScore) { // if player has beaten the HighScore
+		// Render the current score if it's higher than the stored high score
+		if (score > topScore) {
 			if (scoreDisplay > topScore) {
 				text(scoreDisplay, 0, 0);
 			} else {
 				text(topScore, 0, 0);
 			}
 
-		} else { // display current highscore
+		} else {
 			text(topScore, 0, 0);
 		}
 
@@ -808,6 +811,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			gameState = GameState.RESULTS;
 			break;
 
+		// Move to next game state depending on if the player scored highscore
 		case RESULTS:
 			if (checkScore())
 				gameState = GameState.ENTER_NAME;
@@ -815,6 +819,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				gameState = GameState.POSTGAME_MENU;
 			break;
 
+		// Control name entry screen
 		case ENTER_NAME:
 			if (key == CODED) {
 				switch (keyCode) {
@@ -839,8 +844,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					insertHighscore();
 					gameState = GameState.POSTGAME_MENU;
 					break;
-					default:
-						nameEntry.setLetter(key);
+				default:
+					nameEntry.setLetter(key);
 				}
 			}
 			break;
@@ -873,13 +878,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				}
 			}
 			break;
+
+		// Go back to the menu
 		case HIGHSCORE_LIST:
-			switch (keyCode) {
-			case ' ':
-			case ENTER:
-				gameState = GameState.MAIN_MENU;
-			}
-			break;
+			gameState = GameState.MAIN_MENU;
+
 		default:
 			break;
 		}
@@ -891,9 +894,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	public void keyReleased() {
 
 		switch (gameState) {
+
+		// Control the ship
 		case PLAYING:
 		case READY:
-			// Control the ship
 			if (gameState == GameState.PLAYING
 					&& fighter.peek() != Joystick.CENTER) {
 				switch (keyCode) {
@@ -904,12 +908,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				case RIGHT:
 					fighter.pop(Joystick.RIGHT);
 					break;
+
 				default:
 					break;
 				}
-
 			}
 			break;
+
 		default:
 			break;
 		}
@@ -925,7 +930,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		highscoreList.reset();
 
-		// confirm that the player's score is 1 of the top 3
+		// Confirm that the player's score is 1 of the top 3
 		int count = 0;
 		while (highscoreList.hasNext() && count < 3) {
 			HighscoreEntry current = highscoreList.next();
@@ -948,27 +953,27 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private void loadScores() throws IOException {
 
-		// create a reader to read in the file
+		// Create a reader to read in the file
 		BufferedReader reader = createReader("data/highscores.txt");
 		String temp = null;
 
-		// create a new list to store the highscores
+		// Create a new list to store the highscores
 		highscoreList = new HighscoreList();
 
-		// read the first line
+		// Read the first line
 		temp = reader.readLine();
 
-		// until End of File, add lines to highscoreList
+		// Until End of File, add lines to highscoreList
 		while (temp != null) {
 
-			// split each line using the ',' delimiter
+			// Split each line using the ',' delimiter
 			String[] line = temp.split(",");
 			highscoreList.add(line[0], Integer.parseInt(line[1]));
 
 			temp = reader.readLine();
 		}
 
-		// set the HighestScore
+		// Set the HighestScore
 		highscoreList.reset();
 		topScore = highscoreList.next().getScore();
 		reader.close();
@@ -979,7 +984,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private void insertHighscore() {
 
-		// first lets capitalize the playerName
+		// First lets capitalize the playerName
 		String playerName = nameEntry.getName();
 		playerName = playerName.toUpperCase();
 
@@ -1008,14 +1013,15 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		while (highscoreList.hasNext()) {
 
-			// get the score
+			// Get the score
 			HighscoreEntry tempItem = highscoreList.next();
 
-			// write score to file
+			// Write score to file
 			writer.println(tempItem.getName() + "," + tempItem.getScore());
 		}
 
-		writer.flush(); // write the rest of the data
+		// Write the rest of the data
+		writer.flush();
 		writer.close();
 	}
 
