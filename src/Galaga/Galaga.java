@@ -102,11 +102,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * The Highest Score
 	 */
 	private static int topScore;
-
-	/**
-	 * Name of the player
-	 */
-	private static String playerName;
 	
 	private static NameEntry nameEntry;
 
@@ -192,7 +187,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		main = new Menu(mainOptions);
 
 		// Initialize game over menu
-		Option[] gameOverOptions = { returnToMenu, highscore, quit };
+		Option[] gameOverOptions = { returnToMenu, quit };
 		postgame = new Menu(gameOverOptions);
 		
 		nameEntry = new NameEntry();
@@ -204,7 +199,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		score = 0;
 		scoreDisplay = 0;
 		hits = 0;
-		playerName = "aaa";
 
 		// Initialize the HighScores
 		try {
@@ -736,8 +730,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		translate(0, 1.5f * textAscent());
 		textAlign(RIGHT);
 		text(score + "    ", 0, 0);
+		textAlign(LEFT);
+		pushMatrix();
 		translate(textWidth("    "), 0);
 		nameEntry.render(this);
+		popMatrix();
 
 		translate(0, 2 * textAscent());
 
@@ -839,8 +836,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			} else {
 				switch (key) {
 				case ENTER:
-					playerName = nameEntry.getName();
-					nameEntry = new NameEntry();
 					insertHighscore();
 					gameState = GameState.POSTGAME_MENU;
 					break;
@@ -915,59 +910,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			}
 			break;
-			/*
-		case ENTER_NAME:
-			if (checkScore()) {
-				if (playerName.length() < 3 && keyCode != BACKSPACE
-						&& keyCode != ' ') {
-					playerName += key;
-				}
-
-				switch (keyCode) {
-				case ENTER:
-					// if nothing entered, do not add to list
-					if (playerName == "") {
-						gameState = GameState.HIGHSCORE_LIST;
-					} else {
-						insertHighscore();
-
-						// set the HighestScore
-						highscoreList.reset();
-						topScore = highscoreList.next().getScore();
-
-						gameState = GameState.HIGHSCORE_LIST;
-					}
-
-					break;
-				case BACKSPACE: // delete letters in Name
-
-					// Rugged Way -- BRUTEFORCED
-					switch (playerName.length()) {
-					case 1:
-						playerName = "";
-						break;
-					case 2:
-						playerName = "" + playerName.charAt(0);
-						break;
-					case 3:
-						playerName = playerName.substring(0, 2);
-						break;
-
-					default:
-						break;
-					}
-				}
-
-			} else {
-				switch (keyCode) {
-				case ENTER:
-					gameState = GameState.POSTGAME_MENU;
-					break;
-				}
-			}
-
-			break;
-			*/
 		default:
 			break;
 		}
@@ -1038,6 +980,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private void insertHighscore() {
 
 		// first lets capitalize the playerName
+		String playerName = nameEntry.getName();
 		playerName = playerName.toUpperCase();
 
 		boolean found = false;
@@ -1116,11 +1059,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static class Return implements SelectAction {
 		public void execute() {
-			playerName = "";
 			score = 0;
 			hits = 0;
 			Fighter.resetInstance();
 			fighter = Fighter.instance();
+			nameEntry = new NameEntry();
 
 			fighterBullets = new ArrayList<Bullet>();
 			enemyBullets = new ArrayList<Bullet>();
