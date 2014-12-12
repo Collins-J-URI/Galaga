@@ -1,8 +1,13 @@
 package Galaga;
 
 import processing.core.PApplet;
-import processing.core.PConstants;
 
+/**
+ * Defines a letter that can be set manually and cycled through the alphabet
+ * using the joystick
+ * 
+ * @author Christopher Glasz
+ */
 public class CycleableLetter {
 
 	/**
@@ -11,7 +16,7 @@ public class CycleableLetter {
 	private char letter;
 
 	/**
-	 * Indicates whether the option is selected
+	 * Indicates whether the letter is selected
 	 */
 	private boolean selected;
 
@@ -35,27 +40,39 @@ public class CycleableLetter {
 	}
 
 	/**
-	 * Select the option
+	 * Select the letter
 	 */
 	public void select() {
 		selected = true;
 	}
 
 	/**
-	 * Deselect the option
+	 * Deselect the letter
 	 */
 	public void deselect() {
 		selected = false;
 	}
 
+	/**
+	 * Set the letter to the passed in character
+	 * 
+	 * @param l
+	 *            letter to be set
+	 */
 	public void setLetter(char l) {
 		if (l >= 'A' && l <= 'Z')
 			l -= ('A' - 'a');
-		
-		if ((l >= 'a' && l <= 'z') || l == ' ' || l == '.') 
+
+		if ((l >= 'a' && l <= 'z') || l == ' ' || l == '.')
 			this.letter = l;
 	}
 
+	/**
+	 * Cycele the letter through the alphabet (as well as '.' and ' ')
+	 * 
+	 * @param j
+	 *            joystick position
+	 */
 	public void cycleLetter(Joystick j) {
 		switch (j) {
 		case UP:
@@ -84,7 +101,7 @@ public class CycleableLetter {
 	}
 
 	/**
-	 * Renders the option to the passed in PApplet
+	 * Renders the letter to the passed in PApplet
 	 * 
 	 * @param g
 	 *            PApplet to draw to
