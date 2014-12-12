@@ -40,7 +40,37 @@ public interface ApplicationConstants {
 	/**
 	 * Width of one game pixel
 	 */
-	float PIXEL_WIDTH = WORLD_HEIGHT / 255.f;
+	float PIXEL_WIDTH = WORLD_HEIGHT / 256.f;
+
+	/**
+	 * Y coordinate of the fighter
+	 */
+	float FIGHTER_Y = PIXEL_WIDTH * 20;
+
+	/**
+	 * Y coordinate of the row of boss galaga in formation
+	 */
+	float BOSS_Y = WORLD_HEIGHT - PIXEL_WIDTH * 30;
+
+	/**
+	 * Buffer between enemies in formation
+	 */
+	float ENEMY_BUFFER = PIXEL_WIDTH * 15;
+
+	/**
+	 * Number of bosses in formation
+	 */
+	int NUM_BOSSES = 4;
+
+	/**
+	 * Number of butterflies in formation
+	 */
+	int NUM_BUTTERFLIES = 8;
+
+	/**
+	 * Numebr of bees in formation
+	 */
+	int NUM_BEES = 10;
 
 	/**
 	 * Time it takes to strafe from one side of the screen to the other
@@ -81,4 +111,9 @@ public interface ApplicationConstants {
 	 * Length of a frame of an explosion in seconds
 	 */
 	float ANIMATION_FRAME = LOOP_TIME / 2;
+
+	/**
+	 * Time to spend in the READY game state
+	 */
+	float READY_TIME = 2;
 }

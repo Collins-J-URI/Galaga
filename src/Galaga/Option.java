@@ -2,7 +2,6 @@ package Galaga;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
-import processing.core.PFont;
 
 /**
  * Defines an option in a menu
@@ -71,6 +70,15 @@ public class Option {
 	}
 
 	/**
+	 * Accessor method for the action
+	 * 
+	 * @return select action
+	 */
+	public SelectAction getAction() {
+		return action;
+	}
+
+	/**
 	 * Renders the option to the passed in PApplet
 	 * 
 	 * @param g
@@ -80,8 +88,6 @@ public class Option {
 		int color = selected ? g.color(0, 255, 0) : g.color(255, 0, 0);
 		g.fill(color);
 		g.textAlign(PConstants.CENTER);
-		PFont font = g.loadFont("Fonts/Emulogic-36.vlw");
-		g.textFont(font, 36);
 		g.text(text, 0, 0);
 	}
 
