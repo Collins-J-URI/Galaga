@@ -1,7 +1,9 @@
 package Galaga;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -290,7 +292,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Update the score to be displayed
 			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 20);
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
@@ -326,7 +328,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Update the score to be displayed
 			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 0.2f, 20);
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
@@ -576,6 +578,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			
 			translate(0,WORLD_HEIGHT/1.5f);
 			scale(P2W, -P2W);
+			
+			textSize(32);
 			textAlign(CENTER);
 			text("-HIGHSCORES-",0,0);
 			
@@ -584,29 +588,19 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			//reset to the start of our highscores
 			highscoreList.reset();
 			
-			Node current = highscoreList.next();
-			
-			//for all the highscores in the list
-			//display them
-			while(highscoreList.hasNext()){
+			//display the Top 3 highscores
+			int count = 0;
+			while(highscoreList.hasNext() && count < 3){
+				Item current = highscoreList.next();
 				translate(0,2*textAscent());
 				textAlign(RIGHT);
 				text(current.getName() + "  ", 0, 0);
 				
 				textAlign(LEFT);
 				text(current.getScore(),0,0);
-				current = highscoreList.next();
+				
+				count++;
 			}
-			
-			//Perform one last time
-			//to display the last score
-			translate(0,2*textAscent());
-			textAlign(RIGHT);
-			text(current.getName() + "  ", 0, 0);
-			
-			textAlign(LEFT);
-			text(current.getScore(),0,0);
-			current = highscoreList.next();			
 			popMatrix();
 			break;
 		}
@@ -685,7 +679,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		fill(218);
 		translate(0, textAscent() * 1.1f);
 		
-		if(checkScore()){		//if player has beaten the HighScore
+		if(score > topScore){		//if player has beaten the HighScore
 			if(scoreDisplay > topScore){
 				text(scoreDisplay,0,0);
 			}else{
@@ -700,9 +694,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		popMatrix();
 	}
 	
-	float i = 0;
+	/**
+	 * Renders that the player has received a new high score.
+	 */
 	private void renderNewScore(){
-		//System.out.println("NEW HIGHSCORE");
+		
 		pushMatrix();
 		
 		translate(0,WORLD_HEIGHT/1.25f);
@@ -710,11 +706,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		float rf = 0.2f;
 		float gf = 0.3f;
 		float bf = 0.4f;
-		i++;
-		i = i%32;
-		float red   = (float) (Math.sin(rf*i + 0) * 127 + 128);
-		float green = (float) (Math.sin(gf*i + 2*PI/3) * 127 + 128);
-		float blue  = (float) (Math.sin(bf*i + 4*PI/3) * 127 + 128);
+
+		float red   = (float) (Math.sin(rf*(frameCount%32) + 0) * 127 + 128);
+		float green = (float) (Math.sin(gf*(frameCount%32) + 2*PI/3) * 127 + 128);
+		float blue  = (float) (Math.sin(bf*(frameCount%32) + 4*PI/3) * 127 + 128);
 		
 		fill(red,green,blue);
 		textAlign(CENTER);
@@ -732,25 +727,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		text("Press [ENTER] WHEN FINISHED",0,0);
 		popMatrix();
 	}
-	private boolean checkScore(){
-		
-		highscoreList.reset();
-		Node current = highscoreList.next();
-		
-		while(current != null){
-			if(score > current.getScore()){
-				return true;
-			}
-			
-			current = highscoreList.next();
-		}
-		return false;
-	}
+	
+
+	
 	/**
 	 * What do be done when the player presses keys
 	 */
-	
-
 	public void keyPressed() {
 		switch (gameState) {
 
@@ -847,7 +829,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		case HIGHSCORE_LIST:
 			switch(keyCode){
 			case ' ':
-				gameState = GameState.MAIN_MENU;
+				postgame.execute();
 			}
 			break;
 		default:
@@ -885,12 +867,23 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 				if(playerName.length() < 3 && keyCode != BACKSPACE && keyCode != ' '){
 					playerName += key;
-					System.out.println("LETTER ENTERED");
 				}
 				
 				switch(keyCode){
 				case ENTER:
-					gameState = gameState.HIGHSCORE_LIST;
+					//if nothing entered, do not add to list
+					if(playerName == ""){
+						gameState = GameState.HIGHSCORE_LIST;
+					}else{
+							insertHighscore();
+					
+							//set the HighestScore
+							highscoreList.reset();
+							topScore = highscoreList.next().getScore();
+					
+							gameState = GameState.HIGHSCORE_LIST;
+					}
+				
 					break;
 				case BACKSPACE: //delete letters in Name
 
@@ -913,18 +906,41 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				}
 				
 				
+			}else{
+				switch(keyCode){
+				case ENTER:
+					gameState = gameState.POSTGAME_MENU;
+					break;
+				}
 			}
-			System.out.println(playerName + " " + playerName.length());
-			switch(keyCode){
-			case ENTER:
-				gameState = gameState.POSTGAME_MENU;
-				break;
-			}
+			
 			break; //end case RESULTS
 		}
 
 	}
 	
+	/**
+	 * Determines if the player has beaten any of the top 3 high scores
+	 * @return true if it the player beats a high score; false otherwise;
+	 */
+	private boolean checkScore(){
+		
+		highscoreList.reset();
+		
+		//confirm that the player's score is 1 of the top 3
+		int count = 0;
+		while(highscoreList.hasNext() && count < 3){
+			Item current = highscoreList.next();
+			
+			if(score > current.getScore()){
+				return true;
+			}
+			
+			count++;
+			current = highscoreList.next();
+		}
+		return false;
+	}
 	
 	/**
 	 * Load all the highscores from save file
@@ -934,8 +950,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	
 	private void loadScores() throws IOException{
 		
+
 		//create a reader to read in the file
-		BufferedReader reader = createReader("highscores.txt");
+		BufferedReader reader = createReader("data/highscores.txt");
 		String temp = null;
 		
 		//create a new list to store the highscores
@@ -959,6 +976,52 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		//set the HighestScore
 		highscoreList.reset();
 		topScore = highscoreList.next().getScore();
+		reader.close();
+	}
+	
+	/**
+	 * Inserts the player's name and score into the highscore list
+	 */
+	private void insertHighscore(){
+		
+		//first lets capitalize the playerName
+		playerName = playerName.toUpperCase();
+		
+		boolean found = false;
+		highscoreList.reset();
+		
+		while(highscoreList.hasNext() && !found){
+			Item current = highscoreList.next();
+			
+			if(score > current.getScore()){
+				found = true;
+				highscoreList.reset(current);
+				highscoreList.insert (playerName, score);
+			}
+		}
+		
+		saveScores();
+	}
+	
+	/**
+	 * Save the current Highscores to the highscores text file;
+	 */
+	private void saveScores(){
+		PrintWriter writer = createWriter("data/highscores.txt");
+		highscoreList.reset();
+		
+		while(highscoreList.hasNext()){
+			
+			//get the score
+			Item tempItem = highscoreList.next();
+			
+			//write score to file
+			writer.println(tempItem.getName() + "," + tempItem.getScore());
+		}
+		
+		System.out.println(writer.checkError());
+		writer.flush(); //write the rest of the data
+		writer.close();
 	}
 	/**
 	 * Select action associated with Play
