@@ -79,7 +79,7 @@ public abstract class Enemy implements ApplicationConstants {
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
 
-		state = EnemyState.FORMATION;
+		state = EnemyState.ASSUME_POSITION;
 		destroyed = false;
 		animationTimer = (float) Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
@@ -271,10 +271,19 @@ public abstract class Enemy implements ApplicationConstants {
 	 */
 	public int getScore() {
 		int score = 0;
-		if (state == EnemyState.FORMATION)
+		switch (state) {
+		case ASSUME_POSITION:
+		case FORMATION:
 			score = formationScore;
-		else if (state == EnemyState.DIVE)
+			break;
+		case DIVE:
+		case RETURN:
 			score = attackingScore;
+			break;
+		default:
+			break;
+
+		}
 
 		// The enemy is not worth anything after being hit once
 		formationScore = attackingScore = 0;
@@ -288,6 +297,6 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @author Christopher Glasz
 	 */
 	protected enum EnemyState {
-		FORMATION, DIVE, RETURN;
+		ASSUME_POSITION, FORMATION, DIVE, RETURN;
 	}
 }
