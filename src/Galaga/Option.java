@@ -68,8 +68,13 @@ public class Option {
 	public void execute() {
 		action.execute();
 	}
-	
-	public SelectAction getAction(){
+
+	/**
+	 * Accessor method for the action
+	 * 
+	 * @return select action
+	 */
+	public SelectAction getAction() {
 		return action;
 	}
 
