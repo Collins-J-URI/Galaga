@@ -24,7 +24,7 @@ public class HighscoreEntry {
 	}
 
 	/**
-	 * COnstructor initilaizes variables
+	 * Constructor initilaizes variables
 	 * 
 	 * @param name
 	 *            name of the player

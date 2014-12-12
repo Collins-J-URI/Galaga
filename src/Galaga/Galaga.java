@@ -953,7 +953,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * 
 	 * @throws IOException
 	 */
-
 	private void loadScores() throws IOException {
 
 		// create a reader to read in the file
