@@ -832,7 +832,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		case HIGHSCORE_LIST:
 			switch (keyCode) {
 			case ' ':
-				postgame.execute();
+			case ENTER:
+				gameState = GameState.MAIN_MENU;
 			}
 			break;
 		default:
