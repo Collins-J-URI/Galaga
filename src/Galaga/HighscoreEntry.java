@@ -1,14 +1,14 @@
 package Galaga;
 
-public class Item {
+public class HighscoreEntry {
 	
 	private String _name;
 	private int _score;
 	
-	public Item() {
+	public HighscoreEntry() {
 		// TODO Auto-generated constructor stub
 	}
-	public Item(String name, int score){
+	public HighscoreEntry(String name, int score){
 		_name = name;
 		_score = score;
 	}

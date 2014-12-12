@@ -1,11 +1,12 @@
 package Galaga;
 
-public class LinkedDataCollection {
+public class HighscoreList {
 	
-	private Node head = null;
-	private Node tail = null;
-	private Node selected = null;
-	public LinkedDataCollection(){
+	private HighscoreNode head = null;
+	private HighscoreNode tail = null;
+	private HighscoreNode selected = null;
+	
+	public HighscoreList(){
 		
 	}
 	
@@ -18,10 +19,10 @@ public class LinkedDataCollection {
 		
 		//if empty list create first node
 		if(isEmpty()){
-			head = new Node(name,score);
+			head = new HighscoreNode(name,score);
 			selected = tail = head;
 		}else if (selected == tail){ 
-			Node newNode = new Node(name,score,selected,null);
+			HighscoreNode newNode = new HighscoreNode(name,score,selected,null);
 			selected.setNext(newNode);
 			tail = selected = selected.getNext();
 		}
@@ -32,11 +33,11 @@ public class LinkedDataCollection {
 	public void insert(String name, int score){	
 		
 		if(selected == head){
-			Node newNode = new Node(name,score,null,selected);
+			HighscoreNode newNode = new HighscoreNode(name,score,null,selected);
 			head = newNode;
 			selected = head;
 		}else{
-			Node newNode = new Node(name,score,selected.getPrevious(),selected);
+			HighscoreNode newNode = new HighscoreNode(name,score,selected.getPrevious(),selected);
 			selected.getPrevious().setNext(newNode);
 			selected = newNode;
 		}
@@ -69,7 +70,7 @@ public class LinkedDataCollection {
 	 * Changes selected to the Node given
 	 * @param selectThis the Node to be selected
 	 */
-	public void reset(Item selectThis){
+	public void reset(HighscoreEntry selectThis){
 		selected = head;
 		
 		while (selected.getItem() != selectThis && selected != null){
@@ -81,8 +82,8 @@ public class LinkedDataCollection {
 	 * increments selected to the next node
 	 * @return
 	 */
-	public Item next(){
-		Node returnMe = selected;
+	public HighscoreEntry next(){
+		HighscoreNode returnMe = selected;
 		if(selected != null){
 			selected = selected.getNext();
 			return returnMe.getItem();

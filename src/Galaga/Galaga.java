@@ -94,8 +94,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 */
 	private static int score;
 	
-
-
 	/**
 	 * Score being displyed on the screen
 	 */
@@ -107,10 +105,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private static int topScore;
 	
 	private static String playerName;
+	
 	/**
 	 * Current Highscores
 	 */
-	private static LinkedDataCollection highscoreList;
+	private static HighscoreList highscoreList;
+	
 	/**
 	 * Number of enemies hit
 	 */
@@ -559,7 +559,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			
 			//If Player has New HighScore, Have them Enter their INITIALS
 			if(checkScore())
-				renderNewScore();
+				renderNameEntry();
 			break;
 
 		// Draw the postgame menu
@@ -591,7 +591,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			//display the Top 3 highscores
 			int count = 0;
 			while(highscoreList.hasNext() && count < 3){
-				Item current = highscoreList.next();
+				HighscoreEntry current = highscoreList.next();
 				translate(0,2*textAscent());
 				textAlign(RIGHT);
 				text(current.getName() + "  ", 0, 0);
@@ -697,7 +697,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	/**
 	 * Renders that the player has received a new high score.
 	 */
-	private void renderNewScore(){
+	private void renderNameEntry(){
 		
 		pushMatrix();
 		
@@ -927,7 +927,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		//confirm that the player's score is 1 of the top 3
 		int count = 0;
 		while(highscoreList.hasNext() && count < 3){
-			Item current = highscoreList.next();
+			HighscoreEntry current = highscoreList.next();
 			
 			if(score > current.getScore()){
 				return true;
@@ -953,7 +953,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		String temp = null;
 		
 		//create a new list to store the highscores
-		highscoreList = new LinkedDataCollection();
+		highscoreList = new HighscoreList();
 		
 		//read the first line
 		temp = reader.readLine();
@@ -988,7 +988,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		highscoreList.reset();
 		
 		while(highscoreList.hasNext() && !found){
-			Item current = highscoreList.next();
+			HighscoreEntry current = highscoreList.next();
 			
 			if(score > current.getScore()){
 				found = true;
@@ -1010,7 +1010,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		while(highscoreList.hasNext()){
 			
 			//get the score
-			Item tempItem = highscoreList.next();
+			HighscoreEntry tempItem = highscoreList.next();
 			
 			//write score to file
 			writer.println(tempItem.getName() + "," + tempItem.getScore());
