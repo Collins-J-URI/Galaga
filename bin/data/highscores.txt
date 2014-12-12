@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+=======
+CDG,1970
+CDG,1560
+CDG,1470
+CDG,1420
+CDG,1340
+CDG,1180
+>>>>>>> develop
 JEC,1000
 MDM,500
 SFD,50
