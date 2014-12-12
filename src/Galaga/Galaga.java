@@ -703,13 +703,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		
 		translate(0,WORLD_HEIGHT/1.25f);
 		scale(P2W, -P2W);
-		float rf = 0.2f;
-		float gf = 0.3f;
-		float bf = 0.4f;
-
-		float red   = (float) (Math.sin(rf*(frameCount%32) + 0) * 127 + 128);
-		float green = (float) (Math.sin(gf*(frameCount%32) + 2*PI/3) * 127 + 128);
-		float blue  = (float) (Math.sin(bf*(frameCount%32) + 4*PI/3) * 127 + 128);
+		
+		float red = 127 + 127 * sin(TWO_PI * (frameCount%32) / 32);
+		float blue = 127 + 127 * sin(TWO_PI/3 + TWO_PI * (frameCount%32) / 32);
+		float green = 127 + 127 * sin(2*TWO_PI/3 + TWO_PI * (frameCount%32) / 32);
 		
 		fill(red,green,blue);
 		textAlign(CENTER);
