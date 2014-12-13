@@ -23,6 +23,12 @@ public abstract class Enemy implements ApplicationConstants {
 	 * Coordinates in the world
 	 */
 	protected float x, y;
+	
+	protected float theta;
+
+	protected float goalX, goalY;
+
+	boolean goalReached;
 
 	/**
 	 * X and Y components of velocity
@@ -75,12 +81,16 @@ public abstract class Enemy implements ApplicationConstants {
 	public Enemy(float x, float y) {
 		this.x = x;
 		this.y = y;
+		this.theta = 0;
+		this.goalX = x;
+		this.goalY = y;
 		this.vx = 0;
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
 
 		state = EnemyState.ASSUME_POSITION;
 		destroyed = false;
+		goalReached = false;
 		animationTimer = (float) Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
 		createSprite();
@@ -93,17 +103,23 @@ public abstract class Enemy implements ApplicationConstants {
 	 *            x coordinate
 	 * @param y
 	 *            y coordinate
-	 * @param vx
-	 *            x component of velocity
-	 * @param vy
-	 *            y component of velocity
 	 */
-	public Enemy(float x, float y, float vx, float vy) {
+	public Enemy(float x, float y, float goalX, float goalY) {
 		this.x = x;
 		this.y = y;
-		this.vx = vx;
-		this.vy = vy;
+		this.theta = 0;
+		this.goalX = goalX;
+		this.goalY = goalY;
+		this.vx = 0;
+		this.vy = 0;
+		this.r = 7 * PIXEL_WIDTH;
+
+		state = EnemyState.ASSUME_POSITION;
 		destroyed = false;
+		goalReached = false;
+		animationTimer = (float) Math.random() * ANIMATION_FRAME;
+		animationState = AnimationState.random();
+		createSprite();
 	}
 
 	/**
@@ -130,6 +146,58 @@ public abstract class Enemy implements ApplicationConstants {
 				animationState = animationState.getNext();
 			}
 		}
+
+		if (!goalReached)
+			assume(elapsed);
+		
+		x += vx;
+		y += vy;
+
+	}
+
+	protected void assume(float elapsed) {
+		float dx = goalX - x;
+		float dy = goalY - y;
+		float phi = PApplet.atan2(dy, dx);
+		theta = phi;
+		float dist2 = dx * dx + dy * dy;
+		
+		// If far away, travel at strafe speed
+		if (dist2 > PIXEL_WIDTH) {
+			vx = STRAFE_SPEED * PApplet.cos(phi) * elapsed * 0.001f;
+			vy = STRAFE_SPEED * PApplet.sin(phi) * elapsed * 0.001f;
+			
+		// Slow down upon approach
+		} else if (dist2 > PIXEL_WIDTH * 0.01f) {
+			float speed = STRAFE_SPEED * (dist2 /  PIXEL_WIDTH);
+			vx = speed * PApplet.cos(phi) * elapsed * 0.001f;
+			vy = speed * PApplet.sin(phi) * elapsed * 0.001f;
+			
+		// Arrive
+		} else {
+			goalReached = true;
+			x = goalX;
+			y = goalY;
+			vx = 0;
+			vy = 0;
+			theta = -PConstants.PI / 2;
+		}
+	}
+
+	protected void formation() {
+
+	}
+
+	protected void dive() {
+
+	}
+
+	public void setX(float x) {
+		this.x = x;
+	}
+
+	public void setY(float y) {
+		this.y = y;
 	}
 
 	/**
@@ -142,6 +210,7 @@ public abstract class Enemy implements ApplicationConstants {
 		g.pushMatrix();
 		g.translate(x, y);
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.rotate(PApplet.atan2(vx, vy));
 		g.noSmooth();
 		g.imageMode(PConstants.CENTER);
 
@@ -237,7 +306,7 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
-		return new EnemyBullet(x, y, vx);
+		return new EnemyBullet(x, y, theta);
 	}
 
 	/**
