@@ -374,6 +374,8 @@ public abstract class Enemy implements ApplicationConstants {
 
 	public void startPath(EnemyState s) {
 		ut = 0;
+		
+		// TODO: Set waypoints depending on state
 		switch (s) {
 		case ASSUME_POSITION:
 			break;
@@ -396,21 +398,36 @@ public abstract class Enemy implements ApplicationConstants {
 			if (waypoints[i][3] >= ut) {
 				// we fall in the interval [i-1, i]
 
+				// Coefficients
+				// x:     ax_[i-1][3] ax_[i-1][2] ax_[i-1][1] ax_[i-1][0]
+				// y:     ay_[i-1][3] ay_[i-1][2] ay_[i-1][1] ay_[i-1][0]
+				// theta: at_[i-1][3] at_[i-1][2] at_[i-1][1] at_[i-1][0]
+
+				// Time along that interval
 				float tau = (ut - waypoints[i - 1][3])
 						/ (waypoints[i][3] - waypoints[i - 1][3]);
+
+				// Tau squared
 				float tau2 = tau * tau;
+
+				// Tau cubed
 				float tau3 = tau2 * tau;
 
-				float x = ax[i - 1][3] * tau3 + ax[i - 1][2] * tau2
-						+ ax[i - 1][1] * tau + ax[i - 1][0];
-				float y = ay[i - 1][3] * tau3 + ay[i - 1][2] * tau2
-						+ ay[i - 1][1] * tau + ay[i - 1][0];
-				float angle = at[i - 1][3] * tau3 + at[i - 1][2] * tau2
-						+ at[i - 1][1] * tau + at[i - 1][0];
+				// Set x, y, and angle
+				float x = ax[i - 1][3] * tau3 + 
+						ax[i - 1][2] * tau2 + 
+						ax[i - 1][1] * tau + 
+						ax[i - 1][0];
 
-				// compute interpolation factor
-				float s = (ut - waypoints[i - 1][3])
-						/ (waypoints[i][3] - waypoints[i - 1][3]);
+				float y = ay[i - 1][3] * tau3 + 
+						ay[i - 1][2] * tau2 + 
+						ay[i - 1][1] * tau + 
+						ay[i - 1][0];
+
+				float angle = at[i - 1][3] * tau3 + 
+						at[i - 1][2] * tau2 + 
+						at[i - 1][1] * tau + 
+						at[i - 1][0];
 
 				this.x = x;
 				this.y = y;
@@ -478,11 +495,11 @@ public abstract class Enemy implements ApplicationConstants {
 		// Now fill in the values for the connections at interior points
 		// --------------------------------------------------------------
 
-		// 0 ... 0 1 1 1 1 0 0 0 0 0 ... 0 < 4(i - 1) + 2
-		// 0 ... 0 0 0 0 0 1 0 0 0 0 ... 0
+		// 0 ... 0 1 1 1 1 0  0 0 0 0 ... 0 < 4(i - 1) + 2
+		// 0 ... 0 0 0 0 0 1  0 0 0 0 ... 0
 		// 0 ... 0 0 1 2 3 0 -1 0 0 0 ... 0
-		// 0 ... 0 0 0 2 6 0 0 -2 0 0 ... 0
-		// ^ 4(i - 1)
+		// 0 ... 0 0 0 2 6 0  0-2 0 0 ... 0
+		//         ^ 4(i - 1)
 		for (int i = 1; i < NB_WAY_PTS - 1; i++) {
 			int k = 4 * (i - 1) + 2;
 			int l = 4 * (i - 1);
@@ -512,12 +529,12 @@ public abstract class Enemy implements ApplicationConstants {
 			b[k][1] = waypoints[i][1];
 			b[k][2] = waypoints[i][2];
 
-			// 0
+			// Continuity of first derivative for x, y, theta
 			b[k + 1][0] = 0;
 			b[k + 1][1] = 0;
 			b[k + 1][2] = 0;
 
-			// 0
+			// Continuity of first derivative for x, y, theta
 			b[k + 2][0] = 0;
 			b[k + 2][1] = 0;
 			b[k + 2][2] = 0;
