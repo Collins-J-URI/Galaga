@@ -101,7 +101,7 @@ public abstract class Enemy implements ApplicationConstants {
 
 		state = EnemyState.ASSUME_POSITION;
 
-		startPath(EnemyState.ASSUME_POSITION);
+		startPath();
 		calculateA();
 		followPath();
 
@@ -132,7 +132,7 @@ public abstract class Enemy implements ApplicationConstants {
 
 		state = EnemyState.ASSUME_POSITION;
 
-		startPath(EnemyState.ASSUME_POSITION);
+		startPath();
 		calculateA();
 		followPath();
 
@@ -384,11 +384,11 @@ public abstract class Enemy implements ApplicationConstants {
 		return score;
 	}
 
-	public void startPath(EnemyState s) {
+	public void startPath() {
 		ut = 0;
 
 		// TODO: Set waypoints depending on state
-		switch (s) {
+		switch (state) {
 		case ASSUME_POSITION:
 			float[][] newpoints = { { 0.1f, 0.1f, PConstants.PI / 2, 0.f },
 					{ 0.4f, 0.2f, PConstants.PI / 2, 1.5f },
