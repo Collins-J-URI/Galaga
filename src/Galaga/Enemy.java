@@ -38,7 +38,6 @@ public abstract class Enemy implements ApplicationConstants {
 
 	private float[][] ax;
 	private float[][] ay;
-	private float[][] at;
 	private float ut;
 
 	/**
@@ -390,11 +389,11 @@ public abstract class Enemy implements ApplicationConstants {
 		// TODO: Set waypoints depending on state
 		switch (state) {
 		case ASSUME_POSITION:
-			float[][] newpoints = { { 0.1f, 0.1f, PConstants.PI / 2, 0.f },
-					{ 0.4f, 0.2f, PConstants.PI / 2, 1.5f },
-					{ -0.4f, 0.2f, PConstants.PI / 2, 3f },
-					{ goalX, goalY - 0.1f, PConstants.PI / 2, 4.5f },
-					{ goalX, goalY, PConstants.PI / 2, 5f } };
+			float[][] newpoints = { { 0.1f, 0.1f, 0.f },
+					{ 0.4f, 0.2f, 1.5f },
+					{ -0.4f, 0.2f, 3f },
+					{ goalX, goalY - 0.1f, 4.5f },
+					{ goalX, goalY, 5f } };
 			waypoints = newpoints;
 			break;
 		case DIVE:
@@ -413,17 +412,16 @@ public abstract class Enemy implements ApplicationConstants {
 
 		// which interval do we fall into?
 		for (int i = 1; i < NB_WAY_PTS; i++) {
-			if (waypoints[i][3] >= ut) {
+			if (waypoints[i][2] >= ut) {
 				// we fall in the interval [i-1, i]
 
 				// Coefficients
 				// x: ax_[i-1][3] ax_[i-1][2] ax_[i-1][1] ax_[i-1][0]
 				// y: ay_[i-1][3] ay_[i-1][2] ay_[i-1][1] ay_[i-1][0]
-				// theta: at_[i-1][3] at_[i-1][2] at_[i-1][1] at_[i-1][0]
 
 				// Time along that interval
-				float tau = (ut - waypoints[i - 1][3])
-						/ (waypoints[i][3] - waypoints[i - 1][3]);
+				float tau = (ut - waypoints[i - 1][2])
+						/ (waypoints[i][2] - waypoints[i - 1][2]);
 
 				// Tau squared
 				float tau2 = tau * tau;
@@ -431,19 +429,17 @@ public abstract class Enemy implements ApplicationConstants {
 				// Tau cubed
 				float tau3 = tau2 * tau;
 
-				// Set x, y, and angle
+				// Set x and y
 				float newx = ax[i - 1][3] * tau3 + ax[i - 1][2] * tau2
 						+ ax[i - 1][1] * tau + ax[i - 1][0];
 
 				float newy = ay[i - 1][3] * tau3 + ay[i - 1][2] * tau2
 						+ ay[i - 1][1] * tau + ay[i - 1][0];
 
-				this.theta = at[i - 1][3] * tau3 + at[i - 1][2] * tau2
-						+ at[i - 1][1] * tau + at[i - 1][0];
-
 				float dx = x - newx;
 				float dy = y - newy;
 
+				// Set angle
 				this.theta = PApplet.atan2(dy, dx) + PConstants.PI / 2;
 
 				this.x = newx;
@@ -473,18 +469,8 @@ public abstract class Enemy implements ApplicationConstants {
 		// 1 0 0 0 ... 0
 		mat[0][0] = 1;
 
-		// Initial location
-		b[0][0] = waypoints[0][0]; // x0
-		b[0][1] = waypoints[0][1]; // y0
-		b[0][2] = waypoints[0][2]; // theta0
-
 		// 0 1 0 0 0 ... 0
 		mat[1][1] = 1;
-
-		// Initial speed
-		b[1][0] = 1; // vx0
-		b[1][1] = 2; // vy0
-		b[1][2] = -3; // vtheta0
 
 		// 0 ... 0 0 0 1 1 1 1
 		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 4] = 1;
@@ -492,20 +478,26 @@ public abstract class Enemy implements ApplicationConstants {
 		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 2] = 1;
 		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 1] = 1;
 
-		// End location
-		b[4 * NB_SEGMENTS - 2][0] = waypoints[NB_WAY_PTS - 1][0];
-		b[4 * NB_SEGMENTS - 2][1] = waypoints[NB_WAY_PTS - 1][1];
-		b[4 * NB_SEGMENTS - 2][2] = waypoints[NB_WAY_PTS - 1][2];
-
 		// 0 ... 0 0 0 1 2 3
 		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 3] = 1;
 		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 2] = 2.0;
 		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 1] = 3.0;
 
+		// Initial location
+		b[0][0] = waypoints[0][0]; // x0
+		b[0][1] = waypoints[0][1]; // y0
+
+		// Initial speed
+		b[1][0] = 1; // vx0
+		b[1][1] = 2; // vy0
+
+		// End location
+		b[4 * NB_SEGMENTS - 2][0] = waypoints[NB_WAY_PTS - 1][0];
+		b[4 * NB_SEGMENTS - 2][1] = waypoints[NB_WAY_PTS - 1][1];
+
 		// End speed
 		b[4 * NB_SEGMENTS - 1][0] = 0;
 		b[4 * NB_SEGMENTS - 1][1] = 0;
-		b[4 * NB_SEGMENTS - 1][2] = 0;
 
 		// --------------------------------------------------------------
 		// Now fill in the values for the connections at interior points
@@ -543,22 +535,18 @@ public abstract class Enemy implements ApplicationConstants {
 			// Location
 			b[k][0] = waypoints[i][0];
 			b[k][1] = waypoints[i][1];
-			b[k][2] = waypoints[i][2];
 
-			// Continuity of first derivative for x, y, theta
+			// Continuity of first derivative for x and y
 			b[k + 1][0] = 0;
 			b[k + 1][1] = 0;
-			b[k + 1][2] = 0;
 
-			// Continuity of first derivative for x, y, theta
+			// Continuity of first derivative for x and y
 			b[k + 2][0] = 0;
 			b[k + 2][1] = 0;
-			b[k + 2][2] = 0;
 
 			// Location
 			b[k + 3][0] = waypoints[i][0];
 			b[k + 3][1] = waypoints[i][1];
-			b[k + 3][2] = waypoints[i][2];
 		}
 
 		// ----------------------------------------------------
@@ -573,13 +561,11 @@ public abstract class Enemy implements ApplicationConstants {
 		// ----------------------------------------------------
 		ax = new float[NB_SEGMENTS][4];
 		ay = new float[NB_SEGMENTS][4];
-		at = new float[NB_SEGMENTS][4];
 
 		for (int i = 0; i < NB_SEGMENTS; i++) {
 			for (int j = 0; j < 4; j++) {
 				ax[i][j] = (float) Axyt.get(4 * i + j, 0);
 				ay[i][j] = (float) Axyt.get(4 * i + j, 1);
-				at[i][j] = (float) Axyt.get(4 * i + j, 2);
 			}
 		}
 
