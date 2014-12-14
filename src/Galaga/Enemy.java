@@ -1,5 +1,9 @@
 package Galaga;
 
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+
+import Jama.Matrix;
 import processing.core.*;
 
 /**
@@ -29,6 +33,13 @@ public abstract class Enemy implements ApplicationConstants {
 	protected float goalX, goalY;
 
 	boolean goalReached;
+	
+	float[][] waypoints;
+
+	private float[][] ax;
+	private float[][] ay;
+	private float[][] at;
+	private float ut;
 
 	/**
 	 * X and Y components of velocity
@@ -358,6 +369,139 @@ public abstract class Enemy implements ApplicationConstants {
 		formationScore = attackingScore = 0;
 
 		return score;
+	}
+	
+	public void calculateA() {
+
+		final int NB_SEGMENTS = waypoints.length - 1;
+		final int NB_WAY_PTS = waypoints.length;
+
+		// ----------------------------------------------------
+		// 1. Initialize the TNT matrices of the SLE
+		// ----------------------------------------------------
+		double[][] mat = new double[4 * NB_SEGMENTS][4 * NB_SEGMENTS];
+		double[][] b = new double[4 * NB_SEGMENTS][3];
+
+		//------------------------------------------------------------
+		// initialize the first two and last two rows of the matrix. 
+		// These correspond to the conditions at the path's endpoints.
+		//------------------------------------------------------------
+		
+		// 1 0 0 0 ... 0
+		mat[0][0] = 1;
+		
+		// Initial location
+		b[0][0] = waypoints[0][0]; // x0
+		b[0][1] = waypoints[0][1]; // y0
+		b[0][2] = waypoints[0][2]; // theta0
+
+		 // 0 1 0 0 0 ... 0
+		mat[1][1] = 1;
+
+		// Initial speed
+		b[1][0] = 1; 	// vx0
+		b[1][1] = 2; 	// vy0
+		b[1][2] = -3; 	// vtheta0
+
+		// 0 ... 0 0 0 1 1 1 1
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 4] = 1;
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 3] = 1;
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 2] = 1;
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 1] = 1;
+
+		// End location
+		b[4 * NB_SEGMENTS - 2][0] = waypoints[NB_WAY_PTS - 1][0];
+		b[4 * NB_SEGMENTS - 2][1] = waypoints[NB_WAY_PTS - 1][1];
+		b[4 * NB_SEGMENTS - 2][2] = waypoints[NB_WAY_PTS - 1][2];
+
+		// 0 ... 0 0 0 1 2 3
+		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 3] = 1;
+		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 2] = 2.0;
+		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 1] = 3.0;
+
+		//  End speed
+		b[4 * NB_SEGMENTS - 1][0] = 0;
+		b[4 * NB_SEGMENTS - 1][1] = 0;
+		b[4 * NB_SEGMENTS - 1][2] = 0;
+
+		//--------------------------------------------------------------
+		// Now fill in the values for the connections at interior points
+		//--------------------------------------------------------------
+		
+		// 0 ... 0  1 1 1 1 0  0  0 0  0 ... 0 < 4(i - 1) + 2
+		// 0 ... 0  0 0 0 0 1  0  0 0  0 ... 0
+		// 0 ... 0  0 1 2 3 0 -1  0 0  0 ... 0
+		// 0 ... 0  0 0 2 6 0  0 -2 0  0 ... 0
+		//			^ 4(i - 1)
+		for (int i = 1; i < NB_WAY_PTS - 1; i++) {
+			int k = 4 * (i - 1) + 2;
+			int l = 4 * (i - 1);
+
+			// 1 1 1 1  0 0 0 0
+			mat[k][l] = 1; 
+			mat[k][l + 1] = 1;
+			mat[k][l + 2] = 1;
+			mat[k][l + 3] = 1;
+
+			// 0 0 0 0  1 0 0 0
+			mat[k + 3][l + 4] = 1;
+
+			// 0 1 2 3  0 -1 0 0
+			mat[k + 1][l + 1] = 1.0;
+			mat[k + 1][l + 2] = 2.0;
+			mat[k + 1][l + 3] = 3.0;
+			mat[k + 1][l + 5] = -1.0;
+
+			// 0 0 2 6  0 0 -2 0
+			mat[k + 2][l + 2] = 2.0;
+			mat[k + 2][l + 3] = 6.0;
+			mat[k + 2][l + 6] = -2.0;
+
+			// Location
+			b[k][0] = waypoints[i][0];
+			b[k][1] = waypoints[i][1];
+			b[k][2] = waypoints[i][2];
+
+			// 0
+			b[k + 1][0] = 0;
+			b[k + 1][1] = 0;
+			b[k + 1][2] = 0;
+			
+			// 0
+			b[k + 2][0] = 0;
+			b[k + 2][1] = 0;
+			b[k + 2][2] = 0;
+			
+			// Location
+			b[k + 3][0] = waypoints[i][0];
+			b[k + 3][1] = waypoints[i][1];
+			b[k + 3][2] = waypoints[i][2];
+		}
+
+		// ----------------------------------------------------
+		// 2. Solve the SLE
+		// ----------------------------------------------------
+		Matrix M = new Matrix(mat);
+		Matrix B = new Matrix(b);
+		Matrix Axyt = M.solve(B);
+
+		// ----------------------------------------------------
+		// 3. Copy the results in my instance variables
+		// ----------------------------------------------------
+		ax = new float[NB_SEGMENTS][4];
+		ay = new float[NB_SEGMENTS][4];
+		at = new float[NB_SEGMENTS][4];
+
+		for (int i = 0; i < NB_SEGMENTS; i++) {
+			for (int j = 0; j < 4; j++) {
+				ax[i][j] = (float) Axyt.get(4 * i + j, 0);
+				ay[i][j] = (float) Axyt.get(4 * i + j, 1);
+				at[i][j] = (float) Axyt.get(4 * i + j, 2);
+			}
+		}
+
+		ut = 0;
+
 	}
 
 	/**
