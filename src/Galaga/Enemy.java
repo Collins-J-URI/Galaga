@@ -1,5 +1,9 @@
 package Galaga;
 
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+
+import Jama.Matrix;
 import processing.core.*;
 
 /**
@@ -23,6 +27,19 @@ public abstract class Enemy implements ApplicationConstants {
 	 * Coordinates in the world
 	 */
 	protected float x, y;
+
+	protected float theta;
+
+	protected float goalX, goalY;
+
+	boolean goalReached;
+
+	float[][] waypoints;
+
+	private float[][] ax;
+	private float[][] ay;
+	private float[][] at;
+	private float ut;
 
 	/**
 	 * X and Y components of velocity
@@ -75,12 +92,21 @@ public abstract class Enemy implements ApplicationConstants {
 	public Enemy(float x, float y) {
 		this.x = x;
 		this.y = y;
+		this.theta = 0;
+		this.goalX = x;
+		this.goalY = y;
 		this.vx = 0;
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
 
-		state = EnemyState.FORMATION;
+		state = EnemyState.ASSUME_POSITION;
+
+		startPath();
+		calculateA();
+		followPath();
+
 		destroyed = false;
+		goalReached = false;
 		animationTimer = (float) Math.random() * ANIMATION_FRAME;
 		animationState = AnimationState.random();
 		createSprite();
@@ -93,17 +119,28 @@ public abstract class Enemy implements ApplicationConstants {
 	 *            x coordinate
 	 * @param y
 	 *            y coordinate
-	 * @param vx
-	 *            x component of velocity
-	 * @param vy
-	 *            y component of velocity
 	 */
-	public Enemy(float x, float y, float vx, float vy) {
+	public Enemy(float x, float y, float goalX, float goalY) {
 		this.x = x;
 		this.y = y;
-		this.vx = vx;
-		this.vy = vy;
+		this.theta = 0;
+		this.goalX = goalX;
+		this.goalY = goalY;
+		this.vx = 0;
+		this.vy = 0;
+		this.r = 7 * PIXEL_WIDTH;
+
+		state = EnemyState.ASSUME_POSITION;
+
+		startPath();
+		calculateA();
+		followPath();
+
 		destroyed = false;
+		goalReached = false;
+		animationTimer = (float) Math.random() * ANIMATION_FRAME;
+		animationState = AnimationState.random();
+		createSprite();
 	}
 
 	/**
@@ -130,6 +167,61 @@ public abstract class Enemy implements ApplicationConstants {
 				animationState = animationState.getNext();
 			}
 		}
+
+		// if (!goalReached)
+		// assume(elapsed);
+
+		// x += vx;
+		// y += vy;
+
+		ut += elapsed * 0.001;
+		followPath();
+
+	}
+
+	protected void assume(float elapsed) {
+		float dx = goalX - x;
+		float dy = goalY - y;
+		float phi = PApplet.atan2(dy, dx);
+		theta = phi;
+		float dist2 = dx * dx + dy * dy;
+
+		// If far away, travel at strafe speed
+		if (dist2 > PIXEL_WIDTH) {
+			vx = STRAFE_SPEED * PApplet.cos(phi) * elapsed * 0.001f;
+			vy = STRAFE_SPEED * PApplet.sin(phi) * elapsed * 0.001f;
+
+			// Slow down upon approach
+		} else if (dist2 > PIXEL_WIDTH * 0.01f) {
+			float speed = STRAFE_SPEED * (dist2 / PIXEL_WIDTH);
+			vx = speed * PApplet.cos(phi) * elapsed * 0.001f;
+			vy = speed * PApplet.sin(phi) * elapsed * 0.001f;
+
+			// Arrive
+		} else {
+			goalReached = true;
+			x = goalX;
+			y = goalY;
+			vx = 0;
+			vy = 0;
+			theta = -PConstants.PI / 2;
+		}
+	}
+
+	protected void formation() {
+
+	}
+
+	protected void dive() {
+
+	}
+
+	public void setX(float x) {
+		this.x = x;
+	}
+
+	public void setY(float y) {
+		this.y = y;
 	}
 
 	/**
@@ -141,6 +233,7 @@ public abstract class Enemy implements ApplicationConstants {
 	public void render(PApplet g) {
 		g.pushMatrix();
 		g.translate(x, y);
+		g.rotate(theta);
 		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
 		g.noSmooth();
 		g.imageMode(PConstants.CENTER);
@@ -237,7 +330,7 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
-		return new EnemyBullet(x, y, vx);
+		return new EnemyBullet(x, y, theta + PConstants.PI/2);
 	}
 
 	/**
@@ -271,15 +364,227 @@ public abstract class Enemy implements ApplicationConstants {
 	 */
 	public int getScore() {
 		int score = 0;
-		if (state == EnemyState.FORMATION)
+		switch (state) {
+		case ASSUME_POSITION:
+		case FORMATION:
 			score = formationScore;
-		else if (state == EnemyState.DIVE)
+			break;
+		case DIVE:
+		case RETURN:
 			score = attackingScore;
+			break;
+		default:
+			break;
+
+		}
 
 		// The enemy is not worth anything after being hit once
 		formationScore = attackingScore = 0;
 
 		return score;
+	}
+
+	public void startPath() {
+		ut = 0;
+
+		// TODO: Set waypoints depending on state
+		switch (state) {
+		case ASSUME_POSITION:
+			float[][] newpoints = { { 0.1f, 0.1f, PConstants.PI / 2, 0.f },
+					{ 0.4f, 0.2f, PConstants.PI / 2, 1.5f },
+					{ -0.4f, 0.2f, PConstants.PI / 2, 3f },
+					{ goalX, goalY - 0.1f, PConstants.PI / 2, 4.5f },
+					{ goalX, goalY, PConstants.PI / 2, 5f } };
+			waypoints = newpoints;
+			break;
+		case DIVE:
+			break;
+		case FORMATION:
+			break;
+		case RETURN:
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void followPath() {
+		final int NB_WAY_PTS = waypoints.length;
+
+		// which interval do we fall into?
+		for (int i = 1; i < NB_WAY_PTS; i++) {
+			if (waypoints[i][3] >= ut) {
+				// we fall in the interval [i-1, i]
+
+				// Coefficients
+				// x: ax_[i-1][3] ax_[i-1][2] ax_[i-1][1] ax_[i-1][0]
+				// y: ay_[i-1][3] ay_[i-1][2] ay_[i-1][1] ay_[i-1][0]
+				// theta: at_[i-1][3] at_[i-1][2] at_[i-1][1] at_[i-1][0]
+
+				// Time along that interval
+				float tau = (ut - waypoints[i - 1][3])
+						/ (waypoints[i][3] - waypoints[i - 1][3]);
+
+				// Tau squared
+				float tau2 = tau * tau;
+
+				// Tau cubed
+				float tau3 = tau2 * tau;
+
+				// Set x, y, and angle
+				float newx = ax[i - 1][3] * tau3 + ax[i - 1][2] * tau2
+						+ ax[i - 1][1] * tau + ax[i - 1][0];
+
+				float newy = ay[i - 1][3] * tau3 + ay[i - 1][2] * tau2
+						+ ay[i - 1][1] * tau + ay[i - 1][0];
+
+				this.theta = at[i - 1][3] * tau3 + at[i - 1][2] * tau2
+						+ at[i - 1][1] * tau + at[i - 1][0];
+
+				float dx = x - newx;
+				float dy = y - newy;
+
+				this.theta = PApplet.atan2(dy, dx) + PConstants.PI / 2;
+
+				this.x = newx;
+				this.y = newy;
+
+				break;
+			}
+		}
+	}
+
+	public void calculateA() {
+
+		final int NB_SEGMENTS = waypoints.length - 1;
+		final int NB_WAY_PTS = waypoints.length;
+
+		// ----------------------------------------------------
+		// 1. Initialize the TNT matrices of the SLE
+		// ----------------------------------------------------
+		double[][] mat = new double[4 * NB_SEGMENTS][4 * NB_SEGMENTS];
+		double[][] b = new double[4 * NB_SEGMENTS][3];
+
+		// ------------------------------------------------------------
+		// initialize the first two and last two rows of the matrix.
+		// These correspond to the conditions at the path's endpoints.
+		// ------------------------------------------------------------
+
+		// 1 0 0 0 ... 0
+		mat[0][0] = 1;
+
+		// Initial location
+		b[0][0] = waypoints[0][0]; // x0
+		b[0][1] = waypoints[0][1]; // y0
+		b[0][2] = waypoints[0][2]; // theta0
+
+		// 0 1 0 0 0 ... 0
+		mat[1][1] = 1;
+
+		// Initial speed
+		b[1][0] = 1; // vx0
+		b[1][1] = 2; // vy0
+		b[1][2] = -3; // vtheta0
+
+		// 0 ... 0 0 0 1 1 1 1
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 4] = 1;
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 3] = 1;
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 2] = 1;
+		mat[4 * NB_SEGMENTS - 2][4 * NB_SEGMENTS - 1] = 1;
+
+		// End location
+		b[4 * NB_SEGMENTS - 2][0] = waypoints[NB_WAY_PTS - 1][0];
+		b[4 * NB_SEGMENTS - 2][1] = waypoints[NB_WAY_PTS - 1][1];
+		b[4 * NB_SEGMENTS - 2][2] = waypoints[NB_WAY_PTS - 1][2];
+
+		// 0 ... 0 0 0 1 2 3
+		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 3] = 1;
+		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 2] = 2.0;
+		mat[4 * NB_SEGMENTS - 1][4 * NB_SEGMENTS - 1] = 3.0;
+
+		// End speed
+		b[4 * NB_SEGMENTS - 1][0] = 0;
+		b[4 * NB_SEGMENTS - 1][1] = 0;
+		b[4 * NB_SEGMENTS - 1][2] = 0;
+
+		// --------------------------------------------------------------
+		// Now fill in the values for the connections at interior points
+		// --------------------------------------------------------------
+
+		// 0 ... 0 1 1 1 1 0 0 0 0 0 ... 0 < 4(i - 1) + 2
+		// 0 ... 0 0 0 0 0 1 0 0 0 0 ... 0
+		// 0 ... 0 0 1 2 3 0 -1 0 0 0 ... 0
+		// 0 ... 0 0 0 2 6 0 0-2 0 0 ... 0
+		// ^ 4(i - 1)
+		for (int i = 1; i < NB_WAY_PTS - 1; i++) {
+			int k = 4 * (i - 1) + 2;
+			int l = 4 * (i - 1);
+
+			// 1 1 1 1 0 0 0 0
+			mat[k][l] = 1;
+			mat[k][l + 1] = 1;
+			mat[k][l + 2] = 1;
+			mat[k][l + 3] = 1;
+
+			// 0 0 0 0 1 0 0 0
+			mat[k + 3][l + 4] = 1;
+
+			// 0 1 2 3 0 -1 0 0
+			mat[k + 1][l + 1] = 1.0;
+			mat[k + 1][l + 2] = 2.0;
+			mat[k + 1][l + 3] = 3.0;
+			mat[k + 1][l + 5] = -1.0;
+
+			// 0 0 2 6 0 0 -2 0
+			mat[k + 2][l + 2] = 2.0;
+			mat[k + 2][l + 3] = 6.0;
+			mat[k + 2][l + 6] = -2.0;
+
+			// Location
+			b[k][0] = waypoints[i][0];
+			b[k][1] = waypoints[i][1];
+			b[k][2] = waypoints[i][2];
+
+			// Continuity of first derivative for x, y, theta
+			b[k + 1][0] = 0;
+			b[k + 1][1] = 0;
+			b[k + 1][2] = 0;
+
+			// Continuity of first derivative for x, y, theta
+			b[k + 2][0] = 0;
+			b[k + 2][1] = 0;
+			b[k + 2][2] = 0;
+
+			// Location
+			b[k + 3][0] = waypoints[i][0];
+			b[k + 3][1] = waypoints[i][1];
+			b[k + 3][2] = waypoints[i][2];
+		}
+
+		// ----------------------------------------------------
+		// 2. Solve the SLE
+		// ----------------------------------------------------
+		Matrix M = new Matrix(mat);
+		Matrix B = new Matrix(b);
+		Matrix Axyt = M.solve(B);
+
+		// ----------------------------------------------------
+		// 3. Copy the results in my instance variables
+		// ----------------------------------------------------
+		ax = new float[NB_SEGMENTS][4];
+		ay = new float[NB_SEGMENTS][4];
+		at = new float[NB_SEGMENTS][4];
+
+		for (int i = 0; i < NB_SEGMENTS; i++) {
+			for (int j = 0; j < 4; j++) {
+				ax[i][j] = (float) Axyt.get(4 * i + j, 0);
+				ay[i][j] = (float) Axyt.get(4 * i + j, 1);
+				at[i][j] = (float) Axyt.get(4 * i + j, 2);
+			}
+		}
+
+		ut = 0;
+
 	}
 
 	/**
@@ -288,6 +593,6 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @author Christopher Glasz
 	 */
 	protected enum EnemyState {
-		FORMATION, DIVE, RETURN;
+		ASSUME_POSITION, FORMATION, DIVE, RETURN;
 	}
 }

@@ -18,6 +18,8 @@ public abstract class Bullet implements ApplicationConstants {
 	 * Coordinates of the bullet
 	 */
 	protected float x, y;
+	
+	protected float theta;
 
 	/**
 	 * Sprite to draw
@@ -40,6 +42,7 @@ public abstract class Bullet implements ApplicationConstants {
 	public Bullet(float x, float y) {
 		this.x = x;
 		this.y = y;
+		this.theta = 0;
 		this.destroyed = false;
 		createSprite();
 	}
@@ -68,7 +71,7 @@ public abstract class Bullet implements ApplicationConstants {
 		g.pushMatrix();
 		g.translate(x, y);
 		g.scale(PIXEL_WIDTH);
-		g.rotate(PApplet.atan2(vy, vx) + PConstants.PI/2);
+		g.rotate(theta);
 		g.noSmooth();
 		g.imageMode(PConstants.CENTER);
 

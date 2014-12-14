@@ -1,6 +1,7 @@
 package Galaga;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 
 /**
  * Defines a bullet fired by an enemy
@@ -19,10 +20,11 @@ public class EnemyBullet extends Bullet {
 	 * @param vx
 	 *            initial x velocity of the bullet
 	 */
-	public EnemyBullet(float x, float y, float vx) {
+	public EnemyBullet(float x, float y, float theta) {
 		super(x, y);
-		this.vx = vx;
-		vy = -BULLET_SPEED;
+		this.theta = theta + PConstants.PI / 2;
+		this.vx = BULLET_SPEED * PApplet.cos(theta);
+		this.vy = BULLET_SPEED * PApplet.sin(theta);
 	}
 
 	/**
