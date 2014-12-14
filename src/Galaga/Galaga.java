@@ -157,10 +157,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Twenty bees down under
 		for (int i = 0; i < NUM_BEES; i++)
-			enemies.add(new Bee((i - NUM_BEES / 2) * ENEMY_BUFFER
+			enemies.add(new Bee(-WORLD_WIDTH / 2, 0, (i - NUM_BEES / 2) * ENEMY_BUFFER
 					+ ENEMY_BUFFER / 2, BOSS_Y - 3 * ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BEES; i++)
-			enemies.add(new Bee((i - NUM_BEES / 2) * ENEMY_BUFFER
+			enemies.add(new Bee(WORLD_WIDTH / 2, 0, (i - NUM_BEES / 2) * ENEMY_BUFFER
 					+ ENEMY_BUFFER / 2, BOSS_Y - 4 * ENEMY_BUFFER));
 
 		// Instantiate the stars
