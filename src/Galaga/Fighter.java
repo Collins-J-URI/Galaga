@@ -245,6 +245,14 @@ public class Fighter implements ApplicationConstants {
 	public int fired() {
 		return fired;
 	}
+	
+	public float getX() {
+		return x;
+	}
+	
+	public float getY() {
+		return y;
+	}
 
 	/**
 	 * Peeks at the top of the command stack
