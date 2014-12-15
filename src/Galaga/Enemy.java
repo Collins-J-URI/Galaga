@@ -439,9 +439,10 @@ public abstract class Enemy implements ApplicationConstants {
 		return score;
 	}
 
-	public void syncFormation() {
-		state = EnemyState.FORMATION_OUT;
-		float timeToGoal = Math.max(2 - ut, 2);
+	public void syncFormation(EnemyState state) {
+		this.state = state;
+		float timeToGoal = Math.max(FORMATION_CYCLE_TIME - ut,
+				FORMATION_CYCLE_TIME);
 		createFormationPath(timeToGoal);
 	}
 
@@ -456,7 +457,7 @@ public abstract class Enemy implements ApplicationConstants {
 			goalX = homeX;
 			goalY = homeY;
 			float[][] newpoints1 = { { x, y, 0 },
-					{ 0, WORLD_HEIGHT / 2, 2.5f }, { goalX, goalY, 5f } };
+					{ 0, WORLD_HEIGHT / 2, 2 }, { goalX, goalY, 4 } };
 			waypoints = newpoints1;
 			break;
 		case DIVE:
@@ -469,13 +470,15 @@ public abstract class Enemy implements ApplicationConstants {
 		case FORMATION_IN:
 			goalX = homeX * 0.8f;
 			goalY = (homeY - BOSS_Y) * 0.8f + BOSS_Y;
-			float[][] newpoints3 = { { x, y, 0 }, { goalX, goalY, 2 } };
+			float[][] newpoints3 = { { x, y, 0 },
+					{ goalX, goalY, FORMATION_CYCLE_TIME } };
 			waypoints = newpoints3;
 			break;
 		case FORMATION_OUT:
 			goalX = homeX * 1.25f;
 			goalY = (homeY - BOSS_Y) * 1.25f + BOSS_Y;
-			float[][] newpoints4 = { { x, y, 0 }, { goalX, goalY, 2 } };
+			float[][] newpoints4 = { { x, y, 0 },
+					{ goalX, goalY, FORMATION_CYCLE_TIME } };
 			waypoints = newpoints4;
 			break;
 		case RETURN:
