@@ -116,8 +116,7 @@ public abstract class Enemy implements ApplicationConstants {
 		state = EnemyState.ASSUME_POSITION;
 
 		startPath();
-		calculateA();
-		followPath();
+		followCubicPath();
 
 		destroyed = false;
 		goalReached = false;
@@ -151,8 +150,7 @@ public abstract class Enemy implements ApplicationConstants {
 		state = EnemyState.ASSUME_POSITION;
 
 		startPath();
-		calculateA();
-		followPath();
+		followCubicPath();
 
 		destroyed = false;
 		goalReached = false;
@@ -186,14 +184,48 @@ public abstract class Enemy implements ApplicationConstants {
 			}
 		}
 
-		// if (!goalReached)
-		// assume(elapsed);
-
-		// x += vx;
-		// y += vy;
-
 		ut += elapsed * 0.001;
-		followPath();
+
+		switch (state) {
+		case ASSUME_POSITION:
+			if (goalReached) {
+				state = EnemyState.FORMATION_OUT;
+				startPath();
+			}
+			followPath();
+			break;
+		case DIVE:
+			if (goalReached) {
+				state = EnemyState.RETURN;
+				startPath();
+			}
+			followCubicPath();
+			break;
+		case FORMATION_OUT:
+			if (goalReached) {
+				state = EnemyState.FORMATION_IN;
+				startPath();
+			}
+			followPath();
+			break;
+		case FORMATION_IN:
+			if (goalReached) {
+				state = EnemyState.FORMATION_OUT;
+				startPath();
+			}
+			followPath();
+			break;
+		case RETURN:
+			if (goalReached) {
+				state = EnemyState.FORMATION_OUT;
+				startPath();
+			}
+			followPath();
+			break;
+		default:
+			break;
+
+		}
 
 	}
 
@@ -303,7 +335,13 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
-		return new EnemyBullet(x, y, theta + PConstants.PI / 2);
+		float phi = theta;
+		if (state.inFormation())
+			phi -= PConstants.PI / 2;
+		else
+			phi += PConstants.PI / 2;
+
+		return new EnemyBullet(x, y, phi);
 	}
 
 	/**
@@ -339,7 +377,8 @@ public abstract class Enemy implements ApplicationConstants {
 		int score = 0;
 		switch (state) {
 		case ASSUME_POSITION:
-		case FORMATION:
+		case FORMATION_IN:
+		case FORMATION_OUT:
 			score = formationScore;
 			break;
 		case DIVE:
@@ -366,27 +405,95 @@ public abstract class Enemy implements ApplicationConstants {
 		// TODO: Set waypoints depending on state
 		switch (state) {
 		case ASSUME_POSITION:
-			float[][] newpoints = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
+			float[][] newpoints1 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
 					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
 					{ goalX, goalY, 5f } };
-			waypoints = newpoints;
+			waypoints = newpoints1;
 			break;
 		case DIVE:
+			float[][] newpoints2 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
+					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
+					{ goalX, goalY, 5f } };
+			waypoints = newpoints2;
 			break;
-		case FORMATION:
+		case FORMATION_IN:
+			goalX = x * 0.8f;
+			goalY = (y - BOSS_Y) * 0.8f + BOSS_Y;
+			float[][] newpoints3 = { { x, y, 0 }, { goalX, goalY, 2 } };
+			waypoints = newpoints3;
+			break;
+		case FORMATION_OUT:
+			goalX = x * 1.25f;
+			goalY = (y - BOSS_Y) * 1.25f + BOSS_Y;
+			float[][] newpoints4 = { { x, y, 0 },{ goalX, goalY, 2 } };
+			waypoints = newpoints4;
 			break;
 		case RETURN:
+			float[][] newpoints5 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
+					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
+					{ goalX, goalY, 5f } };
+			waypoints = newpoints5;
 			break;
 		default:
 			break;
+		}
+		
+		calculateA();
+		goalReached = false;
+	}
+	
+	private void followPath() {
+		if (state.inFormation()) {
+			followLinearPath();
+			this.theta = 0;
+		}
+		else
+			followCubicPath();
+	}
+	
+	private void followLinearPath() {
+		final int NB_WAY_PTS = waypoints.length;
+
+		if (waypoints[waypoints.length - 1][2] <= ut) {
+			goalReached = true;
+		}
+
+		// which interval do we fall into?
+		for (int i = 1; i < NB_WAY_PTS; i++) {
+			if (waypoints[i][2] >= ut) {
+				// we fall in the interval [i-1, i]
+
+				// Time along the interval
+				float tau = (ut - waypoints[i - 1][2])
+						/ (waypoints[i][2] - waypoints[i - 1][2]);
+
+				// Set x and y
+				float newx = waypoints[i-1][0] + tau * (waypoints[i][0] - waypoints[i-1][0]);
+				float newy = waypoints[i-1][1] + tau * (waypoints[i][1] - waypoints[i-1][1]);
+
+				float dx = x - newx;
+				float dy = y - newy;
+
+				// Set angle
+				this.theta = PApplet.atan2(dy, dx) + PConstants.PI / 2;
+
+				this.x = newx;
+				this.y = newy;
+
+				break;
+			}
 		}
 	}
 
 	/**
 	 * Move according to the the cubic interpolation
 	 */
-	private void followPath() {
+	private void followCubicPath() {
 		final int NB_WAY_PTS = waypoints.length;
+
+		if (waypoints[waypoints.length - 1][2] <= ut) {
+			goalReached = true;
+		}
 
 		// which interval do we fall into?
 		for (int i = 1; i < NB_WAY_PTS; i++) {
@@ -560,6 +667,27 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @author Christopher Glasz
 	 */
 	protected enum EnemyState {
-		ASSUME_POSITION, FORMATION, DIVE, RETURN;
+		ASSUME_POSITION, FORMATION_IN {
+			@Override
+			public boolean inFormation() {
+				return true;
+			}
+		},
+		FORMATION_OUT {
+			@Override
+			public boolean inFormation() {
+				return true;
+			}
+		},
+		DIVE, RETURN;
+
+		/**
+		 * Returns true if the state is an explosion state
+		 * 
+		 * @return true if the state is an explosion state
+		 */
+		public boolean inFormation() {
+			return false;
+		}
 	}
 }
