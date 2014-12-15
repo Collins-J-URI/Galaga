@@ -116,4 +116,14 @@ public interface ApplicationConstants {
 	 * Time to spend in the READY game state
 	 */
 	float READY_TIME = 2;
+
+	/**
+	 * Time to spend in FORMATION_OUT or FORMATION_IN
+	 */
+	float FORMATION_CYCLE_TIME = 2;
+
+	/**
+	 * Interval between enemy spawn
+	 */
+	float SPAWN_TIME = 0.2f;
 }

@@ -119,7 +119,7 @@ public abstract class Enemy implements ApplicationConstants {
 
 		state = EnemyState.ASSUME_POSITION;
 
-		startPath();
+		createPath();
 		followCubicPath();
 
 		destroyed = false;
@@ -155,7 +155,7 @@ public abstract class Enemy implements ApplicationConstants {
 
 		state = EnemyState.ASSUME_POSITION;
 
-		startPath();
+		createPath();
 		followCubicPath();
 
 		destroyed = false;
@@ -192,7 +192,7 @@ public abstract class Enemy implements ApplicationConstants {
 
 		state = EnemyState.ASSUME_POSITION;
 
-		startPath();
+		createPath();
 		followCubicPath();
 
 		destroyed = false;
@@ -233,35 +233,36 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
-				startPath();
+				//createPath();
+				Galaga.syncFormation();
 			}
 			followPath();
 			break;
 		case DIVE:
 			if (goalReached) {
 				state = EnemyState.RETURN;
-				startPath();
+				createPath();
 			}
-			followCubicPath();
+			followPath();
 			break;
 		case FORMATION_OUT:
 			if (goalReached) {
 				state = EnemyState.FORMATION_IN;
-				startPath();
+				createPath();
 			}
 			followPath();
 			break;
 		case FORMATION_IN:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
-				startPath();
+				createPath();
 			}
 			followPath();
 			break;
 		case RETURN:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
-				startPath();
+				createPath();
 			}
 			followPath();
 			break;
@@ -439,18 +440,25 @@ public abstract class Enemy implements ApplicationConstants {
 		return score;
 	}
 
+	public void syncFormation(Enemy prototype) {
+		this.state = prototype.state;
+		float timeToGoal = Math.min(FORMATION_CYCLE_TIME - prototype.ut,
+				FORMATION_CYCLE_TIME);
+		createFormationPath(timeToGoal);
+	}
+
 	/**
 	 * Initializes the waypoints for the path
 	 */
-	public void startPath() {
+	public void createPath() {
 		ut = 0;
 
 		switch (state) {
 		case ASSUME_POSITION:
 			goalX = homeX;
 			goalY = homeY;
-			float[][] newpoints1 = { { x, y, 0 }, { 0, WORLD_HEIGHT/2, 2.5f },
-					{ goalX, goalY, 5f } };
+			float[][] newpoints1 = { { x, y, 0 },
+					{ 0, WORLD_HEIGHT / 2, 2 }, { goalX, goalY, 4 } };
 			waypoints = newpoints1;
 			break;
 		case DIVE:
@@ -461,15 +469,17 @@ public abstract class Enemy implements ApplicationConstants {
 			waypoints = newpoints2;
 			break;
 		case FORMATION_IN:
-			goalX = x * 0.8f;
-			goalY = (y - BOSS_Y) * 0.8f + BOSS_Y;
-			float[][] newpoints3 = { { x, y, 0 }, { goalX, goalY, 2 } };
+			goalX = homeX * 0.8f;
+			goalY = (homeY - BOSS_Y) * 0.8f + BOSS_Y;
+			float[][] newpoints3 = { { x, y, 0 },
+					{ goalX, goalY, FORMATION_CYCLE_TIME } };
 			waypoints = newpoints3;
 			break;
 		case FORMATION_OUT:
-			goalX = x * 1.25f;
-			goalY = (y - BOSS_Y) * 1.25f + BOSS_Y;
-			float[][] newpoints4 = { { x, y, 0 }, { goalX, goalY, 2 } };
+			goalX = homeX * 1.25f;
+			goalY = (homeY - BOSS_Y) * 1.25f + BOSS_Y;
+			float[][] newpoints4 = { { x, y, 0 },
+					{ goalX, goalY, FORMATION_CYCLE_TIME } };
 			waypoints = newpoints4;
 			break;
 		case RETURN:
@@ -480,6 +490,25 @@ public abstract class Enemy implements ApplicationConstants {
 			break;
 		default:
 			break;
+		}
+
+		calculateA();
+		goalReached = false;
+	}
+
+	private void createFormationPath(float timeToGoal) {
+		ut = 0;
+
+		if (state == EnemyState.FORMATION_IN) {
+			goalX = homeX * 0.8f;
+			goalY = (homeY - BOSS_Y) * 0.8f + BOSS_Y;
+			float[][] newpoints3 = { { x, y, 0 }, { goalX, goalY, timeToGoal } };
+			waypoints = newpoints3;
+		} else if (state == EnemyState.FORMATION_OUT) {
+			goalX = homeX * 1.25f;
+			goalY = (homeY - BOSS_Y) * 1.25f + BOSS_Y;
+			float[][] newpoints4 = { { x, y, 0 }, { goalX, goalY, timeToGoal } };
+			waypoints = newpoints4;
 		}
 
 		calculateA();

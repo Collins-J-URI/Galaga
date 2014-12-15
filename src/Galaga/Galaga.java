@@ -29,6 +29,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private static Fighter fighter;
 
 	/**
+	 * Array list of enemies yet to be added
+	 */
+	private static ArrayList<Enemy> onDeck;
+
+	/**
 	 * Array list of enemies
 	 */
 	private static ArrayList<Enemy> enemies;
@@ -121,6 +126,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	private Timer readyTimer;
 
 	/**
+	 * Timer to control the addition of enemies
+	 */
+	private Timer nextEnemyTimer;
+
+	/**
 	 * Options for menus
 	 */
 	private Option play, quit, highscore, returnToMenu;
@@ -140,28 +150,38 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		enemyBullets = new ArrayList<Bullet>();
 
 		// Array list to hold enemies
+		onDeck = new ArrayList<Enemy>();
 		enemies = new ArrayList<Enemy>();
 
 		// Four bosses up top
 		for (int i = 0; i < NUM_BOSSES; i++)
-			enemies.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT, (i - NUM_BOSSES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y));
+			onDeck.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y));
 
 		// Sixteen butterflies in the middle
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			enemies.add(new Butterfly(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT, (i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - ENEMY_BUFFER));
+			onDeck.add(new Butterfly(
+					-WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT,
+					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			enemies.add(new Butterfly(WORLD_WIDTH / 1.5f, WORLD_HEIGHT, (i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - 2 * ENEMY_BUFFER));
+			onDeck.add(new Butterfly(
+					WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT,
+					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 2 * ENEMY_BUFFER));
 
 		// Twenty bees down under
 		for (int i = 0; i < NUM_BEES; i++)
-			enemies.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2, (i - NUM_BEES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - 3 * ENEMY_BUFFER));
+			onDeck.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2,
+					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 3 * ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BEES; i++)
-			enemies.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2, (i - NUM_BEES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - 4 * ENEMY_BUFFER));
+			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
+					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 4 * ENEMY_BUFFER));
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -211,6 +231,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 
 		readyTimer = new Timer(this);
+		nextEnemyTimer = new Timer(this);
+		nextEnemyTimer.start(SPAWN_TIME);
 
 		// Initialize the draw time
 		lastDrawTime = millis();
@@ -267,6 +289,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			// Move the bullets fired by the enemies
 			for (Bullet b : enemyBullets)
 				b.update(elapsed);
+
+			if (!onDeck.isEmpty() && nextEnemyTimer.isDone()) {
+				nextEnemyTimer.start(SPAWN_TIME);
+				enemies.add(onDeck.remove(0));
+			}
+			
+			//syncFormation();
 
 			// Move the enemies
 			for (Enemy e : enemies)
@@ -360,6 +389,26 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		default:
 			break;
+		}
+	}
+
+	/**
+	 * Draws stars and space going by
+	 * 
+	 * @param elapsed
+	 *            time elapsed since last update
+	 */
+	public void updateSpace(float elapsed) {
+		for (int i = 0; i < numStars; i++) {
+			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
+		}
+	}
+
+	public static void syncFormation() {
+		for (int i = 1; i < enemies.size(); i++) {
+			Enemy e = enemies.get(i);
+			if (e.state.inFormation())
+				e.syncFormation(enemies.get(0));
 		}
 	}
 
@@ -611,18 +660,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			break;
 		default:
 			break;
-		}
-	}
-
-	/**
-	 * Draws stars and space going by
-	 * 
-	 * @param elapsed
-	 *            time elapsed since last update
-	 */
-	public void updateSpace(float elapsed) {
-		for (int i = 0; i < numStars; i++) {
-			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
 		}
 	}
 
