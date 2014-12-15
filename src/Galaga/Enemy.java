@@ -449,8 +449,7 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			goalX = homeX;
 			goalY = homeY;
-			float[][] newpoints1 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
-					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
+			float[][] newpoints1 = { { x, y, 0 }, { 0, WORLD_HEIGHT/2, 2.5f },
 					{ goalX, goalY, 5f } };
 			waypoints = newpoints1;
 			break;
