@@ -35,6 +35,8 @@ public abstract class Enemy implements ApplicationConstants {
 	 */
 	protected float goalX, goalY;
 
+	protected float homeX, homeY;
+
 	/**
 	 * Boolean to keep track of whether the goal has been reached
 	 */
@@ -106,9 +108,11 @@ public abstract class Enemy implements ApplicationConstants {
 	public Enemy(float x, float y) {
 		this.x = x;
 		this.y = y;
-		this.theta = 0;
 		this.goalX = x;
 		this.goalY = y;
+		this.homeX = x;
+		this.homeY = y;
+		this.theta = 0;
 		this.vx = 0;
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
@@ -140,9 +144,48 @@ public abstract class Enemy implements ApplicationConstants {
 	public Enemy(float x, float y, float goalX, float goalY) {
 		this.x = x;
 		this.y = y;
-		this.theta = 0;
 		this.goalX = goalX;
 		this.goalY = goalY;
+		this.homeX = goalX;
+		this.homeY = goalY;
+		this.theta = 0;
+		this.vx = 0;
+		this.vy = 0;
+		this.r = 7 * PIXEL_WIDTH;
+
+		state = EnemyState.ASSUME_POSITION;
+
+		startPath();
+		followCubicPath();
+
+		destroyed = false;
+		goalReached = false;
+		animationTimer = (float) Math.random() * ANIMATION_FRAME;
+		animationState = AnimationState.random();
+		createSprite();
+	}
+
+	/**
+	 * Constructor initializes variables
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @param y
+	 *            y coordinate
+	 * @param goalX
+	 *            starting x destination
+	 * @param goalY
+	 *            starting y destination
+	 */
+	public Enemy(float x, float y, float goalX, float goalY, float homeX,
+			float homeY) {
+		this.x = x;
+		this.y = y;
+		this.goalX = goalX;
+		this.goalY = goalY;
+		this.homeX = homeX;
+		this.homeY = homeY;
+		this.theta = 0;
 		this.vx = 0;
 		this.vy = 0;
 		this.r = 7 * PIXEL_WIDTH;
@@ -402,17 +445,19 @@ public abstract class Enemy implements ApplicationConstants {
 	public void startPath() {
 		ut = 0;
 
-		// TODO: Set waypoints depending on state
 		switch (state) {
 		case ASSUME_POSITION:
+			goalX = homeX;
+			goalY = homeY;
 			float[][] newpoints1 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
 					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
 					{ goalX, goalY, 5f } };
 			waypoints = newpoints1;
 			break;
 		case DIVE:
-			float[][] newpoints2 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
-					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
+			goalX = Fighter.instance().getX();
+			goalY = Fighter.instance().getY();
+			float[][] newpoints2 = { { x, y, 0 }, { x, y + 0.1f, 0.5f },
 					{ goalX, goalY, 5f } };
 			waypoints = newpoints2;
 			break;
@@ -425,32 +470,31 @@ public abstract class Enemy implements ApplicationConstants {
 		case FORMATION_OUT:
 			goalX = x * 1.25f;
 			goalY = (y - BOSS_Y) * 1.25f + BOSS_Y;
-			float[][] newpoints4 = { { x, y, 0 },{ goalX, goalY, 2 } };
+			float[][] newpoints4 = { { x, y, 0 }, { goalX, goalY, 2 } };
 			waypoints = newpoints4;
 			break;
 		case RETURN:
-			float[][] newpoints5 = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
-					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
-					{ goalX, goalY, 5f } };
+			goalX = homeX;
+			goalY = homeY;
+			float[][] newpoints5 = { { x, y, 0 }, { goalX, goalY, 2 } };
 			waypoints = newpoints5;
 			break;
 		default:
 			break;
 		}
-		
+
 		calculateA();
 		goalReached = false;
 	}
-	
+
 	private void followPath() {
 		if (state.inFormation()) {
 			followLinearPath();
 			this.theta = 0;
-		}
-		else
+		} else
 			followCubicPath();
 	}
-	
+
 	private void followLinearPath() {
 		final int NB_WAY_PTS = waypoints.length;
 
@@ -468,8 +512,10 @@ public abstract class Enemy implements ApplicationConstants {
 						/ (waypoints[i][2] - waypoints[i - 1][2]);
 
 				// Set x and y
-				float newx = waypoints[i-1][0] + tau * (waypoints[i][0] - waypoints[i-1][0]);
-				float newy = waypoints[i-1][1] + tau * (waypoints[i][1] - waypoints[i-1][1]);
+				float newx = waypoints[i - 1][0] + tau
+						* (waypoints[i][0] - waypoints[i - 1][0]);
+				float newy = waypoints[i - 1][1] + tau
+						* (waypoints[i][1] - waypoints[i - 1][1]);
 
 				float dx = x - newx;
 				float dy = y - newy;
