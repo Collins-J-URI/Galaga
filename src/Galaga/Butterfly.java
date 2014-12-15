@@ -23,6 +23,24 @@ public class Butterfly extends Enemy {
 		attackingScore = 160;
 	}
 
+	/**
+	 * Constructor initializes variables
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @param y
+	 *            y coordinate
+	 * @param goalX
+	 *            the starting destination
+	 * @param goalY
+	 *            the starting destination
+	 */
+	public Butterfly(float x, float y, float goalX, float goalY) {
+		super(x, y, goalX, goalY);
+		formationScore = 80;
+		attackingScore = 160;
+	}
+
 	@Override
 	public void update(float elapsed) {
 		super.update(elapsed);
