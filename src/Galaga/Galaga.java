@@ -144,24 +144,33 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Four bosses up top
 		for (int i = 0; i < NUM_BOSSES; i++)
-			enemies.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT, (i - NUM_BOSSES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y));
+			enemies.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y));
 
 		// Sixteen butterflies in the middle
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			enemies.add(new Butterfly(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT, (i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - ENEMY_BUFFER));
+			enemies.add(new Butterfly(
+					-WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT,
+					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			enemies.add(new Butterfly(WORLD_WIDTH / 1.5f, WORLD_HEIGHT, (i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - 2 * ENEMY_BUFFER));
+			enemies.add(new Butterfly(
+					WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT,
+					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 2 * ENEMY_BUFFER));
 
 		// Twenty bees down under
 		for (int i = 0; i < NUM_BEES; i++)
-			enemies.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2, (i - NUM_BEES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - 3 * ENEMY_BUFFER));
+			enemies.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2,
+					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 3 * ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BEES; i++)
-			enemies.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2, (i - NUM_BEES / 2) * ENEMY_BUFFER
-					+ ENEMY_BUFFER / 2, BOSS_Y - 4 * ENEMY_BUFFER));
+			enemies.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
+					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 4 * ENEMY_BUFFER));
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -361,6 +370,23 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		default:
 			break;
 		}
+	}
+
+	/**
+	 * Draws stars and space going by
+	 * 
+	 * @param elapsed
+	 *            time elapsed since last update
+	 */
+	public void updateSpace(float elapsed) {
+		for (int i = 0; i < numStars; i++) {
+			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
+		}
+	}
+	
+	private void syncFormation() {
+		for (Enemy e : enemies)
+			e.syncFormation();
 	}
 
 	/**
@@ -611,18 +637,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			break;
 		default:
 			break;
-		}
-	}
-
-	/**
-	 * Draws stars and space going by
-	 * 
-	 * @param elapsed
-	 *            time elapsed since last update
-	 */
-	public void updateSpace(float elapsed) {
-		for (int i = 0; i < numStars; i++) {
-			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
 		}
 	}
 
