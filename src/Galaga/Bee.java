@@ -23,6 +23,20 @@ public class Bee extends Enemy {
 		attackingScore = 100;
 	}
 
+	/**
+	 * Constructor initializes variables
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @param y
+	 *            y coordinate
+	 */
+	public Bee(float x, float y, float goalX, float goalY) {
+		super(x, y, goalX, goalY);
+		formationScore = 50;
+		attackingScore = 100;
+	}
+
 	@Override
 	public void update(float elapsed) {
 		super.update(elapsed);
