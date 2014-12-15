@@ -17,8 +17,8 @@ public class EnemyBullet extends Bullet {
 	 *            initial x coordinate of the bullet
 	 * @param y
 	 *            initial y coordinate of the bullet
-	 * @param vx
-	 *            initial x velocity of the bullet
+	 * @param theta
+	 *            initial angle of the bullet
 	 */
 	public EnemyBullet(float x, float y, float theta) {
 		super(x, y);
