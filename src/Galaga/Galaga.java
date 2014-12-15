@@ -289,12 +289,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			// Move the bullets fired by the enemies
 			for (Bullet b : enemyBullets)
 				b.update(elapsed);
-			
+
 			if (!onDeck.isEmpty() && nextEnemyTimer.isDone()) {
 				nextEnemyTimer.start(SPAWN_TIME);
 				enemies.add(onDeck.remove(0));
 			}
-				
+			
+			//syncFormation();
 
 			// Move the enemies
 			for (Enemy e : enemies)
@@ -402,11 +403,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			stary[i] = (stary[i] + starvy[i] * elapsed * 0.001f) % WORLD_HEIGHT;
 		}
 	}
-	
-	private void syncFormation() {
-		Enemy.EnemyState state = enemies.get(0).state;
-		for (Enemy e : enemies)
-			e.syncFormation(state);
+
+	public static void syncFormation() {
+		for (int i = 1; i < enemies.size(); i++) {
+			Enemy e = enemies.get(i);
+			if (e.state.inFormation())
+				e.syncFormation(enemies.get(0));
+		}
 	}
 
 	/**

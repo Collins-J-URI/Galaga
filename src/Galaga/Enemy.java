@@ -233,7 +233,8 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
-				createPath();
+				//createPath();
+				Galaga.syncFormation();
 			}
 			followPath();
 			break;
@@ -242,7 +243,7 @@ public abstract class Enemy implements ApplicationConstants {
 				state = EnemyState.RETURN;
 				createPath();
 			}
-			followCubicPath();
+			followPath();
 			break;
 		case FORMATION_OUT:
 			if (goalReached) {
@@ -439,9 +440,9 @@ public abstract class Enemy implements ApplicationConstants {
 		return score;
 	}
 
-	public void syncFormation(EnemyState state) {
-		this.state = state;
-		float timeToGoal = Math.max(FORMATION_CYCLE_TIME - ut,
+	public void syncFormation(Enemy prototype) {
+		this.state = prototype.state;
+		float timeToGoal = Math.min(FORMATION_CYCLE_TIME - prototype.ut,
 				FORMATION_CYCLE_TIME);
 		createFormationPath(timeToGoal);
 	}
@@ -511,6 +512,7 @@ public abstract class Enemy implements ApplicationConstants {
 		}
 
 		calculateA();
+		goalReached = false;
 	}
 
 	private void followPath() {
