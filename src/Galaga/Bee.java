@@ -30,6 +30,10 @@ public class Bee extends Enemy {
 	 *            x coordinate
 	 * @param y
 	 *            y coordinate
+	 * @param goalX
+	 *            the starting destination of the bee
+	 * @param goalY
+	 *            the starting destination of the bee
 	 */
 	public Bee(float x, float y, float goalX, float goalY) {
 		super(x, y, goalX, goalY);

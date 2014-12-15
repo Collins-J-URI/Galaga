@@ -1,8 +1,5 @@
 package Galaga;
 
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-
 import Jama.Matrix;
 import processing.core.*;
 
@@ -28,16 +25,34 @@ public abstract class Enemy implements ApplicationConstants {
 	 */
 	protected float x, y;
 
+	/**
+	 * Angle of the enemy
+	 */
 	protected float theta;
 
+	/**
+	 * The destination coordinates
+	 */
 	protected float goalX, goalY;
 
+	/**
+	 * Boolean to keep track of whether the goal has been reached
+	 */
 	boolean goalReached;
 
+	/**
+	 * Waypoints for the enemy to follow. each entry is {x, y, time}
+	 */
 	float[][] waypoints;
 
-	private float[][] ax;
-	private float[][] ay;
+	/**
+	 * Coefficients for the cubic interpolation
+	 */
+	private float[][] ax, ay;
+
+	/**
+	 * Time since the beginning of the path
+	 */
 	private float ut;
 
 	/**
@@ -118,6 +133,10 @@ public abstract class Enemy implements ApplicationConstants {
 	 *            x coordinate
 	 * @param y
 	 *            y coordinate
+	 * @param goalX
+	 *            starting x destination
+	 * @param goalY
+	 *            starting y destination
 	 */
 	public Enemy(float x, float y, float goalX, float goalY) {
 		this.x = x;
@@ -176,51 +195,6 @@ public abstract class Enemy implements ApplicationConstants {
 		ut += elapsed * 0.001;
 		followPath();
 
-	}
-
-	protected void assume(float elapsed) {
-		float dx = goalX - x;
-		float dy = goalY - y;
-		float phi = PApplet.atan2(dy, dx);
-		theta = phi;
-		float dist2 = dx * dx + dy * dy;
-
-		// If far away, travel at strafe speed
-		if (dist2 > PIXEL_WIDTH) {
-			vx = STRAFE_SPEED * PApplet.cos(phi) * elapsed * 0.001f;
-			vy = STRAFE_SPEED * PApplet.sin(phi) * elapsed * 0.001f;
-
-			// Slow down upon approach
-		} else if (dist2 > PIXEL_WIDTH * 0.01f) {
-			float speed = STRAFE_SPEED * (dist2 / PIXEL_WIDTH);
-			vx = speed * PApplet.cos(phi) * elapsed * 0.001f;
-			vy = speed * PApplet.sin(phi) * elapsed * 0.001f;
-
-			// Arrive
-		} else {
-			goalReached = true;
-			x = goalX;
-			y = goalY;
-			vx = 0;
-			vy = 0;
-			theta = -PConstants.PI / 2;
-		}
-	}
-
-	protected void formation() {
-
-	}
-
-	protected void dive() {
-
-	}
-
-	public void setX(float x) {
-		this.x = x;
-	}
-
-	public void setY(float y) {
-		this.y = y;
 	}
 
 	/**
@@ -329,7 +303,7 @@ public abstract class Enemy implements ApplicationConstants {
 	 * @return bullet shot from the fighter
 	 */
 	public Bullet shoot() {
-		return new EnemyBullet(x, y, theta + PConstants.PI/2);
+		return new EnemyBullet(x, y, theta + PConstants.PI / 2);
 	}
 
 	/**
@@ -383,16 +357,17 @@ public abstract class Enemy implements ApplicationConstants {
 		return score;
 	}
 
+	/**
+	 * Initializes the waypoints for the path
+	 */
 	public void startPath() {
 		ut = 0;
 
 		// TODO: Set waypoints depending on state
 		switch (state) {
 		case ASSUME_POSITION:
-			float[][] newpoints = { { 0.1f, 0.1f, 0.f },
-					{ 0.4f, 0.2f, 1.5f },
-					{ -0.4f, 0.2f, 3f },
-					{ goalX, goalY - 0.1f, 4.5f },
+			float[][] newpoints = { { 0.1f, 0.1f, 0.f }, { 0.4f, 0.2f, 1.5f },
+					{ -0.4f, 0.2f, 3f }, { goalX, goalY - 0.1f, 4.5f },
 					{ goalX, goalY, 5f } };
 			waypoints = newpoints;
 			break;
@@ -407,6 +382,9 @@ public abstract class Enemy implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * Move according to the the cubic interpolation
+	 */
 	private void followPath() {
 		final int NB_WAY_PTS = waypoints.length;
 
@@ -450,6 +428,9 @@ public abstract class Enemy implements ApplicationConstants {
 		}
 	}
 
+	/**
+	 * Calculate the coefficients for the cubic interpolation
+	 */
 	public void calculateA() {
 
 		final int NB_SEGMENTS = waypoints.length - 1;

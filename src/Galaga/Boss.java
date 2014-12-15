@@ -35,6 +35,25 @@ public class Boss extends Enemy {
 	}
 
 	/**
+	 * Constructor initializes variables
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @param y
+	 *            y coordinate
+	 * @param goalX
+	 *            the starting destination
+	 * @param goalY
+	 *            the starting destination
+	 */
+	public Boss(float x, float y, float goalX, float goalY) {
+		super(x, y, goalX, goalY);
+		hitOnce = false;
+		formationScore = 130;
+		attackingScore = 400;
+	}
+
+	/**
 	 * Hits the fighter
 	 */
 	public void hit() {
