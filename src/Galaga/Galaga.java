@@ -430,6 +430,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
+			
+			if(score > 0 && enemies.size() == 0){
+				newLevel();
+			}
 			break;
 
 		// When ready, we want everything to be updated, but not for the fighter
@@ -1232,6 +1236,42 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		writer.close();
 	}
 
+	
+	private void newLevel(){
+		// Array list to hold enemies
+		onDeck = new ArrayList<Enemy>();
+		enemies = new ArrayList<Enemy>();
+
+		// Four bosses up top
+		for (int i = 0; i < NUM_BOSSES; i++)
+			onDeck.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y));
+
+		// Sixteen butterflies in the middle
+		for (int i = 0; i < NUM_BUTTERFLIES; i++)
+			onDeck.add(new Butterfly(
+					-WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT,
+					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - ENEMY_BUFFER));
+		for (int i = 0; i < NUM_BUTTERFLIES; i++)
+			onDeck.add(new Butterfly(
+					WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT,
+					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 2 * ENEMY_BUFFER));
+
+		// Twenty bees down under
+		for (int i = 0; i < NUM_BEES; i++)
+			onDeck.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2,
+					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 3 * ENEMY_BUFFER));
+		for (int i = 0; i < NUM_BEES; i++)
+			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
+					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
+					BOSS_Y - 4 * ENEMY_BUFFER));
+	}
 	/**
 	 * Select action associated with Play
 	 * 
