@@ -31,6 +31,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	/**
 	 * Array list of enemies yet to be added
 	 */
+	private static ArrayList<Enemy> onDeckPrototype;
+
+	/**
+	 * Array list of enemies yet to be added
+	 */
 	private static ArrayList<Enemy> onDeck;
 
 	/**
@@ -150,38 +155,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		enemyBullets = new ArrayList<Bullet>();
 
 		// Array list to hold enemies
-		onDeck = new ArrayList<Enemy>();
+		populatePrototype();
+		
+		onDeck = new ArrayList<Enemy>(onDeckPrototype);
 		enemies = new ArrayList<Enemy>();
-
-		// Four bosses up top
-		for (int i = 0; i < NUM_BOSSES; i++)
-			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
-					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y));
-
-		// Sixteen butterflies in the middle
-		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			onDeck.add(new Butterfly(
-					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT / 2,
-					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - ENEMY_BUFFER));
-		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			onDeck.add(new Butterfly(
-					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT / 2,
-					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - 2 * ENEMY_BUFFER));
-
-		// Twenty bees down under
-		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
-					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - 3 * ENEMY_BUFFER));
-		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
-					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - 4 * ENEMY_BUFFER));
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -536,12 +513,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Get rid of enemies if they're destroyed
 		Iterator<Enemy> eit = enemies.iterator();
-		while (eit.hasNext())
-			if (eit.next().isDestroyed())
+		while (eit.hasNext()) {
+			Enemy e = eit.next();
+			if (e.isDestroyed()) {
+				e.revive();
 				eit.remove();
-
-		if (score > 0 && enemies.size() == 0) {
-			newLevel();
+			}
 		}
 	}
 
@@ -627,10 +604,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				gameState = GameState.PLAYING;
 
 			break;
-		case GAMEOVER:
-			break;
 		default:
 			break;
+		}
+
+		if (onDeck.size() == 0 && enemies.size() == 0) {
+			newLevel();
+			println("Reached");
 		}
 
 	}
@@ -1242,24 +1222,32 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 	private void newLevel() {
 		// Array list to hold enemies
-		onDeck = new ArrayList<Enemy>();
+		onDeck = new ArrayList<Enemy>(onDeckPrototype);
 		enemies = new ArrayList<Enemy>();
+		
+		gameState = GameState.ASSUMING_POSITIONS;
+		nextEnemyTimer.start(SPAWN_TIME);
+	}
+	
+	private void populatePrototype() {
+
+		onDeckPrototype = new ArrayList<Enemy>();
 
 		// Four bosses up top
 		for (int i = 0; i < NUM_BOSSES; i++)
-			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
+			onDeckPrototype.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
 					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y));
-
+		
 		// Sixteen butterflies in the middle
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			onDeck.add(new Butterfly(
+			onDeckPrototype.add(new Butterfly(
 					WORLD_WIDTH / 1.5f,
 					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			onDeck.add(new Butterfly(
+			onDeckPrototype.add(new Butterfly(
 					WORLD_WIDTH / 1.5f,
 					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
@@ -1267,13 +1255,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Twenty bees down under
 		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
+			onDeckPrototype.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
 					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 3 * ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
+			onDeckPrototype.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
 					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 4 * ENEMY_BUFFER));
+		
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package Galaga;
 
+import Galaga.Enemy.EnemyState;
 import processing.core.*;
 
 /**
@@ -53,18 +54,66 @@ public class Boss extends Enemy {
 		attackingScore = 400;
 	}
 
+	@Override
+	public void render(PApplet g) {
+		g.pushMatrix();
+		g.translate(x, y);
+		g.rotate(theta);
+		g.scale(PIXEL_WIDTH, -PIXEL_WIDTH);
+		g.noSmooth();
+		g.imageMode(PConstants.CENTER);
+
+		switch (animationState) {
+		case UP:
+			if (!hitOnce)
+				g.image(sprite1, 0, 0);
+			else
+				g.image(hitSprite1, 0, 0);
+			break;
+		case DOWN:
+			if (!hitOnce)
+				g.image(sprite2, 0, 0);
+			else
+				g.image(hitSprite2, 0, 0);
+			break;
+		case EXP_1:
+			g.image(eSprites[0], 0, 0);
+			break;
+		case EXP_2:
+			g.image(eSprites[1], 0, 0);
+			break;
+		case EXP_3:
+			g.image(eSprites[2], 0, 0);
+			break;
+		case EXP_4:
+			g.image(eSprites[3], 0, 0);
+			break;
+		case EXP_5:
+			g.image(eSprites[4], 0, 0);
+			break;
+		default:
+			break;
+		}
+
+		g.popMatrix();
+
+	}
+
 	/**
 	 * Hits the fighter
 	 */
 	public void hit() {
 		if (!hitOnce) {
 			hitOnce = true;
-			sprite1 = hitSprite1;
-			sprite2 = hitSprite2;
 		} else {
 			animationState = AnimationState.EXP_1;
 			hit = true;
 		}
+	}
+
+	public void revive() {
+		super.revive();
+		hitOnce = false;
 	}
 
 	@Override
