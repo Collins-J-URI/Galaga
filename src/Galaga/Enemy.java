@@ -233,7 +233,7 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
-				//createPath();
+				// createPath();
 				Galaga.syncFormation();
 			}
 			followPath();
@@ -457,10 +457,45 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			goalX = homeX;
 			goalY = homeY;
-			float[][] newpoints1 = { { x, y, 0 },
-					{ 0, WORLD_HEIGHT / 2, 2 }, { goalX, goalY, 4 } };
-			waypoints = newpoints1;
+
+			waypoints = new float[10][3];
+			
+			float loopEntryTime = 2;
+			float loopExitTime = 2;
+			float formationTime = 1;
+
+			float radius = 0.1f;
+			float cx = 0;
+			float cy = WORLD_HEIGHT / 2;
+
+			waypoints[0][0] = x;
+			waypoints[0][1] = y;
+			waypoints[0][2] = 0;
+
+			waypoints[1][0] = (cx + x) / 2;
+			waypoints[1][1] = (cy + y + radius) / 2;
+			waypoints[1][2] = loopEntryTime / 2;
+
+			for (int i = 2; i < waypoints.length - 2; i++) {
+				float phi = PConstants.PI / 2 +  PConstants.TWO_PI * (i - 2)
+						/ (waypoints.length - 4);
+				waypoints[i][0] = cx + radius * PApplet.cos(phi);
+				waypoints[i][1] = cy + radius * PApplet.sin(phi);
+				waypoints[i][2] = loopEntryTime + loopExitTime * (i - 2)
+						/ (waypoints.length - 4);
+			}
+
+			waypoints[waypoints.length - 2][0] = (cx + goalX) / 2;
+			waypoints[waypoints.length - 2][1] = (cy + goalY + radius) / 2;
+			waypoints[waypoints.length - 2][2] = loopEntryTime + loopExitTime
+					+ formationTime / 2;
+
+			waypoints[waypoints.length - 1][0] = goalX;
+			waypoints[waypoints.length - 1][1] = goalY;
+			waypoints[waypoints.length - 1][2] = loopEntryTime + loopExitTime
+					+ formationTime;
 			break;
+
 		case DIVE:
 			goalX = Fighter.instance().getX();
 			goalY = Fighter.instance().getY();
