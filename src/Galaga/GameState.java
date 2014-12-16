@@ -15,7 +15,12 @@ public enum GameState {
 	/**
 	 * Playing the game
 	 */
-	PLAYING, 
+	PLAYING {
+		@Override
+		public boolean playing() {
+			return true;
+		}
+	}, 
 	
 	ASSUMING_POSITIONS {
 		@Override

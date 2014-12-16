@@ -255,6 +255,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		case READY:
 		case GAMEOVER:
 			purge();
+			gameStateTransition();
 			break;
 		default:
 			break;
@@ -351,8 +352,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Have enemies fire bullets every once in a while
 			for (Enemy e : enemies)
-				if (random(1) < 0.002f)
-					enemyBullets.add(e.shoot());
+				if (random(1) < 0.05f)
+					e.dive();
 
 			// Check to see if enemies have been hit
 			for (Enemy e : enemies)
@@ -402,8 +403,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Have enemies fire bullets every once in a while
 			for (Enemy e : enemies)
-				if (random(1) < 0.002f)
-					enemyBullets.add(e.shoot());
+				if (e.getState() == Enemy.EnemyState.DIVE)
+					if (random(1) < 0.05f)
+						enemyBullets.add(e.shoot());
 
 			// Check to see if enemies have been hit
 			for (Enemy e : enemies)
@@ -503,16 +505,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 	}
 
-	public static void syncFormation() {
-		for (int i = 1; i < enemies.size(); i++) {
-			Enemy e = enemies.get(i);
-			if (e.state.inFormation())
-				e.syncFormation(enemies.get(0));
-		}
+	public static void syncFormation(Enemy toSync) {
+		for (Enemy e : enemies)
+			if (!toSync.equals(e)) {
+				toSync.syncFormation(enemies.get(0));
+				break;
+			}
 	}
 
 	/**
-	 * Remove destroyed enemies, bullets, and handle game state transition
+	 * Remove destroyed enemies and bullets
 	 */
 	public void purge() {
 
@@ -533,6 +535,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		while (eit.hasNext())
 			if (eit.next().isDestroyed())
 				eit.remove();
+	}
+
+	/**
+	 * Handle game state transition
+	 */
+	public void gameStateTransition() {
 
 		// Game state switching is dependent on what state we're in
 		switch (gameState) {
@@ -542,7 +550,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (onDeck.isEmpty()) {
 				gameState = GameState.IN_FORMATION;
 				for (Enemy e : enemies)
-					if (e.getState().inFormation()) {
+					if (!e.getState().inFormation()) {
 						gameState = GameState.ASSUMING_POSITIONS;
 						break;
 					}
@@ -563,6 +571,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			break;
 
 		case IN_FORMATION:
+			// If any enemies are diving, switch game state
+			for (Enemy e : enemies)
+				if (e.getState() == Enemy.EnemyState.DIVE)
+					gameState = GameState.DIVING;
+
 			// If the fighter is destroyed, take a life and reset it
 			if (fighter.isDestroyed() && fighter.lives() > 0) {
 				gameState = GameState.READY;
@@ -578,6 +591,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			break;
 
 		case DIVING:
+			// If all enemies are in formation, switch game state
+			gameState = GameState.IN_FORMATION;
+			for (Enemy e : enemies)
+				if (!e.getState().inFormation()) {
+					gameState = GameState.DIVING;
+					break;
+				}
+
 			// If the fighter is destroyed, take a life and reset it
 			if (fighter.isDestroyed() && fighter.lives() > 0) {
 				gameState = GameState.READY;
@@ -603,6 +624,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		default:
 			break;
 		}
+
 	}
 
 	/**
@@ -1084,8 +1106,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		case IN_FORMATION:
 		case DIVING:
 		case READY:
-			if (gameState == GameState.PLAYING
-					&& fighter.peek() != Joystick.CENTER) {
+			if (gameState.playing() && fighter.peek() != Joystick.CENTER) {
 				switch (keyCode) {
 				case LEFT:
 					fighter.pop(Joystick.LEFT);
