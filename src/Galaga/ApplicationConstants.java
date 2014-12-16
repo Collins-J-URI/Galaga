@@ -126,4 +126,6 @@ public interface ApplicationConstants {
 	 * Interval between enemy spawn
 	 */
 	float SPAWN_TIME = 0.2f;
+	
+	int NEW_LIFE_SCORE = 20000;
 }
