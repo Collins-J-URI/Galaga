@@ -155,7 +155,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Four bosses up top
 		for (int i = 0; i < NUM_BOSSES; i++)
-			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT/2,
+			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
 					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y));
 
@@ -163,13 +163,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
 			onDeck.add(new Butterfly(
 					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT/2,
+					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
 			onDeck.add(new Butterfly(
 					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT/2,
+					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 2 * ENEMY_BUFFER));
 
@@ -249,6 +249,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Only purge during the necessary game states
 		switch (gameState) {
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 		case READY:
 		case GAMEOVER:
 			purge();
@@ -278,6 +281,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// When playing, we want everything to be updated
 		case PLAYING:
+		case ASSUMING_POSITIONS:
 
 			// Move the player ship
 			fighter.update(elapsed);
@@ -294,8 +298,103 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				nextEnemyTimer.start(SPAWN_TIME);
 				enemies.add(onDeck.remove(0));
 			}
-			
-			//syncFormation();
+
+			// Move the enemies
+			for (Enemy e : enemies)
+				e.update(elapsed);
+
+			// Check to see if enemies have been hit
+			for (Enemy e : enemies)
+				if (!e.isHit())
+					for (Bullet b : fighterBullets)
+						if (e.detectCollision(b))
+							hits++;
+
+			// Check to see if the player has been hit
+			for (Bullet b : enemyBullets)
+				if (!fighter.isHit())
+					fighter.detectCollision(b);
+
+			// Get points for enemies hit
+			for (Enemy e : enemies)
+				if (e.isHit())
+					score += e.getScore();
+
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
+				if (scoreDisplay >= score)
+					scoreDisplay = score;
+			}
+			break;
+		case IN_FORMATION:
+
+			// Move the player ship
+			fighter.update(elapsed);
+
+			// Move the bullets fired by the fighter
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
+
+			// Move the bullets fired by the enemies
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
+
+			if (!onDeck.isEmpty() && nextEnemyTimer.isDone()) {
+				nextEnemyTimer.start(SPAWN_TIME);
+				enemies.add(onDeck.remove(0));
+			}
+
+			// Move the enemies
+			for (Enemy e : enemies)
+				e.update(elapsed);
+
+			// Have enemies fire bullets every once in a while
+			for (Enemy e : enemies)
+				if (random(1) < 0.002f)
+					enemyBullets.add(e.shoot());
+
+			// Check to see if enemies have been hit
+			for (Enemy e : enemies)
+				if (!e.isHit())
+					for (Bullet b : fighterBullets)
+						if (e.detectCollision(b))
+							hits++;
+
+			// Check to see if the player has been hit
+			for (Bullet b : enemyBullets)
+				if (!fighter.isHit())
+					fighter.detectCollision(b);
+
+			// Get points for enemies hit
+			for (Enemy e : enemies)
+				if (e.isHit())
+					score += e.getScore();
+
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
+				if (scoreDisplay >= score)
+					scoreDisplay = score;
+			}
+			break;
+		case DIVING:
+
+			// Move the player ship
+			fighter.update(elapsed);
+
+			// Move the bullets fired by the fighter
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
+
+			// Move the bullets fired by the enemies
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
+
+			if (!onDeck.isEmpty() && nextEnemyTimer.isDone()) {
+				nextEnemyTimer.start(SPAWN_TIME);
+				enemies.add(onDeck.remove(0));
+			}
 
 			// Move the enemies
 			for (Enemy e : enemies)
@@ -413,7 +512,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	}
 
 	/**
-	 * Remove destroyed enemies, bullets, and handle destroyed fighter
+	 * Remove destroyed enemies, bullets, and handle game state transition
 	 */
 	public void purge() {
 
@@ -438,6 +537,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Game state switching is dependent on what state we're in
 		switch (gameState) {
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+			// If all enemies are in formation, switch game state
+			if (onDeck.isEmpty()) {
+				gameState = GameState.IN_FORMATION;
+				for (Enemy e : enemies)
+					if (e.getState().inFormation()) {
+						gameState = GameState.ASSUMING_POSITIONS;
+						break;
+					}
+			}
+
 			// If the fighter is destroyed, take a life and reset it
 			if (fighter.isDestroyed() && fighter.lives() > 0) {
 				gameState = GameState.READY;
@@ -451,6 +561,37 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				gameState = GameState.GAMEOVER;
 
 			break;
+
+		case IN_FORMATION:
+			// If the fighter is destroyed, take a life and reset it
+			if (fighter.isDestroyed() && fighter.lives() > 0) {
+				gameState = GameState.READY;
+				fighter.resetPosition();
+				fighter.revive();
+				readyTimer.start(READY_TIME);
+			}
+
+			// If the fighter is destroyed with no lives left, game over
+			else if (fighter.isDestroyed())
+				gameState = GameState.GAMEOVER;
+
+			break;
+
+		case DIVING:
+			// If the fighter is destroyed, take a life and reset it
+			if (fighter.isDestroyed() && fighter.lives() > 0) {
+				gameState = GameState.READY;
+				fighter.resetPosition();
+				fighter.revive();
+				readyTimer.start(READY_TIME);
+			}
+
+			// If the fighter is destroyed with no lives left, game over
+			else if (fighter.isDestroyed())
+				gameState = GameState.GAMEOVER;
+
+			break;
+
 		case READY:
 			// Resume play after a short wait
 			if (readyTimer.isDone())
@@ -462,7 +603,6 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		default:
 			break;
 		}
-
 	}
 
 	/**
@@ -500,6 +640,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Draw all bullets, enemies, the fighter, the score, all that jazz
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 			pushMatrix();
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
@@ -821,6 +964,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Control the ship
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:
@@ -934,6 +1080,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Control the ship
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 		case READY:
 			if (gameState == GameState.PLAYING
 					&& fighter.peek() != Joystick.CENTER) {
@@ -1124,17 +1273,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Sixteen butterflies in the middle
 			for (int i = 0; i < NUM_BUTTERFLIES; i++)
-				onDeck.add(new Butterfly(
-						-WORLD_WIDTH / 1.5f,
-						WORLD_HEIGHT,
-						(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-						BOSS_Y - ENEMY_BUFFER));
+				onDeck.add(new Butterfly(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+						(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER
+								/ 2, BOSS_Y - ENEMY_BUFFER));
 			for (int i = 0; i < NUM_BUTTERFLIES; i++)
-				onDeck.add(new Butterfly(
-						WORLD_WIDTH / 1.5f,
-						WORLD_HEIGHT,
-						(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-						BOSS_Y - 2 * ENEMY_BUFFER));
+				onDeck.add(new Butterfly(WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+						(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER
+								/ 2, BOSS_Y - 2 * ENEMY_BUFFER));
 
 			// Twenty bees down under
 			for (int i = 0; i < NUM_BEES; i++)

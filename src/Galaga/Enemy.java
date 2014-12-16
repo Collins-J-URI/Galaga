@@ -372,6 +372,10 @@ public abstract class Enemy implements ApplicationConstants {
 	public void destroy() {
 		destroyed = true;
 	}
+	
+	public EnemyState getState() {
+		return state;
+	}
 
 	/**
 	 * Return a bullet shot from the fighter
