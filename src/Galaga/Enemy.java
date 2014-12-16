@@ -233,15 +233,14 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
-				//createPath();
-				Galaga.syncFormation();
+				Galaga.syncFormation(this);
 			}
 			followPath();
 			break;
 		case DIVE:
 			if (goalReached) {
-				state = EnemyState.RETURN;
-				createPath();
+				state = EnemyState.FORMATION_OUT;
+				Galaga.syncFormation(this);
 			}
 			followPath();
 			break;
@@ -253,13 +252,6 @@ public abstract class Enemy implements ApplicationConstants {
 			followPath();
 			break;
 		case FORMATION_IN:
-			if (goalReached) {
-				state = EnemyState.FORMATION_OUT;
-				createPath();
-			}
-			followPath();
-			break;
-		case RETURN:
 			if (goalReached) {
 				state = EnemyState.FORMATION_OUT;
 				createPath();
@@ -373,6 +365,15 @@ public abstract class Enemy implements ApplicationConstants {
 		destroyed = true;
 	}
 
+	public void dive() {
+		state = EnemyState.DIVE;
+		createPath();
+	}
+
+	public EnemyState getState() {
+		return state;
+	}
+
 	/**
 	 * Return a bullet shot from the fighter
 	 * 
@@ -426,7 +427,6 @@ public abstract class Enemy implements ApplicationConstants {
 			score = formationScore;
 			break;
 		case DIVE:
-		case RETURN:
 			score = attackingScore;
 			break;
 		default:
@@ -457,15 +457,51 @@ public abstract class Enemy implements ApplicationConstants {
 		case ASSUME_POSITION:
 			goalX = homeX;
 			goalY = homeY;
-			float[][] newpoints1 = { { x, y, 0 },
-					{ 0, WORLD_HEIGHT / 2, 2 }, { goalX, goalY, 4 } };
-			waypoints = newpoints1;
+
+			waypoints = new float[10][3];
+
+			float loopEntryTime = 2;
+			float loopExitTime = 2;
+			float formationTime = 1;
+
+			float radius = 0.1f;
+			float cx = 0;
+			float cy = WORLD_HEIGHT / 2;
+
+			waypoints[0][0] = x;
+			waypoints[0][1] = y;
+			waypoints[0][2] = 0;
+
+			waypoints[1][0] = (cx + x) / 2;
+			waypoints[1][1] = (cy + y + radius) / 2;
+			waypoints[1][2] = loopEntryTime / 2;
+
+			for (int i = 2; i < waypoints.length - 2; i++) {
+				float phi = PConstants.PI / 2 + PConstants.TWO_PI * (i - 2)
+						/ (waypoints.length - 4);
+				waypoints[i][0] = cx + radius * PApplet.cos(phi);
+				waypoints[i][1] = cy + radius * PApplet.sin(phi);
+				waypoints[i][2] = loopEntryTime + loopExitTime * (i - 2)
+						/ (waypoints.length - 4);
+			}
+
+			waypoints[waypoints.length - 2][0] = (cx + goalX) / 2;
+			waypoints[waypoints.length - 2][1] = (cy + goalY + radius) / 2;
+			waypoints[waypoints.length - 2][2] = loopEntryTime + loopExitTime
+					+ formationTime / 2;
+
+			waypoints[waypoints.length - 1][0] = goalX;
+			waypoints[waypoints.length - 1][1] = goalY;
+			waypoints[waypoints.length - 1][2] = loopEntryTime + loopExitTime
+					+ formationTime;
 			break;
+
 		case DIVE:
 			goalX = Fighter.instance().getX();
 			goalY = Fighter.instance().getY();
-			float[][] newpoints2 = { { x, y, 0 }, { x, y + 0.1f, 0.5f },
-					{ goalX, goalY, 5f } };
+			float[][] newpoints2 = { { x, y, 0 },
+					{ x + 0.05f, y + 0.05f, 1 }, { goalX, goalY, 3 },
+					{ x, y, 4 } };
 			waypoints = newpoints2;
 			break;
 		case FORMATION_IN:
@@ -481,12 +517,6 @@ public abstract class Enemy implements ApplicationConstants {
 			float[][] newpoints4 = { { x, y, 0 },
 					{ goalX, goalY, FORMATION_CYCLE_TIME } };
 			waypoints = newpoints4;
-			break;
-		case RETURN:
-			goalX = homeX;
-			goalY = homeY;
-			float[][] newpoints5 = { { x, y, 0 }, { goalX, goalY, 2 } };
-			waypoints = newpoints5;
 			break;
 		default:
 			break;
@@ -516,11 +546,23 @@ public abstract class Enemy implements ApplicationConstants {
 	}
 
 	private void followPath() {
-		if (state.inFormation()) {
+
+		switch (state) {
+		case ASSUME_POSITION:
+			followCubicPath();
+			break;
+		case DIVE:
+			followCubicPath();
+			break;
+		case FORMATION_IN:
+		case FORMATION_OUT:
 			followLinearPath();
 			this.theta = 0;
-		} else
-			followCubicPath();
+			break;
+		default:
+			break;
+
+		}
 	}
 
 	private void followLinearPath() {
@@ -650,8 +692,8 @@ public abstract class Enemy implements ApplicationConstants {
 		b[0][1] = waypoints[0][1]; // y0
 
 		// Initial speed
-		b[1][0] = 1; // vx0
-		b[1][1] = 2; // vy0
+		b[1][0] = 0; // vx0
+		b[1][1] = 0; // vy0
 
 		// End location
 		b[4 * NB_SEGMENTS - 2][0] = waypoints[NB_WAY_PTS - 1][0];
@@ -753,7 +795,7 @@ public abstract class Enemy implements ApplicationConstants {
 				return true;
 			}
 		},
-		DIVE, RETURN;
+		DIVE;
 
 		/**
 		 * Returns true if the state is an explosion state

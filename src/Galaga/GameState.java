@@ -15,12 +15,43 @@ public enum GameState {
 	/**
 	 * Playing the game
 	 */
-	PLAYING, 
+	PLAYING {
+		@Override
+		public boolean playing() {
+			return true;
+		}
+	}, 
+	
+	ASSUMING_POSITIONS {
+		@Override
+		public boolean playing() {
+			return true;
+		}
+	},
+	
+	IN_FORMATION {
+		@Override
+		public boolean playing() {
+			return true;
+		}
+	},
+	
+	DIVING {
+		@Override
+		public boolean playing() {
+			return true;
+		}
+	},
 	
 	/**
 	 * Between lives
 	 */
-	READY, 
+	READY {
+		@Override
+		public boolean playing() {
+			return true;
+		}
+	}, 
 	
 	/**
 	 * Game over
@@ -54,5 +85,14 @@ public enum GameState {
 	 */
 	public GameState getNext() {
 		return values()[(ordinal() + 1) % values().length];
+	}
+
+	/**
+	 * Returns true if the state is during the game cycle
+	 * 
+	 * @return true if the state is during the game cycle
+	 */
+	public boolean playing() {
+		return false;
 	}
 }

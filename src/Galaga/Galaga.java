@@ -155,27 +155,27 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Four bosses up top
 		for (int i = 0; i < NUM_BOSSES; i++)
-			onDeck.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
 					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y));
 
 		// Sixteen butterflies in the middle
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
 			onDeck.add(new Butterfly(
-					-WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT,
+					WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
 			onDeck.add(new Butterfly(
 					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT,
+					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 2 * ENEMY_BUFFER));
 
 		// Twenty bees down under
 		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2,
+			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
 					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 3 * ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BEES; i++)
@@ -249,9 +249,13 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Only purge during the necessary game states
 		switch (gameState) {
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 		case READY:
 		case GAMEOVER:
 			purge();
+			gameStateTransition();
 			break;
 		default:
 			break;
@@ -278,6 +282,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// When playing, we want everything to be updated
 		case PLAYING:
+		case ASSUMING_POSITIONS:
 
 			// Move the player ship
 			fighter.update(elapsed);
@@ -294,17 +299,10 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				nextEnemyTimer.start(SPAWN_TIME);
 				enemies.add(onDeck.remove(0));
 			}
-			
-			//syncFormation();
 
 			// Move the enemies
 			for (Enemy e : enemies)
 				e.update(elapsed);
-
-			// Have enemies fire bullets every once in a while
-			for (Enemy e : enemies)
-				if (random(1) < 0.002f)
-					enemyBullets.add(e.shoot());
 
 			// Check to see if enemies have been hit
 			for (Enemy e : enemies)
@@ -329,8 +327,111 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				if (scoreDisplay >= score)
 					scoreDisplay = score;
 			}
-			
-			if(score > 0 && enemies.size() == 0){
+			break;
+		case IN_FORMATION:
+
+			// Move the player ship
+			fighter.update(elapsed);
+
+			// Move the bullets fired by the fighter
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
+
+			// Move the bullets fired by the enemies
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
+
+			if (!onDeck.isEmpty() && nextEnemyTimer.isDone()) {
+				nextEnemyTimer.start(SPAWN_TIME);
+				enemies.add(onDeck.remove(0));
+			}
+
+			// Move the enemies
+			for (Enemy e : enemies)
+				e.update(elapsed);
+
+			// Have enemies fire bullets every once in a while
+			for (Enemy e : enemies)
+				if (random(1) < 0.05f)
+					e.dive();
+
+			// Check to see if enemies have been hit
+			for (Enemy e : enemies)
+				if (!e.isHit())
+					for (Bullet b : fighterBullets)
+						if (e.detectCollision(b))
+							hits++;
+
+			// Check to see if the player has been hit
+			for (Bullet b : enemyBullets)
+				if (!fighter.isHit())
+					fighter.detectCollision(b);
+
+			// Get points for enemies hit
+			for (Enemy e : enemies)
+				if (e.isHit())
+					score += e.getScore();
+
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
+				if (scoreDisplay >= score)
+					scoreDisplay = score;
+			}
+			break;
+		case DIVING:
+
+			// Move the player ship
+			fighter.update(elapsed);
+
+			// Move the bullets fired by the fighter
+			for (Bullet b : fighterBullets)
+				b.update(elapsed);
+
+			// Move the bullets fired by the enemies
+			for (Bullet b : enemyBullets)
+				b.update(elapsed);
+
+			if (!onDeck.isEmpty() && nextEnemyTimer.isDone()) {
+				nextEnemyTimer.start(SPAWN_TIME);
+				enemies.add(onDeck.remove(0));
+			}
+
+			// Move the enemies
+			for (Enemy e : enemies)
+				e.update(elapsed);
+
+			// Have enemies fire bullets every once in a while
+			for (Enemy e : enemies)
+				if (e.getState() == Enemy.EnemyState.DIVE)
+					if (random(1) < 0.05f)
+						enemyBullets.add(e.shoot());
+
+			// Check to see if enemies have been hit
+			for (Enemy e : enemies)
+				if (!e.isHit())
+					for (Bullet b : fighterBullets)
+						if (e.detectCollision(b))
+							hits++;
+
+			// Check to see if the player has been hit
+			for (Bullet b : enemyBullets)
+				if (!fighter.isHit())
+					fighter.detectCollision(b);
+
+			// Get points for enemies hit
+			for (Enemy e : enemies)
+				if (e.isHit())
+					score += e.getScore();
+
+			// Update the score to be displayed
+			if (score != scoreDisplay) {
+				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
+				if (scoreDisplay >= score)
+					scoreDisplay = score;
+			}
+
+			if (score > 0 && enemies.size() == 0) {
 				newLevel();
 			}
 			break;
@@ -408,16 +509,16 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		}
 	}
 
-	public static void syncFormation() {
-		for (int i = 1; i < enemies.size(); i++) {
-			Enemy e = enemies.get(i);
-			if (e.state.inFormation())
-				e.syncFormation(enemies.get(0));
-		}
+	public static void syncFormation(Enemy toSync) {
+		for (Enemy e : enemies)
+			if (!toSync.equals(e)) {
+				toSync.syncFormation(enemies.get(0));
+				break;
+			}
 	}
 
 	/**
-	 * Remove destroyed enemies, bullets, and handle destroyed fighter
+	 * Remove destroyed enemies and bullets
 	 */
 	public void purge() {
 
@@ -439,9 +540,30 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			if (eit.next().isDestroyed())
 				eit.remove();
 
+		if (score > 0 && enemies.size() == 0) {
+			newLevel();
+		}
+	}
+
+	/**
+	 * Handle game state transition
+	 */
+	public void gameStateTransition() {
+
 		// Game state switching is dependent on what state we're in
 		switch (gameState) {
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+			// If all enemies are in formation, switch game state
+			if (onDeck.isEmpty()) {
+				gameState = GameState.IN_FORMATION;
+				for (Enemy e : enemies)
+					if (!e.getState().inFormation()) {
+						gameState = GameState.ASSUMING_POSITIONS;
+						break;
+					}
+			}
+
 			// If the fighter is destroyed, take a life and reset it
 			if (fighter.isDestroyed() && fighter.lives() > 0) {
 				gameState = GameState.READY;
@@ -455,6 +577,50 @@ public class Galaga extends PApplet implements ApplicationConstants {
 				gameState = GameState.GAMEOVER;
 
 			break;
+
+		case IN_FORMATION:
+			// If any enemies are diving, switch game state
+			for (Enemy e : enemies)
+				if (e.getState() == Enemy.EnemyState.DIVE)
+					gameState = GameState.DIVING;
+
+			// If the fighter is destroyed, take a life and reset it
+			if (fighter.isDestroyed() && fighter.lives() > 0) {
+				gameState = GameState.READY;
+				fighter.resetPosition();
+				fighter.revive();
+				readyTimer.start(READY_TIME);
+			}
+
+			// If the fighter is destroyed with no lives left, game over
+			else if (fighter.isDestroyed())
+				gameState = GameState.GAMEOVER;
+
+			break;
+
+		case DIVING:
+			// If all enemies are in formation, switch game state
+			gameState = GameState.IN_FORMATION;
+			for (Enemy e : enemies)
+				if (!e.getState().inFormation()) {
+					gameState = GameState.DIVING;
+					break;
+				}
+
+			// If the fighter is destroyed, take a life and reset it
+			if (fighter.isDestroyed() && fighter.lives() > 0) {
+				gameState = GameState.READY;
+				fighter.resetPosition();
+				fighter.revive();
+				readyTimer.start(READY_TIME);
+			}
+
+			// If the fighter is destroyed with no lives left, game over
+			else if (fighter.isDestroyed())
+				gameState = GameState.GAMEOVER;
+
+			break;
+
 		case READY:
 			// Resume play after a short wait
 			if (readyTimer.isDone())
@@ -504,6 +670,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Draw all bullets, enemies, the fighter, the score, all that jazz
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 			pushMatrix();
 			fighter.render(this);
 			for (Bullet b : fighterBullets)
@@ -825,6 +994,9 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Control the ship
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 			if (key == CODED) {
 				switch (keyCode) {
 				case LEFT:
@@ -938,9 +1110,11 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// Control the ship
 		case PLAYING:
+		case ASSUMING_POSITIONS:
+		case IN_FORMATION:
+		case DIVING:
 		case READY:
-			if (gameState == GameState.PLAYING
-					&& fighter.peek() != Joystick.CENTER) {
+			if (gameState.playing() && fighter.peek() != Joystick.CENTER) {
 				switch (keyCode) {
 				case LEFT:
 					fighter.pop(Joystick.LEFT);
@@ -1066,35 +1240,34 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		writer.close();
 	}
 
-	
-	private void newLevel(){
+	private void newLevel() {
 		// Array list to hold enemies
 		onDeck = new ArrayList<Enemy>();
 		enemies = new ArrayList<Enemy>();
 
 		// Four bosses up top
 		for (int i = 0; i < NUM_BOSSES; i++)
-			onDeck.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
 					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y));
 
 		// Sixteen butterflies in the middle
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
 			onDeck.add(new Butterfly(
-					-WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT,
+					WORLD_WIDTH / 1.5f,
+					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BUTTERFLIES; i++)
 			onDeck.add(new Butterfly(
 					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT,
+					WORLD_HEIGHT / 2,
 					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 2 * ENEMY_BUFFER));
 
 		// Twenty bees down under
 		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2,
+			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
 					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 3 * ENEMY_BUFFER));
 		for (int i = 0; i < NUM_BEES; i++)
@@ -1102,6 +1275,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 					BOSS_Y - 4 * ENEMY_BUFFER));
 	}
+
 	/**
 	 * Select action associated with Play
 	 * 
@@ -1158,27 +1332,27 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 			// Four bosses up top
 			for (int i = 0; i < NUM_BOSSES; i++)
-				onDeck.add(new Boss(-WORLD_WIDTH / 1.5f, WORLD_HEIGHT,
+				onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
 						(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 						BOSS_Y));
 
 			// Sixteen butterflies in the middle
 			for (int i = 0; i < NUM_BUTTERFLIES; i++)
 				onDeck.add(new Butterfly(
-						-WORLD_WIDTH / 1.5f,
-						WORLD_HEIGHT,
+						WORLD_WIDTH / 1.5f,
+						WORLD_HEIGHT / 2,
 						(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 						BOSS_Y - ENEMY_BUFFER));
 			for (int i = 0; i < NUM_BUTTERFLIES; i++)
 				onDeck.add(new Butterfly(
 						WORLD_WIDTH / 1.5f,
-						WORLD_HEIGHT,
+						WORLD_HEIGHT / 2,
 						(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 						BOSS_Y - 2 * ENEMY_BUFFER));
 
 			// Twenty bees down under
 			for (int i = 0; i < NUM_BEES; i++)
-				onDeck.add(new Bee(-WORLD_WIDTH, WORLD_HEIGHT / 2,
+				onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
 						(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
 						BOSS_Y - 3 * ENEMY_BUFFER));
 			for (int i = 0; i < NUM_BEES; i++)
