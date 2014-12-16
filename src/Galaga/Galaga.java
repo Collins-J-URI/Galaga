@@ -51,8 +51,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	/**
 	 * Number of stars to be drawn
 	 */
-	private final int numStars = 200;
-
+	private final int numStars =200;
 	/**
 	 * X coordinate of each star
 	 */
@@ -114,7 +113,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 	 * Current Highscores
 	 */
 	private static HighscoreList highscoreList;
-
+	
+	/**
+	 * keeps track of new lives
+	 */
+	private static int newLifeScore;
+	
 	/**
 	 * Number of enemies hit
 	 */
@@ -149,39 +153,8 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		fighterBullets = new ArrayList<Bullet>();
 		enemyBullets = new ArrayList<Bullet>();
 
-		// Array list to hold enemies
-		onDeck = new ArrayList<Enemy>();
-		enemies = new ArrayList<Enemy>();
-
-		// Four bosses up top
-		for (int i = 0; i < NUM_BOSSES; i++)
-			onDeck.add(new Boss(WORLD_WIDTH / 1.5f, WORLD_HEIGHT / 2,
-					(i - NUM_BOSSES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y));
-
-		// Sixteen butterflies in the middle
-		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			onDeck.add(new Butterfly(
-					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT / 2,
-					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - ENEMY_BUFFER));
-		for (int i = 0; i < NUM_BUTTERFLIES; i++)
-			onDeck.add(new Butterfly(
-					WORLD_WIDTH / 1.5f,
-					WORLD_HEIGHT / 2,
-					(i - NUM_BUTTERFLIES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - 2 * ENEMY_BUFFER));
-
-		// Twenty bees down under
-		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
-					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - 3 * ENEMY_BUFFER));
-		for (int i = 0; i < NUM_BEES; i++)
-			onDeck.add(new Bee(WORLD_WIDTH, WORLD_HEIGHT / 2,
-					(i - NUM_BEES / 2) * ENEMY_BUFFER + ENEMY_BUFFER / 2,
-					BOSS_Y - 4 * ENEMY_BUFFER));
+		//initiate the level
+		newLevel();
 
 		// Instantiate the stars
 		starx = new float[numStars];
@@ -219,6 +192,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 		// Initialize the score
 		score = 0;
 		scoreDisplay = 0;
+		newLifeScore = 0;
 		hits = 0;
 
 		// Initialize the HighScores
@@ -282,6 +256,7 @@ public class Galaga extends PApplet implements ApplicationConstants {
 
 		// When playing, we want everything to be updated
 		case PLAYING:
+			
 		case ASSUMING_POSITIONS:
 
 			// Move the player ship
@@ -317,16 +292,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					fighter.detectCollision(b);
 
 			// Get points for enemies hit
-			for (Enemy e : enemies)
-				if (e.isHit())
-					score += e.getScore();
-
-			// Update the score to be displayed
-			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
-				if (scoreDisplay >= score)
-					scoreDisplay = score;
+			for (Enemy e : enemies){
+				if (e.isHit()){
+					int tempScore = e.getScore();
+					score += tempScore;
+					newLifeScore += tempScore;
+				}
 			}
+
 			break;
 		case IN_FORMATION:
 
@@ -368,16 +341,14 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					fighter.detectCollision(b);
 
 			// Get points for enemies hit
-			for (Enemy e : enemies)
-				if (e.isHit())
-					score += e.getScore();
-
-			// Update the score to be displayed
-			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
-				if (scoreDisplay >= score)
-					scoreDisplay = score;
+			for (Enemy e : enemies){
+				if (e.isHit()){
+					int tempScore = e.getScore();
+					score += tempScore;
+					newLifeScore += tempScore;
+				}
 			}
+
 			break;
 		case DIVING:
 
@@ -420,20 +391,17 @@ public class Galaga extends PApplet implements ApplicationConstants {
 					fighter.detectCollision(b);
 
 			// Get points for enemies hit
-			for (Enemy e : enemies)
-				if (e.isHit())
-					score += e.getScore();
-
-			// Update the score to be displayed
-			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
-				if (scoreDisplay >= score)
-					scoreDisplay = score;
+			for (Enemy e : enemies){
+				if (e.isHit()){
+					int tempScore = e.getScore();
+					score += tempScore;
+					newLifeScore += tempScore;
+				}
 			}
 
-			if (score > 0 && enemies.size() == 0) {
-				newLevel();
-			}
+
+
+
 			break;
 
 		// When ready, we want everything to be updated, but not for the fighter
@@ -460,15 +428,12 @@ public class Galaga extends PApplet implements ApplicationConstants {
 							hits++;
 
 			// Get points for enemies hit
-			for (Enemy e : enemies)
-				if (e.isHit())
-					score += e.getScore();
-
-			// Update the score to be displayed
-			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
-				if (scoreDisplay >= score)
-					scoreDisplay = score;
+			for (Enemy e : enemies){
+				if (e.isHit()){
+					int tempScore = e.getScore();
+					score += tempScore;
+					newLifeScore += tempScore;
+				}
 			}
 
 			break;
@@ -484,16 +449,28 @@ public class Galaga extends PApplet implements ApplicationConstants {
 			for (Enemy e : enemies)
 				e.update(elapsed);
 
-			// Update the score to be displayed
-			if (score != scoreDisplay) {
-				scoreDisplay += map(score - scoreDisplay, 0, 400, 1, 20);
-				if (scoreDisplay >= score)
-					scoreDisplay = score;
-			}
 			break;
 
 		default:
 			break;
+		}
+		
+		// Update the score to be displayed
+		if (score != scoreDisplay) {
+			scoreDisplay += map(score - scoreDisplay, 0, 400, 1f, 20);
+			if (scoreDisplay >= score)
+				scoreDisplay = score;
+		}
+		
+		System.out.println("NEW LIFE:" + newLifeScore);
+		//add a life if score is reached
+		if(newLifeScore != 0 && newLifeScore >= 20000){
+			newLifeScore -= 500;
+			fighter.addLife();
+		}
+		
+		if (score > 0 && enemies.size() == 0) {
+			newLevel();
 		}
 	}
 
